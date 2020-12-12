@@ -1,0 +1,28 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:VisualElement style="flex-direction: column; align-items: flex-start; flex-grow: 0; bottom: 50px; height: 240px; justify-content: space-between; position: absolute; right: 50px; flex-shrink: 1; flex-basis: auto; width: auto; left: 50px;">
+        <Style src="SCILL.uss" />
+        <ui:VisualElement name="BattlePass" style="flex-grow: 0; flex-shrink: 1; height: 150px; flex-direction: row; border-right-width: 0; border-right-color: rgba(0, 0, 0, 255); padding-left: 2px;">
+            <ui:VisualElement class="column" style="flex-grow: 0;">
+                <ui:VisualElement class="row" style="margin-top: 28px; border-top-width: 2px; align-items: center; justify-content: center;">
+                    <ui:VisualElement style="flex-grow: 0; width: 80px; height: 80px; background-image: url(&apos;/Assets/Paper UI/EmptyStar.png&apos;);" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="column" style="flex-direction: column; flex-grow: 1; align-items: stretch; justify-content: flex-start;">
+                <ui:VisualElement class="header" style="flex-grow: 0;">
+                    <ui:Label text="1" style="-unity-font: url(&apos;/Assets/Fonts/Endgame DEMO.otf&apos;); font-size: 20px; -unity-text-align: middle-center;" />
+                </ui:VisualElement>
+                <ui:VisualElement class="row" style="flex-grow: 1; align-items: center; justify-content: center; padding-left: 10px; padding-right: 10px; padding-top: 10px; padding-bottom: 10px; background-color: rgba(135, 135, 135, 255);">
+                    <ui:VisualElement class="reward-icon" style="width: 50px; height: 50px; background-image: url(&apos;/Assets/Prefabs/TNT.png&apos;);" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="column" style="flex-direction: column; flex-grow: 1; align-items: stretch; justify-content: flex-start;">
+                <ui:VisualElement class="header" style="flex-grow: 0;">
+                    <ui:Label text="1" style="-unity-font: url(&apos;/Assets/Fonts/Endgame DEMO.otf&apos;); font-size: 20px; -unity-text-align: middle-center;" />
+                </ui:VisualElement>
+                <ui:VisualElement class="row" style="flex-grow: 1; align-items: center; justify-content: center; padding-left: 10px; padding-right: 10px; padding-top: 10px; padding-bottom: 10px; background-color: rgb(135, 135, 135);">
+                    <ui:VisualElement class="reward-icon" style="width: 50px; height: 50px; background-image: url(&apos;/Assets/Prefabs/TNT.png&apos;);" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
