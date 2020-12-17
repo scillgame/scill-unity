@@ -545,8 +545,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76cadc9ad1ee146aba5091a538eed029, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  challengePrefab: {fileID: 6123412068141576884, guid: 45e7f8c21d5e94f22a83ccc08e88b0b0,
+  challengePrefab: {fileID: 1276907558961348264, guid: 45e7f8c21d5e94f22a83ccc08e88b0b0,
     type: 3}
+  challengeContainer: {fileID: 0}
 --- !u!114 &736795803746772905
 MonoBehaviour:
   m_ObjectHideFlags: 0

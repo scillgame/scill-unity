@@ -147,4 +147,9 @@ public class SCILLPersonalChallenges : SCILLThreadSafety
             }
         }
     }
+
+    protected virtual void OnPersonalChallengeRewardClaimed(Challenge challenge)
+    {
+        
+    }
 }

@@ -18,7 +18,7 @@ public class SCILLBattlePassLevel : MonoBehaviour
     public Text levelName;
 
     [Header("Prefabs")] [Tooltip("A prefab that will be used as a reward icon")]
-    public GameObject rewardIconPrefab;
+    public SCILLBattlePassRewardIcon rewardIconPrefab;
     
     [Tooltip("A slider that will be used to render the current progress in this level")]
     public Slider progressSlider;
@@ -69,7 +69,7 @@ public class SCILLBattlePassLevel : MonoBehaviour
         UpdateUI();
     }
 
-    void ClearRewardIcons()
+    private void ClearRewardIcons()
     {
         foreach (SCILLBattlePassRewardIcon child in GetComponentsInChildren<SCILLBattlePassRewardIcon>()) {
             Destroy(child.gameObject);
@@ -126,12 +126,12 @@ public class SCILLBattlePassLevel : MonoBehaviour
         }
     }
 
-    public void Select()
+    public virtual void Select()
     {
         
     }
 
-    public void Deselect()
+    public virtual void Deselect()
     {
         
     }

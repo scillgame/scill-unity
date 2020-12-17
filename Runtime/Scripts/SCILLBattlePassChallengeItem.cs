@@ -44,7 +44,7 @@ public class SCILLBattlePassChallengeItem : MonoBehaviour
         }
     }
 
-    public void UpdateUI()
+    public virtual void UpdateUI()
     {
         if (challenge == null)
         {

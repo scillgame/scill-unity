@@ -371,7 +371,7 @@ MonoBehaviour:
   rewardContainer: {fileID: 1349210447875201309}
   battlePassLevelInfo: {fileID: 1349210448024288187}
   levelName: {fileID: 1349210448399650705}
-  rewardIconPrefab: {fileID: 5428217819050024387, guid: e966a54cec6244416ac04b1b2c098cb2,
+  rewardIconPrefab: {fileID: 2188581643628705766, guid: e966a54cec6244416ac04b1b2c098cb2,
     type: 3}
   progressSlider: {fileID: 6489794412372141842}
   showLevelInfo: 1

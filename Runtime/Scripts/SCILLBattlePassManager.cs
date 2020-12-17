@@ -134,7 +134,7 @@ public class SCILLBattlePassManager : SCILLThreadSafety
     {
         SCILLManager.Instance.SCILLClient.StopBattlePassUpdateNotifications(SelectedBattlePass.battle_pass_id, OnBattlePassChangedNotification);   
     }
-
+    
     public async void ClaimBattlePassLevelReward(BattlePassLevel level)
     {
         var response = await SCILLManager.Instance.SCILLClient.ClaimBattlePassLevelRewardAsync(level.level_id);

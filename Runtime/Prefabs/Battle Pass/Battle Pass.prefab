@@ -410,14 +410,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   unlockGroup: {fileID: 2771809246329431809}
-  prevButton: {fileID: 441943324658926967}
-  nextButton: {fileID: 441943324613974547}
-  pageText: {fileID: 441943324858599783}
   currentLevel: {fileID: 441943325315938070}
   battlePassNameText: {fileID: 0}
-  image: {fileID: 16907373757406641}
-  itemsPerPage: 5
-  showLevelInfo: 1
+  imageXS: {fileID: 0}
+  imageS: {fileID: 0}
+  imageM: {fileID: 0}
+  imageL: {fileID: 0}
+  imageXL: {fileID: 0}
 --- !u!114 &3410952679018516318
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -825,6 +824,11 @@ MonoBehaviour:
     type: 3}
   currentLevelPrefab: {fileID: 1485919019506422110, guid: ad0ab4d02a4d64d5c8293875ce2db795,
     type: 3}
+  prevButton: {fileID: 441943324658926967}
+  nextButton: {fileID: 441943324613974547}
+  pageText: {fileID: 441943324858599783}
+  itemsPerPage: 5
+  showLevelInfo: 1
 --- !u!1 &2771809246329431809
 GameObject:
   m_ObjectHideFlags: 0
@@ -1784,7 +1788,7 @@ PrefabInstance:
     - target: {fileID: 5246003187630497968, guid: 0513250d2b2814c558bc3bccf40ca3e9,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 0
+      value: 35.166668
       objectReference: {fileID: 0}
     - target: {fileID: 5246003187630497968, guid: 0513250d2b2814c558bc3bccf40ca3e9,
         type: 3}
@@ -1815,11 +1819,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 16907374734961385}
+      objectReference: {fileID: 4643206414029389206}
+    - target: {fileID: 5246003187630497971, guid: 0513250d2b2814c558bc3bccf40ca3e9,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnNextPage
+      objectReference: {fileID: 0}
     - target: {fileID: 5246003187711115220, guid: 0513250d2b2814c558bc3bccf40ca3e9,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 0
+      value: 35.166668
       objectReference: {fileID: 0}
     - target: {fileID: 5246003187711115220, guid: 0513250d2b2814c558bc3bccf40ca3e9,
         type: 3}
@@ -1850,7 +1859,12 @@ PrefabInstance:
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 16907374734961385}
+      objectReference: {fileID: 4643206414029389206}
+    - target: {fileID: 5246003187711115223, guid: 0513250d2b2814c558bc3bccf40ca3e9,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnPrevPage
+      objectReference: {fileID: 0}
     - target: {fileID: 5246003188098766065, guid: 0513250d2b2814c558bc3bccf40ca3e9,
         type: 3}
       propertyPath: m_AnchorMin.y

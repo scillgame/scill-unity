@@ -7,15 +7,14 @@ using UnityEngine;
 public class SCILLBattlePassLevelChallenges : MonoBehaviour
 {
     [Tooltip("Chosse a Challenge Prefab that has the SCILLBattlePassChallengeItem script attached. This prefab is instantiated for each challenge in the current battle pass level")]
-    public GameObject challengePrefab;
+    public SCILLBattlePassChallengeItem challengePrefab;
 
     [Tooltip(
         "Connect a transform that will be used as the container for the challenge. If left blank, the challengePrefab items will be added to this game object. The container will be hidden if no challenges are available.")]
     public Transform challengeContainer;
     
-    public BattlePassLevel battlePassLevel;
+    private BattlePassLevel battlePassLevel;
     
-
     private void Awake()
     {
         ClearChallenges();     
@@ -59,7 +58,7 @@ public class SCILLBattlePassLevelChallenges : MonoBehaviour
         UpdateChallengeList();
     }
 
-    void ClearChallenges()
+    protected virtual void ClearChallenges()
     {
         // Make sure we delete all items from the battle pass levels container
         // This way we can leave some dummy level items in Unity Editor which makes it easier to design UI
@@ -68,7 +67,7 @@ public class SCILLBattlePassLevelChallenges : MonoBehaviour
         }        
     }
 
-    public void UpdateChallengeList()
+    protected virtual void UpdateChallengeList()
     {
         // Make sure we remove old challenges from the list
         ClearChallenges();
