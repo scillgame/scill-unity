@@ -18,11 +18,5 @@ Developer documentation can be found here: [https://developers.scillgame.com](ht
 
 ## Getting Started
 
-There are many way on how to install this SDK into your Unity project:
-
-* Download the source code and add it in your Unity Assets folder.
-* Add package from git URL in Package Manager (use https://github.com/scillgame/scill-unity.git)
-* Download the source code, open in Visual Studio or Rider and compile to DLLs, copy DLLs, and assets (prefabs) into your Unity Asset folder
-
 Extensive documentation, getting started guides and example code can be found in our [SCILL Unity SDK documentation](https://developers.scillgame.com/sdks/unity.html).
 https://developers.scillgame.com/sdks/unity.html
