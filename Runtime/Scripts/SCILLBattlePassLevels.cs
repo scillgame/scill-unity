@@ -44,6 +44,16 @@ public class SCILLBattlePassLevels : MonoBehaviour
     private void Awake()
     {
         ClearList();
+
+        if (prevButton)
+        {
+            prevButton.onClick.AddListener(OnPrevPage);
+        }
+
+        if (nextButton)
+        {
+            nextButton.onClick.AddListener(OnNextPage);
+        }
     }
 
     private void OnDestroy()
