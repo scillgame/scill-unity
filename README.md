@@ -18,5 +18,5 @@ Developer documentation can be found here: [https://developers.scillgame.com](ht
 
 ## Getting Started
 
-Extensive documentation, getting started guides and example code can be found in our [SCILL Unity SDK documentation](https://developers.scillgame.com/sdks/unity.html).
+Extensive document{{% figure src="/images/battle_pass_list.png" caption="The list with your battle passes and webhooks"%}}ation, getting started guides and example code can be found in our [SCILL Unity SDK documentation](https://developers.scillgame.com/sdks/unity.html).
 https://developers.scillgame.com/sdks/unity.html
