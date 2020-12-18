@@ -96,10 +96,7 @@ public class SCILLManager : MonoBehaviour
         // Please note, in some cases you should change session ids. This is just a simple example where we don't need
         // to do that
         var payload = new EventPayload(UserId, SessionId, eventName, eventType, metaData);
-        Debug.Log("Sending event " + eventName);
-        Debug.Log(payload.ToJson());
         var response = await EventsApi.SendEventAsync(payload);
-        Debug.Log(response);
     }
 
     // Basic wrapper for getting personal challenges
@@ -111,10 +108,8 @@ public class SCILLManager : MonoBehaviour
     [ContextMenu("Open SCILL Playground")]
     public void OpenPlayground()
     {
-        Debug.Log("Opening Playground");
         var url = "https://playground.scillgame.com?appId=" + UnityWebRequest.EscapeURL(this.AppId) + "&apiKey=" + UnityWebRequest.EscapeURL(this.APIKey) +
             "&environment=" + UnityWebRequest.EscapeURL(this.environment.ToString().ToLower()) + "&userId=" + UnityWebRequest.EscapeURL(UserId);
-        Debug.Log(url);
         Help.BrowseURL(url);
     }
 }

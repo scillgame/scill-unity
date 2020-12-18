@@ -88,8 +88,7 @@ public class SCILLBattlePassLevels : MonoBehaviour
         {
             return;
         }
-
-        Debug.Log("UPDATTING LEVELS");
+        
         for (int i = 0; i < itemsPerPage; i++)
         {
             var levelIndex = (currentPageIndex * itemsPerPage) + i;
@@ -130,7 +129,6 @@ public class SCILLBattlePassLevels : MonoBehaviour
     
     void OnBattlePassLevelClicked(SCILLBattlePassLevel level)
     {
-        Debug.Log("CLICKED");
         if (_selectedBattlePassLevel)
         {
             _selectedBattlePassLevel.Deselect();
@@ -143,7 +141,6 @@ public class SCILLBattlePassLevels : MonoBehaviour
         // Inform listening delegates that the selected battle pass level changed
         if (OnSelectedBattlePassLevelChanged != null)
         {
-            Debug.Log("SENDING EVENT");
             OnSelectedBattlePassLevelChanged(level.battlePassLevel);
         }
     }

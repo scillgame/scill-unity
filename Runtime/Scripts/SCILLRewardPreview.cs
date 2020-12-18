@@ -37,7 +37,6 @@ public class SCILLRewardPreview : MonoBehaviour
 
     private void OnSelectedBattlePassLevelChanged(BattlePassLevel selectedBattlePassLevel)
     {
-        Debug.Log("OnSelectedBattlePassLevelChanged");
         _selectedBattlePassLevel = selectedBattlePassLevel;
         if (selectedBattlePassLevel.reward_amount != null)
         {

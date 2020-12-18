@@ -75,8 +75,6 @@ public class SCILLCategoryItem : MonoBehaviour
 
     public void UpdateChallengeList()
     {
-        
-        Debug.Log("UPDATE CHALLENGE LIST");
         foreach (var challenge in _category.challenges)
         {
             GameObject challengeGO = null;

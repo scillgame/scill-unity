@@ -45,12 +45,10 @@ public class SCILLBattlePass : SCILLThreadSafety
 
     private void OnEnable()
     {
-        Debug.Log("SHOW BATTLE PASS");
         if (SCILLBattlePassManager.Instance)
         {
             battlePass = SCILLBattlePassManager.Instance.SelectedBattlePass;
             _levels = SCILLBattlePassManager.Instance.BattlePassLevels;
-            Debug.Log("SELECTED BATTLE PASS" + battlePass);
         }
 
         SCILLBattlePassManager.OnBattlePassUpdatedFromServer += OnBattlePassUpdatedFromServer;

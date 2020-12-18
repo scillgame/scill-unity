@@ -34,7 +34,6 @@ public class SCILLBattlePassManager : SCILLThreadSafety
     void Start()
     {
         _battlePasses = SCILLManager.Instance.SCILLClient.GetBattlePasses();
-        Debug.Log("Loaded Battle Passes" + _battlePasses.Count);
 
         // Select a battle pass
         BattlePass selectedBattlePass = SelectBattlePass(_battlePasses);
@@ -42,8 +41,6 @@ public class SCILLBattlePassManager : SCILLThreadSafety
         if (selectedBattlePass != null)
         {
             this.SelectedBattlePass = selectedBattlePass;
-
-            Debug.Log("HUHU");
 
             // Inform delegates that a new battle pass has been selected
             OnBattlePassUpdatedFromServer?.Invoke(selectedBattlePass);
@@ -103,9 +100,6 @@ public class SCILLBattlePassManager : SCILLThreadSafety
         // Make sure we run this code on Unitys "main thread", i.e. in the Update function
         RunOnMainThread.Enqueue(() =>
         {
-            Debug.Log("Received Battle Pass Update");
-            Debug.Log(payload);
-            
             // The battle pass challenge changed
             if (payload.webhook_type == "battlepass-challenge-changed")
             {
@@ -138,7 +132,6 @@ public class SCILLBattlePassManager : SCILLThreadSafety
     public async void ClaimBattlePassLevelReward(BattlePassLevel level)
     {
         var response = await SCILLManager.Instance.SCILLClient.ClaimBattlePassLevelRewardAsync(level.level_id);
-        Debug.Log(response.ToJson());
         if (response != null && response.message == "OK")
         {
             OnBattlePassLevelRewardClaimed?.Invoke(level);
