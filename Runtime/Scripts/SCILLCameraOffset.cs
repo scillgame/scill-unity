@@ -5,6 +5,7 @@
 // how offset are corners of camera's near plane.
 // Tweak the values and you can see camera's frustum change.
 
+using System;
 using UnityEngine;
 using System.Collections;
 
@@ -29,5 +30,11 @@ public class SCILLCameraOffset : MonoBehaviour
 	void LateUpdate()
 	{
 		UpdateProjectionMatrix();
+	}
+
+	private void OnDisable()
+	{
+		Camera cam = GetComponent<Camera>();
+		cam.ResetProjectionMatrix();
 	}
 }
