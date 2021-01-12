@@ -13,6 +13,8 @@ public class SCILLBattlePassChallengeItem : MonoBehaviour
     public Slider challengeProgressSlider;
     [Tooltip("Text used to render the challenge goal as 34/500")]
     public Text challengeGoal;
+    [Tooltip("A image component that will be used to render the challenge icon")]
+    public Image challengeIcon;
 
     public BattlePassLevelChallenge challenge;
     
@@ -86,5 +88,15 @@ public class SCILLBattlePassChallengeItem : MonoBehaviour
             challengeGoal.text = challenge.user_challenge_current_score.ToString() + "/" +
                                  challenge.challenge_goal.ToString();
         }
+
+        if (challengeIcon)
+        {
+            var sprite = Resources.Load<Sprite>(challenge.challenge_icon);
+            if (sprite)
+            {
+                challengeIcon.sprite = sprite;
+            }
+        }
+        
     }
 }
