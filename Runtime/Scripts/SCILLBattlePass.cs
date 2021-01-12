@@ -140,7 +140,18 @@ public class SCILLBattlePass : SCILLThreadSafety
             imageXL.sprite = sprite;
         }            
 
-        if (battlePass.unlocked_at != null)
+        if (unlockGroup) {
+            if (battlePass.unlocked_at != null)
+            {
+                // This battle pass is unlocked
+                unlockGroup.SetActive(false);
+            }
+            else
+            {
+                unlockGroup.SetActive(true);
+            }
+        }
+
         if (startDate)
         {
             var date = DateTime.Parse(battlePass.start_date);
