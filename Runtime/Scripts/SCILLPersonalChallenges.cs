@@ -15,6 +15,14 @@ public class SCILLPersonalChallenges : SCILLThreadSafety
     private List<ChallengeCategory> _categories;
     private Dictionary<string, GameObject> _categoryObjects = new Dictionary<string, GameObject>();
 
+    private void Awake()
+    {
+        // Remove any dummies
+        foreach (SCILLCategoryItem child in GetComponentsInChildren<SCILLCategoryItem>()) {
+            Destroy(child.gameObject);
+        }      
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -64,8 +72,7 @@ public class SCILLPersonalChallenges : SCILLThreadSafety
             }
             else
             {
-                categoryGO = Instantiate(categoryPrefab.gameObject);
-                categoryGO.transform.SetParent(transform);
+                categoryGO = Instantiate(categoryPrefab.gameObject, transform, false);
                 var categoryItem = categoryGO.GetComponent<SCILLCategoryItem>();
                 if (categoryItem)
                 {

@@ -88,23 +88,12 @@ public class SCILLCategoryItem : MonoBehaviour
             }
             else
             {
-                challengeGO = Instantiate(challengePrefab.gameObject);
+                challengeGO = Instantiate(challengePrefab.gameObject, challengesContainer ? challengesContainer : transform, false);
                 var challengeItem = challengeGO.GetComponent<SCILLChallengeItem>();
                 if (challengeItem)
                 {
                     challengeItem.challenge = challenge;
                 }
-
-                // Group all challenges in a container if provided
-                if (challengesContainer)
-                {
-                    challengeGO.transform.SetParent(challengesContainer);    
-                }
-                else
-                {
-                    challengeGO.transform.SetParent(transform);
-                }
-                
 
                 _challengeObjects.Add(challenge.challenge_id, challengeGO);
             }
