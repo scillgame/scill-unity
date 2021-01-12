@@ -18,15 +18,11 @@ public class SCILLBattlePassLevels : MonoBehaviour
     public SCILLBattlePassLevel currentLevelPrefab;
     
     [Header("Navigation")]
-    [Tooltip("Connect a button that will be used to trigger the previous page of the battle pass levels. It will be hidden if the first page is displayed")]
-    public Button prevButton;
-    [Tooltip("Connect a button that will be used to trigger the next page of the battle pass levels. It will be hidden if there are no more pages left")]
-    public Button nextButton;
-    [Tooltip("A text field which is used to set show the user the current navigation state, i.e. Page 1/10")]
-    public Text pageText;
+    [Tooltip("A pagination component that will be used to navigate the pages")]
+    public SCILLPagination pagination;
     
     [Header("Settings")]
-    [Tooltip("Number of battle pass levels shown per page.")]
+    [Tooltip("Number of battle pass levels shown per page. Should be equal to the number set in the paginator, but sometimes you want to use more.")]
     public int itemsPerPage = 5;
     [Tooltip("Indicate if you want to show the level number for each reward. This value will be set for each Battle Pass Level Prefab.")]
     public bool showLevelInfo = true;
@@ -35,25 +31,23 @@ public class SCILLBattlePassLevels : MonoBehaviour
     private int currentPageIndex = 0;
 
     private List<BattlePassLevel> _levels;
-    private SCILLBattlePassLevel _selectedBattlePassLevel;
 
-    // Events
-    public delegate void SelectedBattlePassLevelChangedAction(BattlePassLevel selectedBattlePassLevel);
-    public static event SelectedBattlePassLevelChangedAction OnSelectedBattlePassLevelChanged;
-    
     private void Awake()
     {
+
+        pagination.OnActivePageChanged += index =>
+        {
+            Debug.Log("PAGE SET " + index);
+            currentPageIndex = index;
+            UpdateBattlePassLevelUI();
+        };
+        
         ClearList();
+    }
 
-        if (prevButton)
-        {
-            prevButton.onClick.AddListener(OnPrevPage);
-        }
+    private void Start()
+    {
 
-        if (nextButton)
-        {
-            nextButton.onClick.AddListener(OnNextPage);
-        }
     }
 
     private void OnDestroy()
@@ -86,28 +80,42 @@ public class SCILLBattlePassLevels : MonoBehaviour
 
         _levels = battlePassLevels;
         UpdateBattlePassLevelUI();
+        
+        if (pagination)
+        {
+            pagination.numItems = _levels.Count;
+        }
     }
 
     void UpdateBattlePassLevelUI()
     {
         ClearList();
         
-        UpdateNavigationButtons();
-        
         if (_levels == null)
         {
             return;
         }
         
+        // Calculate the level index to start adding to the list based on the pagination settings
+        // We always want to render the number of items set in this component
+        int levelStartIndex = (currentPageIndex * pagination.itemsPerPage);
+        while (_levels.Count - levelStartIndex < pagination.itemsPerPage)
+        {
+            levelStartIndex--;
+        }
+        Debug.Log("LEVEL INDEX: " + levelStartIndex);
+
+        Debug.Log("UPDATTING LEVELS");
         for (int i = 0; i < itemsPerPage; i++)
         {
-            var levelIndex = (currentPageIndex * itemsPerPage) + i;
+            var levelIndex = levelStartIndex + i;
+
             if (levelIndex >= 0 && levelIndex < _levels.Count)
             {
                 GameObject levelGO = null;
-                if (_levels[i].activated_at != null)
+                if (_levels[levelIndex].activated_at != null)
                 {
-                    if (_levels[i].level_completed == true)
+                    if (_levels[levelIndex].level_completed == true)
                     {
                         levelGO = Instantiate(levelPrefab.gameObject, this.transform, false);
                     }
@@ -125,7 +133,16 @@ public class SCILLBattlePassLevels : MonoBehaviour
                 {
                     levelItem.battlePassLevel = _levels[levelIndex];
                     levelItem.showLevelInfo = showLevelInfo;
-                    levelItem.button.onClick.AddListener(delegate{OnBattlePassLevelClicked(levelItem);});
+                    
+                    // If a button is attached to the level item then attach a listener to show Reward preview
+                    if (levelItem.button)
+                    {
+                        levelItem.button.onClick.AddListener(delegate{OnBattlePassLevelClicked(levelIndex);});   
+                    }
+
+                    if (_levels[levelIndex].level_id == SCILLBattlePassManager.Instance.SelectedBattlePassLevel?.level_id) {
+                        levelItem.Select();
+                    }
                 }                
             }
         }
@@ -136,77 +153,10 @@ public class SCILLBattlePassLevels : MonoBehaviour
         currentPageIndex = pageIndex;
         UpdateBattlePassLevelUI();
     }
-    
-    void OnBattlePassLevelClicked(SCILLBattlePassLevel level)
+
+    void OnBattlePassLevelClicked(int levelIndex)
     {
-        if (_selectedBattlePassLevel)
-        {
-            _selectedBattlePassLevel.Deselect();
-        }
-
-        _selectedBattlePassLevel = level;
-        _selectedBattlePassLevel.Select();
-
-        
-        // Inform listening delegates that the selected battle pass level changed
-        if (OnSelectedBattlePassLevelChanged != null)
-        {
-            OnSelectedBattlePassLevelChanged(level.battlePassLevel);
-        }
-    }
-    
-    private void UpdateNavigationButtons()
-    {
-        if (_levels == null || _levels.Count <= 0)
-        {
-            return;
-        }
-        
-        if (currentPageIndex <= 0)
-        {
-            if (prevButton) prevButton.gameObject.SetActive(false);
-        }
-        else
-        {
-            if (prevButton) prevButton.gameObject.SetActive(true);
-        }
-
-        if (currentPageIndex >= Decimal.Ceiling((decimal) _levels.Count / (decimal) itemsPerPage) - 1)
-        {
-            if (nextButton) nextButton.gameObject.SetActive(false);
-        }
-        else
-        {
-            if (nextButton) nextButton.gameObject.SetActive(true);
-        }
-
-        if (pageText)
-        {
-            if (currentPageIndex <= 0 &&
-                currentPageIndex >= Decimal.Ceiling((decimal) _levels.Count / (decimal) itemsPerPage) - 1)
-            {
-                pageText.enabled = false;
-            }
-            else
-            {
-                pageText.text = "Page " + (currentPageIndex + 1) + "/" + Decimal.Ceiling((decimal) _levels.Count / (decimal) itemsPerPage);
-                pageText.enabled = true;
-            }
-        }
+        SCILLBattlePassManager.Instance.SelectedBattlePassLevelIndex = levelIndex;
     }
 
-    public void OnNextPage()
-    {
-        currentPageIndex += 1;
-        
-        UpdateBattlePassLevelUI();
-    }
-
-    public void OnPrevPage()
-    {
-        currentPageIndex -= 1;
-
-        UpdateBattlePassLevelUI();
-    }
-    
 }
