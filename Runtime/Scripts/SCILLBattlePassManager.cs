@@ -11,6 +11,19 @@ public class SCILLBattlePassManager : SCILLThreadSafety
     private List<BattlePass> _battlePasses;
     public BattlePass SelectedBattlePass;
     public List<BattlePassLevel> BattlePassLevels;
+    private int _selectedBattlePassLevelIndex;
+
+    public BattlePassLevel SelectedBattlePassLevel => BattlePassLevels?[_selectedBattlePassLevelIndex];
+
+    public int SelectedBattlePassLevelIndex
+    {
+        get => _selectedBattlePassLevelIndex;
+        set
+        {
+            _selectedBattlePassLevelIndex = value;
+            OnSelectedBattlePassLevelChanged?.Invoke(SelectedBattlePassLevel);
+        }
+    }
 
     public delegate void BattlePassUpdatedFromServerAction(BattlePass battlePass);
     public static event BattlePassUpdatedFromServerAction OnBattlePassUpdatedFromServer;
@@ -23,6 +36,9 @@ public class SCILLBattlePassManager : SCILLThreadSafety
     
     public delegate void BattlePassLevelRewardClaimedAction(BattlePassLevel level);
     public static event BattlePassLevelRewardClaimedAction OnBattlePassLevelRewardClaimed;
+    
+    public delegate void SelectedBattlePassLevelChangedAction(BattlePassLevel selectedBattlePassLevel);
+    public static event SelectedBattlePassLevelChangedAction OnSelectedBattlePassLevelChanged;
 
     private void Awake()
     {
@@ -93,6 +109,25 @@ public class SCILLBattlePassManager : SCILLThreadSafety
         var levels = await SCILLManager.Instance.SCILLClient.GetBattlePassLevelsAsync(SelectedBattlePass.battle_pass_id);
         BattlePassLevels = levels;
         OnBattlePassLevelsUpdatedFromServer?.Invoke(levels);
+
+        // If we have not selected a battle pass level, let's pick the current one
+        if (_selectedBattlePassLevelIndex == 0)
+        {
+            var selectedLevelIndex = 0;
+            foreach (var level in BattlePassLevels)
+            {
+                if (level.level_completed == true)
+                {
+                    selectedLevelIndex++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            SelectedBattlePassLevelIndex = selectedLevelIndex;
+        }
     }
     
     private void OnBattlePassChangedNotification(BattlePassChallengeChangedPayload payload)
