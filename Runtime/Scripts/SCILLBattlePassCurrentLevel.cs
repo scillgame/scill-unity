@@ -7,8 +7,11 @@ using UnityEngine.UI;
 
 public class SCILLBattlePassCurrentLevel : MonoBehaviour
 {
+    [Tooltip("Set the name of the level, use {level} for the level number")]
+    public string format = "Level {level}";
+
     private Text LevelText;
-    private List<BattlePassLevel> _battlePassLevels;
+    protected List<BattlePassLevel> _battlePassLevels;
 
     private void Awake()
     {
@@ -36,25 +39,36 @@ public class SCILLBattlePassCurrentLevel : MonoBehaviour
         _battlePassLevels = battlePassLevels;
         UpdateUI();
     }
+
+    protected virtual int GetCurrentLevel()
+    {
+        int currentLevelIndex = -1;
+        for (int i = 0; i < _battlePassLevels.Count; i++)
+        {
+            if (_battlePassLevels[i].activated_at == null && _battlePassLevels[i].level_completed == false)
+            {
+                break;
+            }
+            else
+            {
+                currentLevelIndex = i;
+            }
+        }
+
+        return currentLevelIndex;
+    }
     
     void UpdateUI()
     {
         if (LevelText && _battlePassLevels != null)
         {
-            int currentLevelIndex = 0;
-            for (int i = 0; i < _battlePassLevels.Count; i++)
+            int currentLevelIndex = GetCurrentLevel();
+            if (currentLevelIndex == -1)
             {
-                if (_battlePassLevels[i].level_completed == false)
-                {
-                    break;
-                }
-                else
-                {
-                    currentLevelIndex = i;
-                }
+                return;
             }
             
-            var newText = _battlePassLevels[currentLevelIndex].level_priority.ToString();
+            var newText = format.Replace("{level}", _battlePassLevels[currentLevelIndex].level_priority.ToString());
             if (newText != LevelText.text)
             {
                 LevelText.text = newText;
