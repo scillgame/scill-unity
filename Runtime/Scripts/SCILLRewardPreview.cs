@@ -25,20 +25,25 @@ public class SCILLRewardPreview : MonoBehaviour
 
     private void OnEnable()
     {
-        SCILLBattlePassLevels.OnSelectedBattlePassLevelChanged += OnSelectedBattlePassLevelChanged;
+        if (SCILLBattlePassManager.Instance)
+        {
+            OnSelectedBattlePassLevelChanged(SCILLBattlePassManager.Instance.SelectedBattlePassLevel);
+        }
+        SCILLBattlePassManager.OnSelectedBattlePassLevelChanged += OnSelectedBattlePassLevelChanged;
         SCILLBattlePassManager.OnBattlePassLevelRewardClaimed += OnBattlePassLevelRewardClaimed;
     }
 
     private void OnDisable()
     {
-        SCILLBattlePassLevels.OnSelectedBattlePassLevelChanged -= OnSelectedBattlePassLevelChanged;
+        SCILLBattlePassManager.OnSelectedBattlePassLevelChanged -= OnSelectedBattlePassLevelChanged;
         SCILLBattlePassManager.OnBattlePassLevelRewardClaimed -= OnBattlePassLevelRewardClaimed;
     }
 
     private void OnSelectedBattlePassLevelChanged(BattlePassLevel selectedBattlePassLevel)
     {
+        Debug.Log("SELECT BATTLE PASS LEVEL: " + selectedBattlePassLevel?.level_id);
         _selectedBattlePassLevel = selectedBattlePassLevel;
-        if (selectedBattlePassLevel.reward_amount != null)
+        if (selectedBattlePassLevel?.reward_amount != null)
         {
             SetRewardId(selectedBattlePassLevel.reward_amount);
         }
@@ -124,7 +129,16 @@ public class SCILLRewardPreview : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        ToggleUI(false);   
+        ToggleUI(false);
+
+        if (claimButton)
+        {
+            Button button = claimButton.GetComponent<Button>();
+            if (button && button.onClick.GetPersistentEventCount() <= 0)
+            {
+                 button.onClick.AddListener(OnClaimButtonPassRewardButtonClicked);
+            }
+        }
     }
 
     // Update is called once per frame
