@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Added script `SCILLCameraOffset` which can be attached to a camera to offset the perspective center to place items without perspective distortion to the left or right side.
+
+### Changed
+- Changed Battle Pass Style 2 scene to offset reward item to the right without perspective distortion.
+
 ## [1.1.0] - 2021-01-12
 
 This version adds a full working nice looking sample for personal challenges and battle passes and many UI assets that you can use for your own game
