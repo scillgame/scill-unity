@@ -30,6 +30,12 @@ public class SCILLBattlePass : SCILLThreadSafety
     [Tooltip("An image that will be set with the image set for the battle pass. It will be loaded as a Sprite with the name you set in Admin Panel. Make sure this Sprite is in a Resources folder - otherwise it will not be loaded at runtime")]
     public Image imageXL;
 
+    [Tooltip("Start date for the battle pass")]
+    public Text startDate;
+
+    [Tooltip("End date for this battle pass")]
+    public Text endDate;
+
     private List<BattlePassLevel> _levels;
     private SCILLBattlePassLevel _selectedBattlePassLevel;
     private Dictionary<int, GameObject> _levelObjects = new Dictionary<int, GameObject>();
@@ -135,13 +141,16 @@ public class SCILLBattlePass : SCILLThreadSafety
         }            
 
         if (battlePass.unlocked_at != null)
+        if (startDate)
         {
-            // This battle pass is unlocked
-            unlockGroup.SetActive(false);
+            var date = DateTime.Parse(battlePass.start_date);
+            startDate.text = date.ToShortDateString();
         }
-        else
+
+        if (endDate)
         {
-            unlockGroup.SetActive(true);
+            var date = DateTime.Parse(battlePass.end_date);
+            endDate.text = date.ToShortDateString();
         }
     }
 
