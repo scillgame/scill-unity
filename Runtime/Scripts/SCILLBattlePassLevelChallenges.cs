@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using SCILL.Model;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SCILLBattlePassLevelChallenges : MonoBehaviour
 {
@@ -10,14 +11,29 @@ public class SCILLBattlePassLevelChallenges : MonoBehaviour
     public SCILLBattlePassChallengeItem challengePrefab;
 
     [Tooltip(
+        "Chosse a Challenge Prefab that has the SCILLBattlePassChallengeItem script attached for completed challenges. This prefab is instantiated for each completed challenge in the current battle pass level")]
+    public SCILLBattlePassChallengeItem completedChallengePrefab;
+    
+    [Tooltip(
         "Connect a transform that will be used as the container for the challenge. If left blank, the challengePrefab items will be added to this game object. The container will be hidden if no challenges are available.")]
     public Transform challengeContainer;
+
+    [Tooltip("Hide completed challenges or keep them in the list")]
+    public bool showCompletedChallenges = false;
+
+    [Tooltip("A text field that will contain the challenge stats in the form 1/2")]
+    public Text challengeStats;
     
     private BattlePassLevel battlePassLevel;
     
     private void Awake()
     {
-        ClearChallenges();     
+        if (!challengePrefab)
+        {
+            Debug.LogError("SCILL Battle Pass Challenges: You need to assign a prefab to challengePrefab");
+        }
+        
+        ClearChallenges();
     }
     
     // Start is called before the first frame update
@@ -78,10 +94,27 @@ public class SCILLBattlePassLevelChallenges : MonoBehaviour
         }
 
         int numberOfChallengesShown = 0;
+        int numberOfChallengesCompleted = 0;
         foreach (var challenge in battlePassLevel.challenges)
         {
+            numberOfChallengesShown++;
+            
             // Only add active challenges to the list
-            if (challenge.type == "in-progress")
+            if (challenge.type == "finished")
+            {
+                numberOfChallengesCompleted++;
+                if (showCompletedChallenges)
+                {
+                    var challengeGO = Instantiate(completedChallengePrefab ? completedChallengePrefab : challengePrefab, challengeContainer ? challengeContainer : transform);
+                    var challengeItem = challengeGO.GetComponent<SCILLBattlePassChallengeItem>();
+                    if (challengeItem)
+                    {
+                        challengeItem.challenge = challenge;
+                        challengeItem.UpdateUI();
+                    }
+                }
+            }
+            else
             {
                 var challengeGO = Instantiate(challengePrefab, challengeContainer ? challengeContainer : transform);
                 var challengeItem = challengeGO.GetComponent<SCILLBattlePassChallengeItem>();
@@ -90,8 +123,6 @@ public class SCILLBattlePassLevelChallenges : MonoBehaviour
                     challengeItem.challenge = challenge;
                     challengeItem.UpdateUI();
                 }
-
-                numberOfChallengesShown++;
             }
         }
         
@@ -106,7 +137,12 @@ public class SCILLBattlePassLevelChallenges : MonoBehaviour
             {
                 challengeContainer.gameObject.SetActive(true);
             }
-        }        
+        }
+
+        if (challengeStats)
+        {
+            challengeStats.text = numberOfChallengesCompleted + "/" + battlePassLevel.challenges.Count;
+        }
     }
 
     // Update is called once per frame
