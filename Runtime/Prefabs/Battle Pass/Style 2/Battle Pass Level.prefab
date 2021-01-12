@@ -258,11 +258,11 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 40
-    m_FontStyle: 1
+    m_FontSize: 20
+    m_FontStyle: 2
     m_BestFit: 0
     m_MinSize: 0
-    m_MaxSize: 60
+    m_MaxSize: 286
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
@@ -371,9 +371,12 @@ MonoBehaviour:
   rewardContainer: {fileID: 1349210447875201309}
   battlePassLevelInfo: {fileID: 1349210448024288187}
   levelName: {fileID: 1349210448399650705}
+  levelTextFormat: Level {level}
   rewardIconPrefab: {fileID: 2188581643628705766, guid: e966a54cec6244416ac04b1b2c098cb2,
     type: 3}
   progressSlider: {fileID: 6489794412372141842}
+  autoHideProgressSlider: 0
+  challengeText: {fileID: 0}
   showLevelInfo: 1
   button: {fileID: 0}
 --- !u!114 &5271467698424647086
