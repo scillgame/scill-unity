@@ -8,7 +8,7 @@ public class SCILLReward : ScriptableObject
     [Tooltip("Set a UI Sprite which is used as a reward image in the Battle Pass. Make sure its located in a Resources folder so that it can be loaded at runtime")]
     public Sprite image;
     [Tooltip("The name of the reward")]
-    public string name;
+    public new string name;
     [TextArea]
     [Tooltip("The description of the reward")]
     public string description;
