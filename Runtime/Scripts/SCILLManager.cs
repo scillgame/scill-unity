@@ -69,7 +69,7 @@ public class SCILLManager : MonoBehaviour
     {
         // Override this function and generate an access token in the backend!
         _scillBackend = new SCILLBackend(this.APIKey, environment);
-        return _scillBackend.GetAccessToken(UserId);
+        return _scillBackend.GetAccessToken(userId);
     }
 
     protected virtual string GetUserId()
