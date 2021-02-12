@@ -161,7 +161,10 @@ public class SCILLBattlePassManager : SCILLThreadSafety
 
     private void OnDestroy()
     {
-        SCILLManager.Instance.SCILLClient.StopBattlePassUpdateNotifications(SelectedBattlePass.battle_pass_id, OnBattlePassChangedNotification);   
+        if (SelectedBattlePass != null)
+        {
+            SCILLManager.Instance.SCILLClient.StopBattlePassUpdateNotifications(SelectedBattlePass.battle_pass_id, OnBattlePassChangedNotification);            
+        }   
     }
     
     public async void ClaimBattlePassLevelReward(BattlePassLevel level)
