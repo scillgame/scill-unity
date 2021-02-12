@@ -105,6 +105,7 @@ public class SCILLManager : MonoBehaviour
         return await ChallengesApi.GetPersonalChallengesAsync(AppId);
     }
 
+#if UNITY_EDITOR    
     [ContextMenu("Open SCILL Playground")]
     public void OpenPlayground()
     {
@@ -112,4 +113,5 @@ public class SCILLManager : MonoBehaviour
             "&environment=" + UnityWebRequest.EscapeURL(this.environment.ToString().ToLower()) + "&userId=" + UnityWebRequest.EscapeURL(UserId);
         Help.BrowseURL(url);
     }
+#endif
 }
