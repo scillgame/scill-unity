@@ -143,8 +143,34 @@ public class SCILLManager : MonoBehaviour
     {
         // Please note, in some cases you should change session ids. This is just a simple example where we don't need
         // to do that
-        var payload = new EventPayload(UserId, SessionId, eventName, eventType, metaData);
-        var response = await EventsApi.SendEventAsync(payload);
+        var payload = new EventPayload(GetUserId(), SessionId, eventName, eventType, metaData);
+        try
+        {
+            var response = await EventsApi.SendEventAsync(payload);
+        }
+        catch (ApiException e)
+        {
+            Debug.Error("EVENT FAILED: " + payload.ToJson());
+            Debug.Error(e);
+            throw;
+        }
+    }
+    
+    public async void SendEventAsync(string eventName, string eventType = "single", string sessionId = null, EventMetaData metaData = null)
+    {
+        // Please note, in some cases you should change session ids. This is just a simple example where we don't need
+        // to do that
+        var payload = new EventPayload(GetUserId(), sessionId != null ? sessionId : SessionId, eventName, eventType, metaData);
+        try
+        {
+            var response = await EventsApi.SendEventAsync(payload);
+        }
+        catch (ApiException e)
+        {
+            Debug.Error("EVENT FAILED: " + payload.ToJson());
+            Debug.Error(e);
+            throw;
+        }
     }
 
     // Basic wrapper for getting personal challenges
