@@ -4,10 +4,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.3.0] - 2021-02-11
+## [1.3.0] - 2021-03-26
+
+This release primary focus has been on adding leaderboards to SCILL Unity SDK. We added ready-to-use leaderboard prefabs. More Info on the leaderboards can be found in our [developer documentation](https://developers.scillgame.com/sdks/unity/classes/scillleaderboard.html)
+
+### Added
+- Support for different languages in SCILL backend has been added
+- Added `SetUserInfo` and `GetUserInfo` to `SCILLManager` to set usernames and avatars
+- Added Leaderboards (Classes, Prefabs, etc)
 
 ### Changed
-- Added support for Package Manager by adding missing `*.meta` files.  
+- SCILL C# SDK has been updated to the latest version
+- Changed some UI parameters like spacing for challenge lists
+- Errors when sending events is now caught and printed in the console
+- Reworked `SCILLManager` inspector property order and tooltips
+- Use `GetAllPersonalChallenges` as `GetPersonalChallenges` has been deprecated
+- Changed execution order of `SCILLManager` to `-1` so that it runs before everything else
+
+### Fixed
+- Fixed a couple of minor issues in the Battle Pass system
 
 ## [1.2.0] - 2021-02-10
 
