@@ -150,8 +150,8 @@ public class SCILLManager : MonoBehaviour
         }
         catch (ApiException e)
         {
-            Debug.Error("EVENT FAILED: " + payload.ToJson());
-            Debug.Error(e);
+            Debug.LogError("EVENT FAILED: " + payload.ToJson());
+            Debug.LogError(e);
             throw;
         }
     }
@@ -167,8 +167,8 @@ public class SCILLManager : MonoBehaviour
         }
         catch (ApiException e)
         {
-            Debug.Error("EVENT FAILED: " + payload.ToJson());
-            Debug.Error(e);
+            Debug.LogError("EVENT FAILED: " + payload.ToJson());
+            Debug.LogError(e);
             throw;
         }
     }
