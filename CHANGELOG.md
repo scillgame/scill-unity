@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.3.0] - 2021-03-26
+## [1.4.0] - 2021-03-26
 
 This release primary focus has been on adding leaderboards to SCILL Unity SDK. We added ready-to-use leaderboard prefabs. More Info on the leaderboards can be found in our [developer documentation](https://developers.scillgame.com/sdks/unity/classes/scillleaderboard.html)
 
@@ -14,7 +14,7 @@ This release primary focus has been on adding leaderboards to SCILL Unity SDK. W
 - Added Leaderboards (Classes, Prefabs, etc)
 
 ### Changed
-- SCILL C# SDK has been updated to the latest version
+- SCILL C# SDK has been updated to the latest version (1.3.0)
 - Changed some UI parameters like spacing for challenge lists
 - Errors when sending events is now caught and printed in the console
 - Reworked `SCILLManager` inspector property order and tooltips
@@ -23,6 +23,11 @@ This release primary focus has been on adding leaderboards to SCILL Unity SDK. W
 
 ### Fixed
 - Fixed a couple of minor issues in the Battle Pass system
+
+## [1.3.0] - 2021-02-11
+
+### Changed
+- Added `*.meta` tags to support Package Manager
 
 ## [1.2.0] - 2021-02-10
 
