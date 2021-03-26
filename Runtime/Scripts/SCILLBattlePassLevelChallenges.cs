@@ -88,7 +88,8 @@ public class SCILLBattlePassLevelChallenges : MonoBehaviour
         // Make sure we remove old challenges from the list
         ClearChallenges();
         
-        if (battlePassLevel == null)
+        // If there is no level or it's not activated yet, don't show anything
+        if (battlePassLevel == null || battlePassLevel.activated_at == null)
         {
             return;
         }

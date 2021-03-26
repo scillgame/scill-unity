@@ -42,8 +42,15 @@ public class SCILLBattlePassManager : SCILLThreadSafety
 
     private void Awake()
     {
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);    
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
     // Start is called before the first frame update
@@ -164,7 +171,7 @@ public class SCILLBattlePassManager : SCILLThreadSafety
         if (SelectedBattlePass != null)
         {
             SCILLManager.Instance.SCILLClient.StopBattlePassUpdateNotifications(SelectedBattlePass.battle_pass_id, OnBattlePassChangedNotification);            
-        }   
+        }
     }
     
     public async void ClaimBattlePassLevelReward(BattlePassLevel level)
