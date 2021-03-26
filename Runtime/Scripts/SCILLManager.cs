@@ -1,26 +1,41 @@
-﻿using System.CodeDom.Compiler;
+﻿using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using SCILL;
 using SCILL.Api;
+using SCILL.Client;
 using SCILL.Model;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 
+public enum SupportedLanguages
+{
+    en,
+    de
+}
+
 [HelpURL("https://developers.scillgame.com")]
 public class SCILLManager : MonoBehaviour
 {
     // Properties to be set in the Unity inspector
-    [Tooltip("Set your API key here. You can get your API-key in the SCILL Admin Panel")]
-    public string APIKey;
     [Tooltip("Set your App id here. You need to create an App in the SCILL Admin Panel")]
     public string AppId;
     [Tooltip("You should leave this setting in Production. Sometimes, the SCILL team might ask you to change that.")]
     public SCILL.Environment environment;
+    [Tooltip("Set the language")] 
+    public SupportedLanguages language;
 
+    [Header("Development/Testing options")]
+    [Tooltip("Set your API key here. You can get your API-key in the SCILL Admin Panel")]
+    public string APIKey;
+    [Tooltip("Set a user id for testing purposes. ")]
     public string UserId = "12345";
+    // Default session id. This is just an example value.
+    [Tooltip("Set a default session id. Please check out developer documentation for more info.")]
+    public string SessionId = "persistent";
 
     // Getter for the access token
     public string AccessToken => _accessToken;
@@ -28,9 +43,6 @@ public class SCILLManager : MonoBehaviour
     // In this case, we use a unique devide identifier. Multi device support requires a user account system like
     // Steam, Playfab, etc.
     //public string UserId => SystemInfo.deviceUniqueIdentifier;
-    
-    // Default session id. This is just an example value.
-    public string SessionId => "1234";
 
     // Getter for the singleton instance of this class
     public static SCILLManager Instance; // **<- reference link to SCILL
@@ -39,6 +51,7 @@ public class SCILLManager : MonoBehaviour
     public EventsApi EventsApi => _scillClient.EventsApi;
     public ChallengesApi ChallengesApi => _scillClient.ChallengesApi;
     public BattlePassesApi BattlePassesApi => _scillClient.BattlePassesApi;
+    public LeaderboardsApi LeaderboardsApi => _scillClient.LeaderboardsApi;
     public SCILLClient SCILLClient => _scillClient;
 
     // Local instances of SCILLClient. Please note, that SCILLBackend should not be used in game clients in production!
@@ -53,8 +66,9 @@ public class SCILLManager : MonoBehaviour
             Instance = this;
             
             _accessToken = GenerateAccessToken(GetUserId());
+            Debug.Log(_accessToken);
 
-            _scillClient = new SCILLClient(_accessToken, AppId, environment);
+            _scillClient = new SCILLClient(_accessToken, AppId, language.ToString(), environment);
             
             DontDestroyOnLoad(gameObject);
         }
