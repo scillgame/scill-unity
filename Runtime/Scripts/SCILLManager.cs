@@ -86,10 +86,44 @@ public class SCILLManager : MonoBehaviour
         return _scillBackend.GetAccessToken(userId);
     }
 
-    protected virtual string GetUserId()
+    public virtual bool SetUserInfo(string username, string avatar)
+    {
+        var userInfo = new UserInfo(username, avatar);
+        var result =_scillClient.AuthApi.SetUserInfo(userInfo);
+        if (result.Equals(userInfo))
+        {
+            return true;
+        }
+
+        return false;
+    }
+    
+    public virtual UserInfo GetUserInfo()
+    {
+        var result =_scillClient.AuthApi.GetUserInfo();
+        return result;
+    }
+
+    public virtual string GetUserId()
     {
         // Override this function to return a User Id
-        return UserId;
+        if (!string.IsNullOrEmpty(UserId))
+        {
+            return UserId;
+        }
+        else
+        {
+            return SystemInfo.deviceUniqueIdentifier;    
+        }
+        
+    }
+
+    public virtual void SetLanguage(SupportedLanguages newSupportedLanguage)
+    {
+        language = newSupportedLanguage;
+        
+        // Update the SCILLClient instance with the new language setting
+        _scillClient = new SCILLClient(_accessToken, AppId, language.ToString(), environment);
     }
 
     private void SceneManagerOnactiveSceneChanged(Scene oldScene, Scene newScene)
