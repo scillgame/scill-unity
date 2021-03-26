@@ -54,7 +54,7 @@ public class SCILLPersonalChallenges : SCILLThreadSafety
 
     public async void UpdatePersonalChallengesList()
     {
-        var categories = await SCILLManager.Instance.SCILLClient.GetPersonalChallengesAsync();
+        var categories = await SCILLManager.Instance.SCILLClient.GetAllPersonalChallengesAsync();
         _categories = categories;
         UpdateCategories(categories);
     }
