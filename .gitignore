@@ -33,7 +33,6 @@ build/
 *_i.c
 *_p.c
 *.ilk
-*.meta
 *.obj
 *.pch
 *.pdb
@@ -187,3 +186,23 @@ $RECYCLE.BIN/
 
 # Jetbrains Rider
 .idea
+
+
+# =========================
+# Unity specific
+# =========================
+
+# Asset data should only be ignored when the corresponding asset is also ignored
+!/**/*.meta
+
+# Unity3D generated meta files
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+
+# Unity3D generated file on crash reports
+sysinfo.txt
+
+# Builds
+*.apk
+*.unitypackage
