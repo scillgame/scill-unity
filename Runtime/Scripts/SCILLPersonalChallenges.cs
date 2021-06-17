@@ -9,18 +9,21 @@ public class SCILLPersonalChallenges : SCILLThreadSafety
 {
     [Tooltip("A prefab to be used as a category item. This will be instantiated for each category in the response")]
     public SCILLCategoryItem categoryPrefab;
-    [Tooltip("A prefab that will be used for each challenge. It will be instantiated and added as child to the category game object")]
+
+    [Tooltip(
+        "A prefab that will be used for each challenge. It will be instantiated and added as child to the category game object")]
     public SCILLChallengeItem challengePrefab;
- 
+
     private List<ChallengeCategory> _categories;
     private Dictionary<string, GameObject> _categoryObjects = new Dictionary<string, GameObject>();
 
     private void Awake()
     {
         // Remove any dummies
-        foreach (SCILLCategoryItem child in GetComponentsInChildren<SCILLCategoryItem>()) {
+        foreach (SCILLCategoryItem child in GetComponentsInChildren<SCILLCategoryItem>())
+        {
             Destroy(child.gameObject);
-        }      
+        }
     }
 
     // Start is called before the first frame update
@@ -52,11 +55,14 @@ public class SCILLPersonalChallenges : SCILLThreadSafety
         return null;
     }
 
-    public async void UpdatePersonalChallengesList()
+    public void UpdatePersonalChallengesList()
     {
-        var categories = await SCILLManager.Instance.SCILLClient.GetAllPersonalChallengesAsync();
-        _categories = categories;
-        UpdateCategories(categories);
+        var categoriesPromise = SCILLManager.Instance.SCILLClient.GetAllPersonalChallengesAsync();
+        categoriesPromise.Then(categories =>
+        {
+            _categories = categories;
+            UpdateCategories(categories);
+        });
     }
 
     private void UpdateCategories(List<ChallengeCategory> categories)
@@ -92,71 +98,79 @@ public class SCILLPersonalChallenges : SCILLThreadSafety
             challenge.type = newChallenge.type;
             challenge.user_challenge_current_score = newChallenge.user_challenge_current_score;
             challenge.user_challenge_activated_at = newChallenge.user_challenge_activated_at;
-            challenge.user_challenge_unlocked_at = newChallenge.user_challenge_unlocked_at;            
+            challenge.user_challenge_unlocked_at = newChallenge.user_challenge_unlocked_at;
         }
     }
 
     private void OnChallengeWebhookMessage(ChallengeWebhookPayload payload)
     {
-        // Make sure we run this code in Unitys "main" thread, i.e. in the update function
-        RunOnMainThread.Enqueue(() =>
-        {
-            UpdateChallenge(payload.new_challenge); 
-        });
+        UpdateChallenge(payload.new_challenge);
     }
 
     public void UnlockPersonalChallenge(Challenge challenge)
     {
-        var response = SCILLManager.Instance.SCILLClient.UnlockPersonalChallenge(challenge.challenge_id);
-        if (response.status >= 200 && response.status < 300)
+        var responsePromise = SCILLManager.Instance.SCILLClient.UnlockPersonalChallengeAsync(challenge.challenge_id);
+        responsePromise.Then(response =>
         {
-            if (response.challenge != null)
+            if (response.status >= 200 && response.status < 300)
             {
-                UpdateChallenge(response.challenge);
+                if (response.challenge != null)
+                {
+                    UpdateChallenge(response.challenge);
+                }
             }
-        }
+        });
     }
-    
+
     public void ActivatePersonalChallenge(Challenge challenge)
     {
-        var response = SCILLManager.Instance.SCILLClient.ActivatePersonalChallenge(challenge.challenge_id);
-        if (response.status >= 200 && response.status < 300)
+        var responsePromise = SCILLManager.Instance.SCILLClient.ActivatePersonalChallengeAsync(challenge.challenge_id);
+        responsePromise.Then(response =>
         {
-            if (response.challenge != null)
+            if (response.status >= 200 && response.status < 300)
             {
-                UpdateChallenge(response.challenge);
+                if (response.challenge != null)
+                {
+                    UpdateChallenge(response.challenge);
+                }
             }
-        }
+        });
     }
-    
+
     public void ClaimPersonalChallengeReward(Challenge challenge)
     {
-        var response = SCILLManager.Instance.SCILLClient.ClaimPersonalChallengeReward(challenge.challenge_id);
-        if (response.status >= 200 && response.status < 300)
+        var responsePromise =
+            SCILLManager.Instance.SCILLClient.ClaimPersonalChallengeRewardAsync(challenge.challenge_id);
+        responsePromise.Then(response =>
         {
-            if (response.challenge != null)
+            if (response.status >= 200 && response.status < 300)
             {
-                UpdateChallenge(response.challenge);
+                if (response.challenge != null)
+                {
+                    UpdateChallenge(response.challenge);
+                }
             }
-        }
-    }    
+        });
+    }
 
     public void CancelPersonalChallenge(Challenge challenge)
     {
-        var response = SCILLManager.Instance.SCILLClient.CancelPersonalChallenge(challenge.challenge_id);
-        if (response.status >= 200 && response.status < 300)
+        var responsePromise = SCILLManager.Instance.SCILLClient.CancelPersonalChallengeAsync(challenge.challenge_id);
+        responsePromise.Then(response =>
         {
-            if (response.challenge != null)
+            if (response.status >= 200 && response.status < 300)
             {
-                // In this case we need to reload the list from the server as we don't know if this challenge will
-                // be available as it's set to repeatable or not. 
-                UpdatePersonalChallengesList();
+                if (response.challenge != null)
+                {
+                    // In this case we need to reload the list from the server as we don't know if this challenge will
+                    // be available as it's set to repeatable or not. 
+                    UpdatePersonalChallengesList();
+                }
             }
-        }
+        });
     }
 
     protected virtual void OnPersonalChallengeRewardClaimed(Challenge challenge)
     {
-        
     }
 }
