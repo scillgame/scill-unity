@@ -79,7 +79,7 @@ public class SCILLBattlePassManager : SCILLThreadSafety
                 OnBattlePassUpdatedFromServer?.Invoke(selectedBattlePass);
 
                 // Get notifications from SCILL backend whenever battle pass changes
-                SCILLManager.Instance.SCILLClient.StartBattlePassUpdateNotifications(selectedBattlePass.battle_pass_id,
+                SCILLManager.Instance.StartBattlePassUpdateNotifications(selectedBattlePass.battle_pass_id,
                     OnBattlePassChangedNotification);
 
                 // Load battle pass levels from SCILL backend
@@ -183,7 +183,7 @@ public class SCILLBattlePassManager : SCILLThreadSafety
     {
         if (SelectedBattlePass != null)
         {
-            SCILLManager.Instance.SCILLClient.StopBattlePassUpdateNotifications(SelectedBattlePass.battle_pass_id,
+            SCILLManager.Instance.StopBattlePassUpdateNotifications(SelectedBattlePass.battle_pass_id,
                 OnBattlePassChangedNotification);
         }
     }

@@ -1,8 +1,12 @@
 ﻿using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
+using NativeWebSocket;
+using Newtonsoft.Json;
+using Proyecto26;
 using RSG;
 using SCILL;
 using SCILL.Api;
@@ -78,9 +82,11 @@ public class SCILLManager : MonoBehaviour
             Instance = this;
 
             _scillBackend = new SCILLBackend(this.APIKey, environment);
-            _scillBackend.GetAccessTokenAsync(GetUserId(), token =>
+            var accessTokenPromise = GenerateAccessToken(GetUserId());
+
+            accessTokenPromise.Then(accessToken =>
             {
-                _accessToken = token;
+                _accessToken = accessToken;
                 Debug.Log(_accessToken);
 
                 eventsApi = new EventsApi(new Configuration());
@@ -90,22 +96,7 @@ public class SCILLManager : MonoBehaviour
                 leaderboardsApi = new LeaderboardsApi(new Configuration());
 
                 _scillClient = new SCILLClient(_accessToken, AppId, language.ToString(), environment);
-            });
-                
-            // var accessTokenPromise = GenerateAccessToken(GetUserId());
-            // accessTokenPromise.Then(accessToken =>
-            // {
-            //     _accessToken = accessToken;
-            //     Debug.Log(_accessToken);
-            //
-            //     eventsApi = new EventsApi(new Configuration());
-            //     challengesApi = new ChallengesApi(new Configuration());
-            //     battlePassesApi = new BattlePassesApi(new Configuration());
-            //     authApi = new AuthApi(new Configuration());
-            //     leaderboardsApi = new LeaderboardsApi(new Configuration());
-            //
-            //     _scillClient = new SCILLClient(_accessToken, AppId, language.ToString(), environment);
-            // });
+            }).Catch(e => { Debug.LogError(e.Message); });
             DontDestroyOnLoad(gameObject);
         }
         else
@@ -187,6 +178,15 @@ public class SCILLManager : MonoBehaviour
         try
         {
             var eventResponsePromise = EventsApi.SendEventAsync(payload);
+            eventResponsePromise.Catch(e =>
+            {
+                var error = e as RequestException;
+                Debug.LogError("EVENT FAILED: " + e.Message);
+                if (null != error)
+                {
+                    Debug.LogError("Error Response" + error.Response);
+                }
+            });
         }
         catch (ApiException e)
         {
@@ -217,4 +217,178 @@ public class SCILLManager : MonoBehaviour
         Help.BrowseURL(url);
     }
 #endif
+
+
+    #region Realtime Updates
+
+    public delegate void ChallengeChangedNotificationHandler(ChallengeWebhookPayload payload);
+
+    public event ChallengeChangedNotificationHandler OnChallengeChangedNotification;
+
+    public delegate void BattlePassChangedNotificationHandler(BattlePassChallengeChangedPayload payload);
+
+    public event BattlePassChangedNotificationHandler OnBattlePassChangedNotification;
+
+
+    private List<WebSocket> _webhookClients = new List<WebSocket>();
+    private WebSocket _challengesWebhookClient;
+
+
+    void Update()
+    {
+#if !UNITY_WEBGL || UNITY_EDITOR
+        foreach (var client in _webhookClients)
+        {
+            client.DispatchMessageQueue();
+        }
+#endif
+    }
+
+    public async Task StartChallengeUpdateNotifications(ChallengeChangedNotificationHandler handler)
+    {
+        OnChallengeChangedNotification += handler;
+
+        if (_challengesWebhookClient == null)
+        {
+            await StartMonitorUserChallenges();
+        }
+    }
+
+    public void StopChallengeUpdateNotifications(ChallengeChangedNotificationHandler handler)
+    {
+        OnChallengeChangedNotification -= handler;
+
+        if (OnChallengeChangedNotification == null ||
+            OnChallengeChangedNotification?.GetInvocationList().Length <= 0)
+        {
+            StopMonitorUserChallenges();
+        }
+    }
+
+    public void StartBattlePassUpdateNotifications(string battlePassId,
+        BattlePassChangedNotificationHandler handler)
+    {
+        OnBattlePassChangedNotification += handler;
+
+        // if (!_battlePassMqttClients.ContainsKey(battlePassId))
+        // {
+        //     StartMonitorBattlePass(battlePassId);
+        // }
+    }
+
+    public void StopBattlePassUpdateNotifications(string battlePassId, BattlePassChangedNotificationHandler handler)
+    {
+        OnBattlePassChangedNotification -= handler;
+
+        if (OnBattlePassChangedNotification == null ||
+            OnBattlePassChangedNotification?.GetInvocationList().Length <= 0)
+        {
+            StopMonitorBattlePass(battlePassId);
+        }
+    }
+
+    private async Task StartMonitorUserChallenges()
+    {
+        var headers = new Dictionary<string, string>();
+        string websocketURL = "wss://mqtt.scillgame.com:8083/mqtt";
+        _challengesWebhookClient = new WebSocket(websocketURL);
+
+        _challengesWebhookClient.OnMessage += data =>
+        {
+            string jsonStr = Encoding.UTF8.GetString(data);
+            var payload = JsonConvert.DeserializeObject<ChallengeWebhookPayload>(jsonStr);
+            if (payload != null)
+            {
+                OnChallengeChangedNotification?.Invoke(payload);
+            }
+        };
+        _challengesWebhookClient.OnOpen += () => { Debug.Log("Websocket Connection Opened"); };
+
+        _challengesWebhookClient.OnError += msg => { Debug.LogError("Websocket Connection Error:" + msg); };
+
+        _challengesWebhookClient.OnClose += code => { Debug.Log("Closed with code: " + code.ToString()); };
+
+        _webhookClients.Add(_challengesWebhookClient);
+
+        await _challengesWebhookClient.Connect();
+        
+        
+    }
+
+    private void StopMonitorUserChallenges()
+    {
+        if (_challengesWebhookClient == null)
+        {
+            return;
+        }
+
+        Debug.Log("Calling Close from StopMonitorUserChallenges");
+        _challengesWebhookClient.Close();
+        _webhookClients.Remove(_challengesWebhookClient);
+        _challengesWebhookClient = null;
+    }
+
+
+    private void StartMonitorBattlePass(string battlePassId)
+    {
+        // var client = CreateMQTTClient();
+        // _battlePassMqttClients.Add(battlePassId, client);
+        //
+        // // Subscribe to that topic once the MQTT connection is established
+        // client.UseConnectedHandler(async e =>
+        // {
+        //     // Get the MQTT topic for listening on changes for the challenges
+        //     var notificationTopic =  AuthApi.GetUserBattlePassNotificationTopicAsync(battlePassId);
+        //
+        //     // Subscribe to the returned topic
+        //      client.SubscribeAsync(new MqttTopicFilterBuilder()
+        //         .WithTopic(notificationTopic.topic).Build());
+        // });
+        //
+        // // Handle incoming messages and send payloads to callback handler
+        // client.UseApplicationMessageReceivedHandler(e =>
+        // {
+        //     string jsonStr = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
+        //     var payload = JsonConvert.DeserializeObject<BattlePassChallengeChangedPayload>(jsonStr);
+        //     if (payload != null)
+        //     {
+        //         OnBattlePassChangedNotification?.Invoke(payload);
+        //     }
+        // });
+        //
+        // // Connect to SCILLs MQTT server to receive real time notifications
+        // var options = new MqttClientOptionsBuilder()
+        //     .WithTcpServer("mqtt.scillgame.com", 1883)
+        //     .Build();
+        //
+        //  client.ConnectAsync(options, CancellationToken.None);
+    }
+
+    private void StopMonitorBattlePass(string battlePassId)
+    {
+        // if (_battlePassMqttClients.ContainsKey(battlePassId))
+        // {
+        //      _battlePassMqttClients[battlePassId].DisconnectAsync();
+        //     _battlePassMqttClients.Remove(battlePassId);
+        // }
+    }
+
+    private async void OnApplicationQuit()
+    {
+        await StopMonitoring();
+    }
+
+    private async Task StopMonitoring()
+    {
+        Debug.Log("Calling Close from StopMonitoring");
+
+        foreach (var client in _webhookClients)
+        {
+            await client.Close();
+        }
+
+        _webhookClients.Clear();
+    }
+
+    #endregion
 }

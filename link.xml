@@ -1,9 +1,0 @@
-<linker>
-    <!--
-    Preserve types and members in an assembly
-    -->
-    <assembly fullname="SCILL.Api" preserve="all"/>
-    <assembly fullname="SCILL" preserve="all"/>
-    <assembly fullname="SCILL.Client" preserve="all"/>
-    <assembly fullname="SCILL.Modek" preserve="all"/>
-</linker>

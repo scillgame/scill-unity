@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using SCILL;
 using SCILL.Model;
 using UnityEngine;
@@ -27,16 +28,20 @@ public class SCILLPersonalChallenges : SCILLThreadSafety
     }
 
     // Start is called before the first frame update
-    void Start()
+    IEnumerator Start()
     {
+        while (null == SCILLManager.Instance.SCILLClient)
+            yield return null;
         UpdatePersonalChallengesList();
+        
+        Task task = SCILLManager.Instance.StartChallengeUpdateNotifications(OnChallengeWebhookMessage);
+        yield return new WaitUntil(() => task.IsCompleted);
 
-        SCILLManager.Instance.SCILLClient.StartChallengeUpdateNotifications(OnChallengeWebhookMessage);
     }
 
     private void OnDestroy()
     {
-        SCILLManager.Instance.SCILLClient.StopChallengeUpdateNotifications(OnChallengeWebhookMessage);
+        SCILLManager.Instance.StopChallengeUpdateNotifications(OnChallengeWebhookMessage);
     }
 
     private Challenge FindChallengeById(string id)
