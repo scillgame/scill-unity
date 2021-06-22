@@ -262,7 +262,7 @@ public class SCILLManager : MonoBehaviour
         if (String.IsNullOrEmpty(_personalChallengeNotificationTopic) &&
             !_mqtt.IsSubscriptionActive(_personalChallengeNotificationTopic))
         {
-            StartCoroutine(WaitForMqttConnectionEstablished(StartMonitorUserChallenges));
+            StartCoroutine(WaitForMqttConnectionBeforeChallengeMonitoring());
         }
     }
 
@@ -282,11 +282,22 @@ public class SCILLManager : MonoBehaviour
     {
         OnBattlePassChangedNotification += handler;
 
-        if ((!_battlepassIdToTopicMap.ContainsKey(battlePassId)) &&
+        if ((!_battlepassIdToTopicMap.ContainsKey(battlePassId)) ||
             !_mqtt.IsSubscriptionActive(_battlepassIdToTopicMap[battlePassId]))
         {
-            StartMonitorBattlePass(battlePassId);
+            StartCoroutine(WaitForMqttConnectionBeforeBattlePassMonitoring(battlePassId));
         }
+    }
+
+
+    private IEnumerator WaitForMqttConnectionBeforeBattlePassMonitoring(string battlePassId)
+    {
+        while (null == _mqtt || !_mqtt.IsConnected)
+        {
+            yield return null;
+        }
+
+        StartMonitorBattlePass(battlePassId);
     }
 
     public void StopBattlePassUpdateNotifications(string battlePassId, BattlePassChangedNotificationHandler handler)
@@ -309,14 +320,14 @@ public class SCILLManager : MonoBehaviour
         });
     }
 
-    private IEnumerator WaitForMqttConnectionEstablished(Action callback)
+    private IEnumerator WaitForMqttConnectionBeforeChallengeMonitoring()
     {
         while (null == _mqtt || !_mqtt.IsConnected)
         {
             yield return null;
         }
 
-        callback();
+        StartMonitorUserChallenges();
     }
 
     private void StopMonitorUserChallenges()
@@ -326,37 +337,12 @@ public class SCILLManager : MonoBehaviour
 
     private void StartMonitorBattlePass(string battlePassId)
     {
-        // var client = CreateMQTTClient();
-        // _battlePassMqttClients.Add(battlePassId, client);
-        //
-        // // Subscribe to that topic once the MQTT connection is established
-        // client.UseConnectedHandler(async e =>
-        // {
-        //     // Get the MQTT topic for listening on changes for the challenges
-        //     var notificationTopic =  AuthApi.GetUserBattlePassNotificationTopicAsync(battlePassId);
-        //
-        //     // Subscribe to the returned topic
-        //      client.SubscribeAsync(new MqttTopicFilterBuilder()
-        //         .WithTopic(notificationTopic.topic).Build());
-        // });
-        //
-        // // Handle incoming messages and send payloads to callback handler
-        // client.UseApplicationMessageReceivedHandler(e =>
-        // {
-        //     string jsonStr = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
-        //     var payload = JsonConvert.DeserializeObject<BattlePassChallengeChangedPayload>(jsonStr);
-        //     if (payload != null)
-        //     {
-        //         OnBattlePassChangedNotification?.Invoke(payload);
-        //     }
-        // });
-        //
-        // // Connect to SCILLs MQTT server to receive real time notifications
-        // var options = new MqttClientOptionsBuilder()
-        //     .WithTcpServer("mqtt.scillgame.com", 1883)
-        //     .Build();
-        //
-        //  client.ConnectAsync(options, CancellationToken.None);
+        SCILLClient.AuthApi.GetUserBattlePassNotificationTopicAsync(battlePassId).Then(topicRequestResult =>
+        {
+            _battlepassIdToTopicMap[battlePassId] = topicRequestResult.topic;
+            _mqtt.SubscribeToTopicBattlePass(topicRequestResult.topic, OnBattlePassChangedNotification);
+
+        });
     }
 
     private void StopMonitorBattlePass(string battlePassId)

@@ -48,7 +48,9 @@ namespace ScillHelpers
                 return ScillMqttPacketPublish.FromBuffer(buffer);
             }
 
-            return new ScillMqttPacketBase();
+            var packet = new ScillMqttPacketBase();
+            packet.CommandType = commandType;
+            return packet;
         }
 
         public static MqttCommandType GetCommandTypeFromBuffer(byte[] buffer)

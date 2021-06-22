@@ -56,6 +56,9 @@ namespace ScillHelpers
         public void Ping()
         {
             // Debug.Log("Pinging");
+            ScillMqttPacketPing pingPacket = new ScillMqttPacketPing();
+            pingPacket.Buffer = pingPacket.ToBuffer();
+            _mqttWS.Send(pingPacket.Buffer);
         }
 
         public void DispatchMessageQueue()
@@ -90,55 +93,86 @@ namespace ScillHelpers
 
         private void MqttWSOnOnMessage(byte[] data)
         {
-            Debug.Log("Received Message");
             ScillMqttPacketBase packet = ScillMqttPacketBase.FromBuffer(data);
             if (MqttCommandType.CONNACK == packet.CommandType)
             {
-                ScillMqttPacketConnack connackPacket = (ScillMqttPacketConnack) packet;
-                if (ScillMqttConnackCode.ACCEPTED == connackPacket.Code)
-                {
-                    IsConnected = true;
-                    Debug.Log("MQTT Connection Acknowledged and Accepted.");
-                }
-                else
-                {
-                    Debug.LogError("MQTT Connection refused with code: " + connackPacket.Code);
-                }
+                HandleConnAckPacket(packet);
             }
             else if (MqttCommandType.PUBLISH == packet.CommandType)
             {
-                Debug.Log("Message identified as publish message");
-                ScillMqttPacketPublish publishPacket = (ScillMqttPacketPublish) packet;
-                if (callbacksPersonalChallengeChanged.ContainsKey(publishPacket.TopicName))
-                {
-                    ChallengeWebhookPayload payload =
-                        JsonConvert.DeserializeObject<ChallengeWebhookPayload>(publishPacket.Payload);
+                HandlePublishPacket(packet);
+            }
+            else if (MqttCommandType.PINGRESP == packet.CommandType)
+            {
+                // Debug.Log("Got a ping response.");
+            }
+            else if (MqttCommandType.SUBACK == packet.CommandType)
+            {
+                // Debug.Log("Got a SUBACK response.");
+            }
+            else
+            {
+                Debug.Log("Received Unhandled Mqtt Message");
+            }
+        }
 
-                    var callback = callbacksPersonalChallengeChanged[publishPacket.TopicName];
-                    if (null != callback)
+        private void HandlePublishPacket(ScillMqttPacketBase packet)
+        {
+            // Debug.Log("Message identified as publish message");
+            ScillMqttPacketPublish publishPacket = (ScillMqttPacketPublish) packet;
+            if (callbacksPersonalChallengeChanged.ContainsKey(publishPacket.TopicName))
+            {
+                ChallengeWebhookPayload payload =
+                    JsonConvert.DeserializeObject<ChallengeWebhookPayload>(publishPacket.Payload);
+
+                var callback = callbacksPersonalChallengeChanged[publishPacket.TopicName];
+                if (null != callback)
+                {
+                    callback.Invoke(payload);
+                }
+            }
+            else if (callbacksBattlePassChanged.ContainsKey(publishPacket.TopicName))
+            {
+                var jObject = (JObject) JsonConvert.DeserializeObject(publishPacket.Payload);
+                if (jObject != null)
+                {
+                    string webhookType = jObject["webhook_type"].Value<string>();
+                    Debug.Log($"Webhooktype: {webhookType}");
+
+                    switch (webhookType)
                     {
-                        callback.Invoke(payload);
+                        case "battlepass-challenge-changed":
+                            BattlePassChallengeChangedPayload payload =
+                                JsonConvert.DeserializeObject<BattlePassChallengeChangedPayload>(publishPacket.Payload);
+                            BattlePassChangedNotificationHandler callback =
+                                callbacksBattlePassChanged[publishPacket.TopicName];
+                            if (null != callback)
+                            {
+                                callback.Invoke(payload);
+                            }
+
+                            break;
+                        case "battlepass-level-reward-claimed":
+                            break;
+                        case "battlepass-expired":
+                            break;
                     }
                 }
-                else if (callbacksBattlePassChanged.ContainsKey(publishPacket.TopicName))
-                {
-                    var jObject = (JObject) JsonConvert.DeserializeObject(publishPacket.Payload);
-                    if (jObject != null)
-                    {
-                        string webhookType = jObject["webhook_type"].Value<string>();
-                        Debug.Log($"Webhooktype: {webhookType}");
+            }
+        }
 
-                        switch (webhookType)
-                        {
-                            case "battlepass-challenge-changed":
-                                break;
-                            case "battlepass-level-reward-claimed":
-                                break;
-                            case "battlepass-expired":
-                                break;
-                        }
-                    }
-                }
+
+        private void HandleConnAckPacket(ScillMqttPacketBase packet)
+        {
+            ScillMqttPacketConnack connackPacket = (ScillMqttPacketConnack) packet;
+            if (ScillMqttConnackCode.ACCEPTED == connackPacket.Code)
+            {
+                IsConnected = true;
+                Debug.Log("MQTT Connection Acknowledged and Accepted.");
+            }
+            else
+            {
+                Debug.LogError("MQTT Connection refused with code: " + connackPacket.Code);
             }
         }
 
@@ -156,7 +190,7 @@ namespace ScillHelpers
 
         public bool IsSubscriptionActive(string topic)
         {
-            return null != topic &&
+            return !string.IsNullOrEmpty(topic) &&
                    (callbacksBattlePassChanged.ContainsKey(topic) ||
                     callbacksPersonalChallengeChanged.ContainsKey(topic));
         }
