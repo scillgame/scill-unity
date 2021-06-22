@@ -1,8 +1,8 @@
 {
-    "name": "Unity.Scillgame.Runtime",
+    "name": "Scillgame.Scillhelpers.ScillMqtt",
     "rootNamespace": "",
     "references": [
-        "GUID:21bf07b167f3b1a48b2a83076f372430"
+        "GUID:04376767bc1f3b428aefa3d20743e819"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

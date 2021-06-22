@@ -1,8 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text;
 using JetBrains.Annotations;
 using NativeWebSocket;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using SCILL.Model;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace ScillHelpers
 {
@@ -21,7 +26,17 @@ namespace ScillHelpers
     {
         private WebSocket _mqttWS;
 
-        ScillMqtt()
+        public bool IsConnected { get; private set; }
+
+        private ushort CurrentPacketIdentifier = 0;
+
+        private Dictionary<string, BattlePassChangedNotificationHandler> callbacksBattlePassChanged =
+            new Dictionary<string, BattlePassChangedNotificationHandler>();
+
+        private Dictionary<string, ChallengeChangedNotificationHandler> callbacksPersonalChallengeChanged =
+            new Dictionary<string, ChallengeChangedNotificationHandler>();
+
+        public ScillMqtt()
         {
             _mqttWS = new WebSocket("wss://mqtt.scillgame.com:8083/mqtt");
 
@@ -35,183 +50,139 @@ namespace ScillHelpers
 
         ~ScillMqtt()
         {
+            Close();
+        }
+
+        public void Ping()
+        {
+            // Debug.Log("Pinging");
+        }
+
+        public void DispatchMessageQueue()
+        {
+#if !UNITY_WEBGL || UNITY_EDITOR
+
+            _mqttWS.DispatchMessageQueue();
+#endif
+        }
+
+        public void Close()
+        {
             if (null != _mqttWS && (_mqttWS.State == WebSocketState.Open || _mqttWS.State == WebSocketState.Connecting))
             {
                 _mqttWS.Close();
             }
         }
 
-        private void MqttWSOnOnClose(WebSocketCloseCode closecode)
+        private void MqttWSOnOnOpen()
         {
-            throw new System.NotImplementedException();
+            Debug.Log("TCP connection opened");
+            ScillMqttPacketConnect connectPacket = new ScillMqttPacketConnect
+            {
+                KeepAlive = 300, WillRetain = false, WillQoS = 0, CleanSession = true
+            };
+
+
+            connectPacket.Buffer = connectPacket.ToBuffer();
+            _mqttWS.Send(connectPacket.Buffer);
         }
+
 
         private void MqttWSOnOnMessage(byte[] data)
         {
-            throw new System.NotImplementedException();
+            Debug.Log("Received Message");
+            ScillMqttPacketBase packet = ScillMqttPacketBase.FromBuffer(data);
+            if (MqttCommandType.CONNACK == packet.CommandType)
+            {
+                ScillMqttPacketConnack connackPacket = (ScillMqttPacketConnack) packet;
+                if (ScillMqttConnackCode.ACCEPTED == connackPacket.Code)
+                {
+                    IsConnected = true;
+                    Debug.Log("MQTT Connection Acknowledged and Accepted.");
+                }
+                else
+                {
+                    Debug.LogError("MQTT Connection refused with code: " + connackPacket.Code);
+                }
+            }
+            else if (MqttCommandType.PUBLISH == packet.CommandType)
+            {
+                Debug.Log("Message identified as publish message");
+                ScillMqttPacketPublish publishPacket = (ScillMqttPacketPublish) packet;
+                if (callbacksPersonalChallengeChanged.ContainsKey(publishPacket.TopicName))
+                {
+                    ChallengeWebhookPayload payload =
+                        JsonConvert.DeserializeObject<ChallengeWebhookPayload>(publishPacket.Payload);
+
+                    var callback = callbacksPersonalChallengeChanged[publishPacket.TopicName];
+                    if (null != callback)
+                    {
+                        callback.Invoke(payload);
+                    }
+                }
+                else if (callbacksBattlePassChanged.ContainsKey(publishPacket.TopicName))
+                {
+                    var jObject = (JObject) JsonConvert.DeserializeObject(publishPacket.Payload);
+                    if (jObject != null)
+                    {
+                        string webhookType = jObject["webhook_type"].Value<string>();
+                        Debug.Log($"Webhooktype: {webhookType}");
+
+                        switch (webhookType)
+                        {
+                            case "battlepass-challenge-changed":
+                                break;
+                            case "battlepass-level-reward-claimed":
+                                break;
+                            case "battlepass-expired":
+                                break;
+                        }
+                    }
+                }
+            }
         }
+
 
         private void MqttWSOnOnError(string errormsg)
         {
-            Debug.LogError("Could not establish connection to MQTT Server: " + errormsg);
+            Debug.LogError("ScillMqtt threw a Websocket Error: " + errormsg);
         }
 
-        private void MqttWSOnOnOpen()
+        private void MqttWSOnOnClose(WebSocketCloseCode closecode)
         {
+            IsConnected = false;
+            Debug.Log("Closed connection to MQTT Server with code: " + closecode);
         }
 
-        public void SubscribeToTopicBattlePass(string Topic, BattlePassChangedNotificationHandler callback)
+        public bool IsSubscriptionActive(string topic)
         {
+            return null != topic &&
+                   (callbacksBattlePassChanged.ContainsKey(topic) ||
+                    callbacksPersonalChallengeChanged.ContainsKey(topic));
         }
 
-        public void SubscribeToTopicChallenge(string Topic, ChallengeChangedNotificationHandler callback)
+
+        public void SubscribeToTopicBattlePass(string topic, BattlePassChangedNotificationHandler callback)
         {
+            callbacksBattlePassChanged.Add(topic, callback);
+            SubscribeToTopic(topic);
         }
 
-        public void SubscribeToTopic(string Topic)
+        public void SubscribeToTopicChallenge(string topic, ChallengeChangedNotificationHandler callback)
         {
+            callbacksPersonalChallengeChanged.Add(topic, callback);
+            SubscribeToTopic(topic);
+        }
+
+        public void SubscribeToTopic(string topic, byte qoS = 0)
+        {
+            ScillMqttPacketSubscribe subcribePacket = new ScillMqttPacketSubscribe();
+            subcribePacket.PacketIdentifier = ++CurrentPacketIdentifier;
+            subcribePacket.TopicFilter = new[] {topic};
+            subcribePacket.RequestedQoS = new[] {qoS};
+
+            subcribePacket.Buffer = subcribePacket.ToBuffer();
+            _mqttWS.Send(subcribePacket.Buffer);
         }
     }
-
-    enum MqttCommandType : byte
-    {
-        CONNECT = 1,
-        CONNACK = 2,
-        PUBLISH = 3,
-        PUBACK = 4,
-        PUBREC = 5,
-        PUBREL = 6,
-        PUBCOMP = 7,
-        SUBSCRIBE = 8,
-        SUBACK = 9,
-        UNSUBSCRIBE = 10,
-        UNSUBACK = 11,
-        PINGREQ = 12,
-        PINGRESP = 13,
-        DISCONNECT = 14
-    };
-
-    class ScillMqttPacketBase
-    {
-        public MqttCommandType PacketType;
-        public byte PacketFlags;
-        public byte[] Buffer;
-
-        public int RemainingLength;
-        public int Length;
-
-        public virtual byte[] ToBuffer()
-        {
-            return new byte[0];
-        }
-
-        public static ulong GetRemainingLengthFromBuffer(byte[] buffer)
-        {
-            return 0;
-        }
-
-        public static ulong CalculateLengthFromRemaining(ulong remainingLength)
-        {
-            return 0;
-        }
-
-        public static byte FixedHeaderLengthFromRemaining(ulong remainingLength)
-        {
-            return 0;
-        }
-
-        public static int GetNumBytesRequiredForRemainingLength(int varlength)
-        {
-            return varlength < 128 ? 1 : varlength < 16384 ? 2 : varlength < 2097152 ? 3 : 4;
-        }
-
-        public static byte GetControlHeader(MqttCommandType commandType)
-        {
-            // TODO: Adjust for Control Flags when using Subscribe or unsubscribe
-            return (byte) (Convert.ToByte(commandType) << 4);
-        }
-    }
-
-
-    class ScillMqttPacketConnect : ScillMqttPacketBase
-    {
-        public override byte[] ToBuffer()
-        {
-            PacketType = MqttCommandType.CONNECT;
-
-            // calculate Lengths of package
-            {
-                // Number of bytes for protocol name length + protocol level + connect flags + keep alive
-                int variableLength = 2 + 1 + 1 + 2;
-
-                // add payload length
-                variableLength += ProtocolName.Length;
-                variableLength += GetPayloadEntryLength(WillTopic);
-                variableLength += GetPayloadEntryLength(WillMessage);
-                variableLength += GetPayloadEntryLength(UserName);
-                variableLength += GetPayloadEntryLength(Password);
-
-                int packageLength = 1; // fixed header without remaining length
-                packageLength += GetNumBytesRequiredForRemainingLength(variableLength);
-                packageLength += variableLength;
-
-                this.Length = packageLength;
-                this.RemainingLength = variableLength;
-            }
-
-
-            // start filling the package
-
-            byte[] buffer = new byte[this.Length];
-            int pointer = 0;
-
-            // write control header
-            byte controlHeader = GetControlHeader(PacketType);
-            buffer[pointer] = controlHeader;
-            pointer++;
-
-            // write remaining length
-            {
-                int remainingLength = this.RemainingLength;
-                do
-                {
-                    buffer[pointer] = (byte) (remainingLength % 128);
-                    remainingLength = remainingLength / 128;
-                    if (remainingLength > 0)
-                        remainingLength += 128; // add MSB to signal that the remaining length is continued
-                    pointer++;
-                } while (remainingLength > 0);
-            }
-
-            return buffer;
-        }
-
-        /// <summary>
-        /// If the entry is not null, always reserve additional
-        /// two bytes for setting the length of the payload entry
-        /// </summary>
-        /// <param name="entry"></param>
-        /// <returns></returns>
-        int GetPayloadEntryLength(string entry)
-        {
-            return null != entry ? entry.Length + 2 : 0;
-        }
-
-        void SetConnectFlags()
-        {
-        }
-
-        string ProtocolName = "MQTT";
-        byte ProtocolLevel = 4;
-        byte ConnectFlags;
-        ushort KeepAlive;
-        bool WillRetain;
-        byte WillQoS;
-        bool CleanSession;
-        string ClientId;
-        [CanBeNull] string WillTopic;
-        [CanBeNull] string WillMessage;
-        [CanBeNull] string UserName;
-        [CanBeNull] string Password;
-    };
 }

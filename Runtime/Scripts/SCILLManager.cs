@@ -1,10 +1,10 @@
 ﻿using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
-using NativeWebSocket;
 using Newtonsoft.Json;
 using Proyecto26;
 using RSG;
@@ -12,6 +12,7 @@ using SCILL;
 using SCILL.Api;
 using SCILL.Client;
 using SCILL.Model;
+using ScillHelpers;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -68,11 +69,16 @@ public class SCILLManager : MonoBehaviour
     private SCILLClient _scillClient;
     private string _accessToken;
 
-    EventsApi eventsApi;
-    ChallengesApi challengesApi;
-    BattlePassesApi battlePassesApi;
-    AuthApi authApi;
-    LeaderboardsApi leaderboardsApi;
+
+    public event ChallengeChangedNotificationHandler OnChallengeChangedNotification;
+    public event BattlePassChangedNotificationHandler OnBattlePassChangedNotification;
+
+    private ScillMqtt _mqtt;
+
+    private string _personalChallengeNotificationTopic = null;
+
+    // <battlepassID, topic>
+    private Dictionary<string, string> _battlepassIdToTopicMap = new Dictionary<string, string>();
 
     private void Awake()
     {
@@ -83,20 +89,18 @@ public class SCILLManager : MonoBehaviour
 
             _scillBackend = new SCILLBackend(this.APIKey, environment);
             var accessTokenPromise = GenerateAccessToken(GetUserId());
-
             accessTokenPromise.Then(accessToken =>
             {
                 _accessToken = accessToken;
                 Debug.Log(_accessToken);
 
-                eventsApi = new EventsApi(new Configuration());
-                challengesApi = new ChallengesApi(new Configuration());
-                battlePassesApi = new BattlePassesApi(new Configuration());
-                authApi = new AuthApi(new Configuration());
-                leaderboardsApi = new LeaderboardsApi(new Configuration());
 
                 _scillClient = new SCILLClient(_accessToken, AppId, language.ToString(), environment);
+
+                _mqtt = new ScillMqtt();
+                StartCoroutine(PingRoutine());
             }).Catch(e => { Debug.LogError(e.Message); });
+
             DontDestroyOnLoad(gameObject);
         }
         else
@@ -107,9 +111,31 @@ public class SCILLManager : MonoBehaviour
         SceneManager.activeSceneChanged += SceneManagerOnactiveSceneChanged;
     }
 
+
+    private void OnDestroy()
+    {
+        if (null != _mqtt)
+        {
+            Debug.Log("On Destroy");
+            _mqtt.Close();
+        }
+    }
+
+    IEnumerator PingRoutine()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(250);
+
+            if (null != _mqtt && _mqtt.IsConnected)
+            {
+                _mqtt.Ping();
+            }
+        }
+    }
+
     protected virtual IPromise<string> GenerateAccessToken(string userId)
     {
-        // Configuration defaultConfig = Configuration.Default;
         // Override this function and generate an access token in the backend!
         _scillBackend = new SCILLBackend(this.APIKey, environment);
         return _scillBackend.GetAccessTokenAsync(userId);
@@ -221,36 +247,22 @@ public class SCILLManager : MonoBehaviour
 
     #region Realtime Updates
 
-    public delegate void ChallengeChangedNotificationHandler(ChallengeWebhookPayload payload);
-
-    public event ChallengeChangedNotificationHandler OnChallengeChangedNotification;
-
-    public delegate void BattlePassChangedNotificationHandler(BattlePassChallengeChangedPayload payload);
-
-    public event BattlePassChangedNotificationHandler OnBattlePassChangedNotification;
-
-
-    private List<WebSocket> _webhookClients = new List<WebSocket>();
-    private WebSocket _challengesWebhookClient;
-
-
     void Update()
     {
 #if !UNITY_WEBGL || UNITY_EDITOR
-        foreach (var client in _webhookClients)
-        {
-            client.DispatchMessageQueue();
-        }
+        if (null != _mqtt)
+            _mqtt.DispatchMessageQueue();
 #endif
     }
 
-    public async Task StartChallengeUpdateNotifications(ChallengeChangedNotificationHandler handler)
+    public void StartChallengeUpdateNotifications(ChallengeChangedNotificationHandler handler)
     {
         OnChallengeChangedNotification += handler;
 
-        if (_challengesWebhookClient == null)
+        if (String.IsNullOrEmpty(_personalChallengeNotificationTopic) &&
+            !_mqtt.IsSubscriptionActive(_personalChallengeNotificationTopic))
         {
-            await StartMonitorUserChallenges();
+            StartCoroutine(WaitForMqttConnectionEstablished(StartMonitorUserChallenges));
         }
     }
 
@@ -270,10 +282,11 @@ public class SCILLManager : MonoBehaviour
     {
         OnBattlePassChangedNotification += handler;
 
-        // if (!_battlePassMqttClients.ContainsKey(battlePassId))
-        // {
-        //     StartMonitorBattlePass(battlePassId);
-        // }
+        if ((!_battlepassIdToTopicMap.ContainsKey(battlePassId)) &&
+            !_mqtt.IsSubscriptionActive(_battlepassIdToTopicMap[battlePassId]))
+        {
+            StartMonitorBattlePass(battlePassId);
+        }
     }
 
     public void StopBattlePassUpdateNotifications(string battlePassId, BattlePassChangedNotificationHandler handler)
@@ -287,45 +300,27 @@ public class SCILLManager : MonoBehaviour
         }
     }
 
-    private async Task StartMonitorUserChallenges()
+    private void StartMonitorUserChallenges()
     {
-        var headers = new Dictionary<string, string>();
-        string websocketURL = "wss://mqtt.scillgame.com:8083/mqtt";
-        _challengesWebhookClient = new WebSocket(websocketURL);
-
-        _challengesWebhookClient.OnMessage += data =>
+        SCILLClient.AuthApi.GetUserChallengesNotificationTopicAsync().Then(topicRequestResult =>
         {
-            string jsonStr = Encoding.UTF8.GetString(data);
-            var payload = JsonConvert.DeserializeObject<ChallengeWebhookPayload>(jsonStr);
-            if (payload != null)
-            {
-                OnChallengeChangedNotification?.Invoke(payload);
-            }
-        };
-        _challengesWebhookClient.OnOpen += () => { Debug.Log("Websocket Connection Opened"); };
+            _personalChallengeNotificationTopic = topicRequestResult.topic;
+            _mqtt.SubscribeToTopicChallenge(topicRequestResult.topic, OnChallengeChangedNotification);
+        });
+    }
 
-        _challengesWebhookClient.OnError += msg => { Debug.LogError("Websocket Connection Error:" + msg); };
+    private IEnumerator WaitForMqttConnectionEstablished(Action callback)
+    {
+        while (null == _mqtt || !_mqtt.IsConnected)
+        {
+            yield return null;
+        }
 
-        _challengesWebhookClient.OnClose += code => { Debug.Log("Closed with code: " + code.ToString()); };
-
-        _webhookClients.Add(_challengesWebhookClient);
-
-        await _challengesWebhookClient.Connect();
-        
-        
+        callback();
     }
 
     private void StopMonitorUserChallenges()
     {
-        if (_challengesWebhookClient == null)
-        {
-            return;
-        }
-
-        Debug.Log("Calling Close from StopMonitorUserChallenges");
-        _challengesWebhookClient.Close();
-        _webhookClients.Remove(_challengesWebhookClient);
-        _challengesWebhookClient = null;
     }
 
 
@@ -366,28 +361,6 @@ public class SCILLManager : MonoBehaviour
 
     private void StopMonitorBattlePass(string battlePassId)
     {
-        // if (_battlePassMqttClients.ContainsKey(battlePassId))
-        // {
-        //      _battlePassMqttClients[battlePassId].DisconnectAsync();
-        //     _battlePassMqttClients.Remove(battlePassId);
-        // }
-    }
-
-    private async void OnApplicationQuit()
-    {
-        await StopMonitoring();
-    }
-
-    private async Task StopMonitoring()
-    {
-        Debug.Log("Calling Close from StopMonitoring");
-
-        foreach (var client in _webhookClients)
-        {
-            await client.Close();
-        }
-
-        _webhookClients.Clear();
     }
 
     #endregion

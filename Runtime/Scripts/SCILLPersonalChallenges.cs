@@ -34,8 +34,7 @@ public class SCILLPersonalChallenges : SCILLThreadSafety
             yield return null;
         UpdatePersonalChallengesList();
         
-        Task task = SCILLManager.Instance.StartChallengeUpdateNotifications(OnChallengeWebhookMessage);
-        yield return new WaitUntil(() => task.IsCompleted);
+        SCILLManager.Instance.StartChallengeUpdateNotifications(OnChallengeWebhookMessage);
 
     }
 
