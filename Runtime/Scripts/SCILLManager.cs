@@ -111,12 +111,18 @@ public class SCILLManager : MonoBehaviour
         SceneManager.activeSceneChanged += SceneManagerOnactiveSceneChanged;
     }
 
+    void Update()
+    {
+#if !UNITY_WEBGL || UNITY_EDITOR
+        if (null != _mqtt)
+            _mqtt.DispatchMessageQueue();
+#endif
+    }
 
     private void OnDestroy()
     {
         if (null != _mqtt)
         {
-            Debug.Log("On Destroy");
             _mqtt.Close();
         }
     }
@@ -232,28 +238,8 @@ public class SCILLManager : MonoBehaviour
         }
     }
 
-#if UNITY_EDITOR
-    [ContextMenu("Open SCILL Playground")]
-    public void OpenPlayground()
-    {
-        var url = "https://playground.scillgame.com?appId=" + UnityWebRequest.EscapeURL(this.AppId) + "&apiKey=" +
-                  UnityWebRequest.EscapeURL(this.APIKey) +
-                  "&environment=" + UnityWebRequest.EscapeURL(this.environment.ToString().ToLower()) + "&userId=" +
-                  UnityWebRequest.EscapeURL(UserId);
-        Help.BrowseURL(url);
-    }
-#endif
-
 
     #region Realtime Updates
-
-    void Update()
-    {
-#if !UNITY_WEBGL || UNITY_EDITOR
-        if (null != _mqtt)
-            _mqtt.DispatchMessageQueue();
-#endif
-    }
 
     public void StartChallengeUpdateNotifications(ChallengeChangedNotificationHandler handler)
     {
@@ -264,6 +250,25 @@ public class SCILLManager : MonoBehaviour
         {
             StartCoroutine(WaitForMqttConnectionBeforeChallengeMonitoring());
         }
+    }
+
+    private IEnumerator WaitForMqttConnectionBeforeChallengeMonitoring()
+    {
+        while (null == _mqtt || !_mqtt.IsConnected)
+        {
+            yield return null;
+        }
+
+        StartMonitorUserChallenges();
+    }
+
+    private void StartMonitorUserChallenges()
+    {
+        SCILLClient.AuthApi.GetUserChallengesNotificationTopicAsync().Then(topicRequestResult =>
+        {
+            _personalChallengeNotificationTopic = topicRequestResult.topic;
+            _mqtt.SubscribeToTopicChallenge(topicRequestResult.topic, OnChallengeChangedNotification);
+        });
     }
 
     public void StopChallengeUpdateNotifications(ChallengeChangedNotificationHandler handler)
@@ -277,6 +282,13 @@ public class SCILLManager : MonoBehaviour
         }
     }
 
+    private void StopMonitorUserChallenges()
+    {
+        _mqtt.UnsubscribeFromTopic(_personalChallengeNotificationTopic);
+        _personalChallengeNotificationTopic = null;
+    }
+
+
     public void StartBattlePassUpdateNotifications(string battlePassId,
         BattlePassChangedNotificationHandler handler)
     {
@@ -289,7 +301,6 @@ public class SCILLManager : MonoBehaviour
         }
     }
 
-
     private IEnumerator WaitForMqttConnectionBeforeBattlePassMonitoring(string battlePassId)
     {
         while (null == _mqtt || !_mqtt.IsConnected)
@@ -298,6 +309,15 @@ public class SCILLManager : MonoBehaviour
         }
 
         StartMonitorBattlePass(battlePassId);
+    }
+
+    private void StartMonitorBattlePass(string battlePassId)
+    {
+        SCILLClient.AuthApi.GetUserBattlePassNotificationTopicAsync(battlePassId).Then(topicRequestResult =>
+        {
+            _battlepassIdToTopicMap[battlePassId] = topicRequestResult.topic;
+            _mqtt.SubscribeToTopicBattlePass(topicRequestResult.topic, OnBattlePassChangedNotification);
+        });
     }
 
     public void StopBattlePassUpdateNotifications(string battlePassId, BattlePassChangedNotificationHandler handler)
@@ -311,43 +331,28 @@ public class SCILLManager : MonoBehaviour
         }
     }
 
-    private void StartMonitorUserChallenges()
-    {
-        SCILLClient.AuthApi.GetUserChallengesNotificationTopicAsync().Then(topicRequestResult =>
-        {
-            _personalChallengeNotificationTopic = topicRequestResult.topic;
-            _mqtt.SubscribeToTopicChallenge(topicRequestResult.topic, OnChallengeChangedNotification);
-        });
-    }
-
-    private IEnumerator WaitForMqttConnectionBeforeChallengeMonitoring()
-    {
-        while (null == _mqtt || !_mqtt.IsConnected)
-        {
-            yield return null;
-        }
-
-        StartMonitorUserChallenges();
-    }
-
-    private void StopMonitorUserChallenges()
-    {
-    }
-
-
-    private void StartMonitorBattlePass(string battlePassId)
-    {
-        SCILLClient.AuthApi.GetUserBattlePassNotificationTopicAsync(battlePassId).Then(topicRequestResult =>
-        {
-            _battlepassIdToTopicMap[battlePassId] = topicRequestResult.topic;
-            _mqtt.SubscribeToTopicBattlePass(topicRequestResult.topic, OnBattlePassChangedNotification);
-
-        });
-    }
-
     private void StopMonitorBattlePass(string battlePassId)
     {
+        if (_battlepassIdToTopicMap.ContainsKey(battlePassId))
+        {
+            string topic = _battlepassIdToTopicMap[battlePassId];
+            _mqtt.UnsubscribeFromTopic(topic);
+            _battlepassIdToTopicMap.Remove(battlePassId);
+        }
     }
 
     #endregion
+
+
+#if UNITY_EDITOR
+    [ContextMenu("Open SCILL Playground")]
+    public void OpenPlayground()
+    {
+        var url = "https://playground.scillgame.com?appId=" + UnityWebRequest.EscapeURL(this.AppId) + "&apiKey=" +
+                  UnityWebRequest.EscapeURL(this.APIKey) +
+                  "&environment=" + UnityWebRequest.EscapeURL(this.environment.ToString().ToLower()) + "&userId=" +
+                  UnityWebRequest.EscapeURL(UserId);
+        Help.BrowseURL(url);
+    }
+#endif
 }

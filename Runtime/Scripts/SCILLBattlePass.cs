@@ -4,7 +4,7 @@ using SCILL.Model;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SCILLBattlePass : SCILLThreadSafety
+public class SCILLBattlePass : MonoBehaviour
 {
     [HideInInspector] public BattlePass battlePass;
 

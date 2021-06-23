@@ -55,7 +55,6 @@ namespace ScillHelpers
 
         public void Ping()
         {
-            // Debug.Log("Pinging");
             ScillMqttPacketPing pingPacket = new ScillMqttPacketPing();
             pingPacket.Buffer = pingPacket.ToBuffer();
             _mqttWS.Send(pingPacket.Buffer);
@@ -79,7 +78,7 @@ namespace ScillHelpers
 
         private void MqttWSOnOnOpen()
         {
-            Debug.Log("TCP connection opened");
+            // Debug.Log("TCP connection opened");
             ScillMqttPacketConnect connectPacket = new ScillMqttPacketConnect
             {
                 KeepAlive = 300, WillRetain = false, WillQoS = 0, CleanSession = true
@@ -108,11 +107,15 @@ namespace ScillHelpers
             }
             else if (MqttCommandType.SUBACK == packet.CommandType)
             {
-                // Debug.Log("Got a SUBACK response.");
+                // Debug.Log("Acknowledged subscription");
+            }
+            else if (MqttCommandType.UNSUBACK == packet.CommandType)
+            {
+                // Debug.Log("Acknowledged unsubscription");
             }
             else
             {
-                Debug.Log("Received Unhandled Mqtt Message");
+                // Debug.Log("Received Unhandled Mqtt Message");
             }
         }
 
@@ -137,26 +140,35 @@ namespace ScillHelpers
                 if (jObject != null)
                 {
                     string webhookType = jObject["webhook_type"].Value<string>();
-                    Debug.Log($"Webhooktype: {webhookType}");
+                    // Debug.Log($"Webhooktype: {webhookType}");
 
-                    switch (webhookType)
+                    BattlePassChallengeChangedPayload payload =
+                        JsonConvert.DeserializeObject<BattlePassChallengeChangedPayload>(publishPacket.Payload);
+                    BattlePassChangedNotificationHandler callback =
+                        callbacksBattlePassChanged[publishPacket.TopicName];
+                    if (null != callback)
                     {
-                        case "battlepass-challenge-changed":
-                            BattlePassChallengeChangedPayload payload =
-                                JsonConvert.DeserializeObject<BattlePassChallengeChangedPayload>(publishPacket.Payload);
-                            BattlePassChangedNotificationHandler callback =
-                                callbacksBattlePassChanged[publishPacket.TopicName];
-                            if (null != callback)
-                            {
-                                callback.Invoke(payload);
-                            }
-
-                            break;
-                        case "battlepass-level-reward-claimed":
-                            break;
-                        case "battlepass-expired":
-                            break;
+                        callback.Invoke(payload);
                     }
+
+                    // TODO: deserialize the payloads correctly according to webhook type
+                    // switch (webhookType)
+                    // {
+                    //     case "battlepass-challenge-changed":
+                    //         BattlePassChallengeChangedPayload payload =
+                    //             JsonConvert.DeserializeObject<BattlePassChallengeChangedPayload>(publishPacket.Payload);
+                    //         BattlePassChangedNotificationHandler callback =
+                    //             callbacksBattlePassChanged[publishPacket.TopicName];
+                    //         if (null != callback)
+                    //         {
+                    //             callback.Invoke(payload);
+                    //         }
+                    //         break;
+                    //     case "battlepass-level-reward-claimed":
+                    //         break;
+                    //     case "battlepass-expired":
+                    //         break;
+                    // }
                 }
             }
         }
@@ -208,7 +220,23 @@ namespace ScillHelpers
             SubscribeToTopic(topic);
         }
 
-        public void SubscribeToTopic(string topic, byte qoS = 0)
+        public void UnsubscribeFromTopic(string topic)
+        {
+            TryRemoveCallback(topic, callbacksBattlePassChanged);
+            TryRemoveCallback(topic, callbacksPersonalChallengeChanged);
+            ScillMqttPacketUnsubscribe unsubscribe = new ScillMqttPacketUnsubscribe();
+            unsubscribe.PacketIdentifier = ++CurrentPacketIdentifier;
+            unsubscribe.TopicFilter = new[] {topic};
+            unsubscribe.Buffer = unsubscribe.ToBuffer();
+            _mqttWS.Send(unsubscribe.Buffer);
+        }
+
+        private void TryRemoveCallback<T>(string topic, Dictionary<string, T> fromDictionary)
+        {
+            fromDictionary.Remove(topic);
+        }
+
+        private void SubscribeToTopic(string topic, byte qoS = 0)
         {
             ScillMqttPacketSubscribe subcribePacket = new ScillMqttPacketSubscribe();
             subcribePacket.PacketIdentifier = ++CurrentPacketIdentifier;

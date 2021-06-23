@@ -1,31 +1,28 @@
-﻿using UnityEngine.Assertions;
+﻿using System.Data;
 
 namespace ScillHelpers
 {
-    public class ScillMqttPacketSubscribe : ScillMqttPacketBase
+    public class ScillMqttPacketUnsubscribe : ScillMqttPacketBase
     {
         public ushort PacketIdentifier;
         public string[] TopicFilter;
-        public byte[] RequestedQoS;
 
-        public ScillMqttPacketSubscribe()
+        public ScillMqttPacketUnsubscribe()
         {
-            CommandType = MqttCommandType.SUBSCRIBE;
+            CommandType = MqttCommandType.UNSUBSCRIBE;
         }
 
         public override byte[] ToBuffer()
         {
-            Assert.AreEqual(TopicFilter.Length, RequestedQoS.Length);
-
             // calculate packet length
             {
-                // start with length of packet identifier
+                // start with length of packet identifier (2 byte)
                 int varLength = 2;
 
                 for (int i = 0; i < TopicFilter.Length; i++)
                 {
-                    // 2Bytes for the Topic Length + Number of characters in the topic + 1 Byte for QoS
-                    varLength += TopicFilter[i].Length + 2 + 1;
+                    // 2Bytes for the Topic Length + Number of characters in the topic
+                    varLength += TopicFilter[i].Length + 2;
                 }
 
                 RemainingLength = varLength;
@@ -36,6 +33,7 @@ namespace ScillHelpers
             int pointer = 0;
 
             // ----------- Write Header
+
             buffer[pointer] = GetNonPublishControlHeader(CommandType);
             pointer++;
 
@@ -49,7 +47,6 @@ namespace ScillHelpers
 
 
             // --------------- Payload ---------------
-
             for (int i = 0; i < TopicFilter.Length; i++)
             {
                 int topicLength = TopicFilter[i].Length;
@@ -57,10 +54,6 @@ namespace ScillHelpers
                 WriteTwoByteNumberIntoBuffer(ref buffer, ref pointer, (ushort) topicLength);
                 // Write topic into buffer
                 WriteStringIntoBuffer(ref buffer, ref pointer, TopicFilter[i]);
-
-                // Write QoS into buffer
-                buffer[pointer] = RequestedQoS[i];
-                pointer++;
             }
 
             return buffer;

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using SCILL.Model;
 using UnityEngine;
 
-public class SCILLBattlePassManager : SCILLThreadSafety
+public class SCILLBattlePassManager : MonoBehaviour
 {
     public static SCILLBattlePassManager Instance { get; private set; }
 
@@ -63,7 +63,7 @@ public class SCILLBattlePassManager : SCILLThreadSafety
     {
         while (null == SCILLManager.Instance.SCILLClient)
             yield return null;
-        
+
         var battlePassesAsync = SCILLManager.Instance.SCILLClient.GetBattlePassesAsync();
         battlePassesAsync.Then(battlePassesList =>
         {
@@ -78,13 +78,12 @@ public class SCILLBattlePassManager : SCILLThreadSafety
                 // Inform delegates that a new battle pass has been selected
                 OnBattlePassUpdatedFromServer?.Invoke(selectedBattlePass);
 
-                // Get notifications from SCILL backend whenever battle pass changes
-                SCILLManager.Instance.StartBattlePassUpdateNotifications(selectedBattlePass.battle_pass_id,
-                    OnBattlePassChangedNotification);
 
                 // Load battle pass levels from SCILL backend
                 UpdateBattlePassLevelsFromServer();
             }
+
+            StartRealtimeNotifications();
 
             SCILLBattlePass.OnBattlePassUnlocked += OnOnBattlePassUnlocked;
         });
@@ -128,10 +127,16 @@ public class SCILLBattlePassManager : SCILLThreadSafety
         var levelsPromise =
             SCILLManager.Instance.SCILLClient.GetBattlePassLevelsAsync(SelectedBattlePass.battle_pass_id);
 
+        // Debug.Log("Requested BP Update from Server");
+
         levelsPromise.Then(levels =>
         {
             BattlePassLevels = levels;
+            int numBattlePassLevels = null == BattlePassLevels ? 0 : BattlePassLevels.Count;
+            // Debug.Log($"Received BP Update from server with {numBattlePassLevels} entries");
+
             OnBattlePassLevelsUpdatedFromServer?.Invoke(levels);
+
 
             // If we have not selected a battle pass level, let's pick the current one
             if (_selectedBattlePassLevelIndex == 0)
@@ -148,6 +153,8 @@ public class SCILLBattlePassManager : SCILLThreadSafety
                         break;
                     }
                 }
+
+                selectedLevelIndex = Mathf.Min(selectedLevelIndex, BattlePassLevels.Count - 1);
 
                 SelectedBattlePassLevelIndex = selectedLevelIndex;
             }
@@ -180,6 +187,21 @@ public class SCILLBattlePassManager : SCILLThreadSafety
     }
 
     private void OnDestroy()
+    {
+        StopRealtimeNotifications();
+    }
+
+    public void StartRealtimeNotifications()
+    {
+        if (null != SelectedBattlePass)
+        {
+            // Get notifications from SCILL backend whenever battle pass changes
+            SCILLManager.Instance.StartBattlePassUpdateNotifications(SelectedBattlePass.battle_pass_id,
+                OnBattlePassChangedNotification);
+        }
+    }
+
+    public void StopRealtimeNotifications()
     {
         if (SelectedBattlePass != null)
         {

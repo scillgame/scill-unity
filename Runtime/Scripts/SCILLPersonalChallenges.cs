@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using SCILL;
 using SCILL.Model;
 using UnityEngine;
 
-public class SCILLPersonalChallenges : SCILLThreadSafety
+public class SCILLPersonalChallenges : MonoBehaviour
 {
     [Tooltip("A prefab to be used as a category item. This will be instantiated for each category in the response")]
     public SCILLCategoryItem categoryPrefab;
@@ -61,9 +59,11 @@ public class SCILLPersonalChallenges : SCILLThreadSafety
 
     public void UpdatePersonalChallengesList()
     {
+        Debug.Log("Requesting update of personal challenges");
         var categoriesPromise = SCILLManager.Instance.SCILLClient.GetAllPersonalChallengesAsync();
         categoriesPromise.Then(categories =>
         {
+            Debug.Log("Received update of personal challenges");
             _categories = categories;
             UpdateCategories(categories);
         });
