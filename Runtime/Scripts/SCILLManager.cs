@@ -245,11 +245,17 @@ public class SCILLManager : MonoBehaviour
     {
         OnChallengeChangedNotification += handler;
 
-        if (String.IsNullOrEmpty(_personalChallengeNotificationTopic) &&
-            !_mqtt.IsSubscriptionActive(_personalChallengeNotificationTopic))
+        if (ShouldShartupChallengeMonitoring())
         {
             StartCoroutine(WaitForMqttConnectionBeforeChallengeMonitoring());
         }
+    }
+
+    private bool ShouldShartupChallengeMonitoring()
+    {
+        bool isChallengeTopicInvalid = String.IsNullOrEmpty(_personalChallengeNotificationTopic);
+        bool isMqttSubInactive = null == _mqtt || !_mqtt.IsSubscriptionActive(_personalChallengeNotificationTopic);
+        return isChallengeTopicInvalid && isMqttSubInactive;
     }
 
     private IEnumerator WaitForMqttConnectionBeforeChallengeMonitoring()
@@ -294,11 +300,22 @@ public class SCILLManager : MonoBehaviour
     {
         OnBattlePassChangedNotification += handler;
 
-        if ((!_battlepassIdToTopicMap.ContainsKey(battlePassId)) ||
-            !_mqtt.IsSubscriptionActive(_battlepassIdToTopicMap[battlePassId]))
+        if (ShouldStartBpMonitoring(battlePassId))
         {
             StartCoroutine(WaitForMqttConnectionBeforeBattlePassMonitoring(battlePassId));
         }
+    }
+
+    private bool ShouldStartBpMonitoring(string battlePassId)
+    {
+        bool isBpTopicInvalid = !_battlepassIdToTopicMap.ContainsKey(battlePassId);
+        if (null != _mqtt && !isBpTopicInvalid)
+        {
+            bool isMqttSubInActive = !_mqtt.IsSubscriptionActive(_battlepassIdToTopicMap[battlePassId]);
+            return isMqttSubInActive;
+        }
+
+        return isBpTopicInvalid;
     }
 
     private IEnumerator WaitForMqttConnectionBeforeBattlePassMonitoring(string battlePassId)

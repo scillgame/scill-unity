@@ -22,11 +22,15 @@ namespace ScillHelpers
 
     public delegate void BattlePassChangedNotificationHandler(BattlePassChallengeChangedPayload payload);
 
+    public delegate void MqttConnectionEstablishedHandler();
+
     public class ScillMqtt
     {
-        private WebSocket _mqttWS;
-
         public bool IsConnected { get; private set; }
+
+        public event MqttConnectionEstablishedHandler OnMqttConnectionEstablished;
+
+        private WebSocket _mqttWS;
 
         private ushort CurrentPacketIdentifier = 0;
 
@@ -181,6 +185,7 @@ namespace ScillHelpers
             {
                 IsConnected = true;
                 Debug.Log("MQTT Connection Acknowledged and Accepted.");
+                OnMqttConnectionEstablished?.Invoke();
             }
             else
             {
