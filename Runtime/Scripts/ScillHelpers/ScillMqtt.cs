@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using JetBrains.Annotations;
 using NativeWebSocket;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using SCILL;
 using SCILL.Model;
 using UnityEngine;
-using UnityEngine.Assertions;
 
 namespace ScillHelpers
 {
@@ -18,9 +16,6 @@ namespace ScillHelpers
         Expired = 2
     };
 
-    public delegate void ChallengeChangedNotificationHandler(ChallengeWebhookPayload payload);
-
-    public delegate void BattlePassChangedNotificationHandler(BattlePassChallengeChangedPayload payload);
 
     public delegate void MqttConnectionEstablishedHandler();
 

@@ -1,11 +1,7 @@
 ﻿using System;
-using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 using JetBrains.Annotations;
-using Newtonsoft.Json;
 using Proyecto26;
 using RSG;
 using SCILL;
