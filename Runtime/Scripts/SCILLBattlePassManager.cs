@@ -141,24 +141,27 @@ public class SCILLBattlePassManager : MonoBehaviour
             // If we have not selected a battle pass level, let's pick the current one
             if (_selectedBattlePassLevelIndex == 0)
             {
-                var selectedLevelIndex = 0;
-                foreach (var level in BattlePassLevels)
-                {
-                    if (level.level_completed == true)
-                    {
-                        selectedLevelIndex++;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-
-                selectedLevelIndex = Mathf.Min(selectedLevelIndex, BattlePassLevels.Count - 1);
-
-                SelectedBattlePassLevelIndex = selectedLevelIndex;
+                SelectedBattlePassLevelIndex = GetCurrentBattlePassLevel();
             }
         });
+    }
+
+    public int GetCurrentBattlePassLevel()
+    {
+        var selectedLevelIndex = 0;
+        foreach (var level in BattlePassLevels)
+        {
+            if (level.level_completed == true)
+            {
+                selectedLevelIndex++;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        return Mathf.Min(selectedLevelIndex, BattlePassLevels.Count - 1);
     }
 
     private void OnBattlePassChangedNotification(BattlePassChallengeChangedPayload payload)
