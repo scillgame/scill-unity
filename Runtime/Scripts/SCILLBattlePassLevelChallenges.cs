@@ -58,18 +58,8 @@ public class SCILLBattlePassLevelChallenges : MonoBehaviour
         {
             return;
         }
-        
-        // Find current level and update the challenges list
-        int currentLevelIndex = 0;
-        for (int i = 0; i < battlePassLevels.Count; i++)
-        {
-            if (battlePassLevels[i].level_completed == false)
-            {
-                currentLevelIndex = i;
-                break;
-            }
-        }
-            
+
+        int currentLevelIndex = SCILLBattlePassManager.Instance.GetCurrentBattlePassLevel();
         battlePassLevel = battlePassLevels[currentLevelIndex];
         UpdateChallengeList();
     }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using SCILL.Client;
 using SCILL.Model;
 using UnityEngine;
@@ -48,13 +49,17 @@ public class SCILLLeaderboard : MonoBehaviour
     [Tooltip("The prefab of a UI item that will be used for any other rankings")]
     public SCILLLeaderboardRankingItem defaultRankingPrefab;
 
+    public delegate void UsersLeaderboardRankingChangedAction(LeaderboardUpdatePayload payload);
+
+    public static event UsersLeaderboardRankingChangedAction OnUsersLeaderboardRankingChanged;
+
     public int CurrentPage { get; private set; }
 
     private float contentSize = 0;
     private bool allContentLoaded = false;
     private ScrollRect _scrollRect;
 
-    private bool isLoading = false;
+    private bool IsLoading { get; set; } = false;
 
     private void Awake()
     {
@@ -63,18 +68,41 @@ public class SCILLLeaderboard : MonoBehaviour
 
     private void Start()
     {
-        InvokeRepeating(nameof(PollLeaderboard), 10.0f, 10.0f);
+        PollLeaderboard();
+
+        SCILLManager.Instance.StartLeaderboardUpdateNotifications(leaderboardId, OnLeaderboardUpdated);
+    }
+
+    private void OnDestroy()
+    {
+        SCILLManager.Instance.StopLeaderboardUpdateNotifications(leaderboardId, OnLeaderboardUpdated);
+    }
+
+    private void OnLeaderboardUpdated(LeaderboardUpdatePayload payload)
+    {
+        // Make sure this this leaderboard has been updated
+        if (payload.leaderboard_data.leaderboard_id != leaderboardId)
+        {
+            return;
+        }
+
+        PollLeaderboard();
+
+        if (payload.member_data.member_type == "user" &&
+            payload.member_data.member_id == SCILLManager.Instance.GetUserId())
+        {
+            OnUsersLeaderboardRankingChanged?.Invoke(payload);
+        }
     }
 
     private void PollLeaderboard()
     {
         // Don't poll while we are loading new content
-        if (isLoading)
+        if (IsLoading)
         {
             return;
         }
 
-        isLoading = true;
         // Reload all data currently visible
         var leaderboardPromise =
             SCILLManager.Instance.SCILLClient.GetLeaderboardAsync(leaderboardId, 1, pageSize * CurrentPage);
@@ -86,7 +114,6 @@ public class SCILLLeaderboard : MonoBehaviour
                 : leaderboard.grouped_by_teams;
             ClearRankings();
             AddLeaderItems(rankings);
-            isLoading = false;
         });
     }
 
@@ -170,9 +197,10 @@ public class SCILLLeaderboard : MonoBehaviour
     private void LoadLeaderboardRankings(int page, bool clear = false)
     {
         //Debug.Log("LOAD LEADERBOARD RANKINGS " + page);
-        var leaderboardPromise = SCILLManager.Instance.SCILLClient.GetLeaderboardAsync(leaderboardId, page, pageSize);
+        var loadPromise = SCILLManager.Instance.SCILLClient.GetLeaderboardAsync(leaderboardId, page, pageSize);
+        IsLoading = true;
 
-        leaderboardPromise.Then(leaderboard =>
+        loadPromise.Then(leaderboard =>
         {
             //Debug.Log(leaderboard.ToJson());
 
@@ -199,13 +227,15 @@ public class SCILLLeaderboard : MonoBehaviour
             }
 
             AddLeaderItems(rankings);
+
+            IsLoading = false;
         });
     }
 
     protected virtual void AddNextPage()
     {
         // Dont load new data if we are at the end of the list
-        if (allContentLoaded || isLoading)
+        if (allContentLoaded || IsLoading)
         {
             //Debug.Log("Skipping adding next page, Loading: " + loading + ", All content loaded: " + allContentLoaded);
             return;
@@ -240,7 +270,7 @@ public class SCILLLeaderboard : MonoBehaviour
         {
             if (_scrollRect.normalizedPosition.y < 0.25)
             {
-                if (isLoading == false && allContentLoaded == false)
+                if (IsLoading == false && allContentLoaded == false)
                 {
                     //Debug.Log("Bottom of page reached, adding next page, Loading: " + loading + ", All Content Loaded: " + allContentLoaded);
                     AddNextPage();

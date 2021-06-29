@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using SCILL;
 using SCILL.Model;
 using UnityEngine;
 
@@ -26,19 +27,34 @@ public class SCILLPersonalChallenges : MonoBehaviour
     }
 
     // Start is called before the first frame update
-    IEnumerator Start()
+    void Start()
     {
-        while (null == SCILLManager.Instance.SCILLClient)
-            yield return null;
-        UpdatePersonalChallengesList();
-        
-        SCILLManager.Instance.StartChallengeUpdateNotifications(OnChallengeWebhookMessage);
+        if (SCILLPersonalChallengesManager.Instance.Categories != null)
+        {
+            _categories = SCILLPersonalChallengesManager.Instance.Categories;
+            UpdateCategories(_categories);
+        }
 
+        SCILLPersonalChallengesManager.OnPersonalChallengesUpdatedFromServer += OnPersonalChallengesUpdated;
+        SCILLPersonalChallengesManager.OnPersonalChallengeUpdatedFromServer += OnPersonalChallengeUpdated;
+    }
+
+    private void OnPersonalChallengeUpdated(Challenge challenge,
+        SCILLPersonalChallengeModificationType modificationtype)
+    {
+        UpdateChallenge(challenge);
+    }
+
+    private void OnPersonalChallengesUpdated(List<ChallengeCategory> categories)
+    {
+        _categories = categories;
+        UpdateCategories(_categories);
     }
 
     private void OnDestroy()
     {
-        SCILLManager.Instance.StopChallengeUpdateNotifications(OnChallengeWebhookMessage);
+        SCILLPersonalChallengesManager.OnPersonalChallengesUpdatedFromServer -= OnPersonalChallengesUpdated;
+        SCILLPersonalChallengesManager.OnPersonalChallengeUpdatedFromServer -= OnPersonalChallengeUpdated;
     }
 
     private Challenge FindChallengeById(string id)
@@ -59,11 +75,9 @@ public class SCILLPersonalChallenges : MonoBehaviour
 
     public void UpdatePersonalChallengesList()
     {
-        Debug.Log("Requesting update of personal challenges");
         var categoriesPromise = SCILLManager.Instance.SCILLClient.GetAllPersonalChallengesAsync();
         categoriesPromise.Then(categories =>
         {
-            Debug.Log("Received update of personal challenges");
             _categories = categories;
             UpdateCategories(categories);
         });

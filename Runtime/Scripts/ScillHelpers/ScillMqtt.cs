@@ -17,7 +17,7 @@ namespace ScillHelpers
     };
 
 
-    public delegate void MqttConnectionEstablishedHandler();
+    public delegate void MqttConnectionEstablishedHandler(ScillMqtt mqttClient);
 
     public class ScillMqtt
     {
@@ -31,6 +31,9 @@ namespace ScillHelpers
 
         private Dictionary<string, BattlePassChangedNotificationHandler> callbacksBattlePassChanged =
             new Dictionary<string, BattlePassChangedNotificationHandler>();
+
+        private Dictionary<string, LeaderboardChangedNotificationHandler> callbacksLeaderboardChanged =
+            new Dictionary<string, LeaderboardChangedNotificationHandler>();
 
         private Dictionary<string, ChallengeChangedNotificationHandler> callbacksPersonalChallengeChanged =
             new Dictionary<string, ChallengeChangedNotificationHandler>();
@@ -54,10 +57,14 @@ namespace ScillHelpers
 
         public void Ping()
         {
-            ScillMqttPacketPing pingPacket = new ScillMqttPacketPing();
-            pingPacket.Buffer = pingPacket.ToBuffer();
-            _mqttWS.Send(pingPacket.Buffer);
+            if (IsConnected)
+            {
+                ScillMqttPacketPing pingPacket = new ScillMqttPacketPing();
+                pingPacket.Buffer = pingPacket.ToBuffer();
+                _mqttWS.Send(pingPacket.Buffer);
+            }
         }
+
 
         public void DispatchMessageQueue()
         {
@@ -77,7 +84,7 @@ namespace ScillHelpers
 
         private void MqttWSOnOnOpen()
         {
-            // Debug.Log("TCP connection opened");
+            Debug.Log("TCP connection opened");
             ScillMqttPacketConnect connectPacket = new ScillMqttPacketConnect
             {
                 KeepAlive = 300, WillRetain = false, WillQoS = 0, CleanSession = true
@@ -91,6 +98,7 @@ namespace ScillHelpers
 
         private void MqttWSOnOnMessage(byte[] data)
         {
+            // Debug.Log("Received any message");
             ScillMqttPacketBase packet = ScillMqttPacketBase.FromBuffer(data);
             if (MqttCommandType.CONNACK == packet.CommandType)
             {
@@ -139,7 +147,7 @@ namespace ScillHelpers
                 if (jObject != null)
                 {
                     string webhookType = jObject["webhook_type"].Value<string>();
-                    // Debug.Log($"Webhooktype: {webhookType}");
+                    Debug.Log($"Webhooktype: {webhookType}");
 
                     BattlePassChallengeChangedPayload payload =
                         JsonConvert.DeserializeObject<BattlePassChallengeChangedPayload>(publishPacket.Payload);
@@ -179,8 +187,8 @@ namespace ScillHelpers
             if (ScillMqttConnackCode.ACCEPTED == connackPacket.Code)
             {
                 IsConnected = true;
-                Debug.Log("MQTT Connection Acknowledged and Accepted.");
-                OnMqttConnectionEstablished?.Invoke();
+                // Debug.Log("Mqtt Connection Established.");
+                OnMqttConnectionEstablished?.Invoke(this);
             }
             else
             {
@@ -202,22 +210,41 @@ namespace ScillHelpers
 
         public bool IsSubscriptionActive(string topic)
         {
-            return !string.IsNullOrEmpty(topic) &&
-                   (callbacksBattlePassChanged.ContainsKey(topic) ||
-                    callbacksPersonalChallengeChanged.ContainsKey(topic));
+            if (string.IsNullOrEmpty(topic))
+                return false;
+
+            bool active = callbacksPersonalChallengeChanged.ContainsKey(topic);
+            active |= callbacksBattlePassChanged.ContainsKey(topic);
+            active |= callbacksLeaderboardChanged.ContainsKey(topic);
+            return active;
         }
 
 
         public void SubscribeToTopicBattlePass(string topic, BattlePassChangedNotificationHandler callback)
         {
-            callbacksBattlePassChanged.Add(topic, callback);
-            SubscribeToTopic(topic);
+            if (!IsSubscriptionActive(topic))
+            {
+                callbacksBattlePassChanged.Add(topic, callback);
+                SubscribeToTopic(topic);
+            }
+        }
+
+        public void SubscribeToTopicLeaderboard(string topic, LeaderboardChangedNotificationHandler callback)
+        {
+            if (!IsSubscriptionActive(topic))
+            {
+                callbacksLeaderboardChanged.Add(topic, callback);
+                SubscribeToTopic(topic);
+            }
         }
 
         public void SubscribeToTopicChallenge(string topic, ChallengeChangedNotificationHandler callback)
         {
-            callbacksPersonalChallengeChanged.Add(topic, callback);
-            SubscribeToTopic(topic);
+            if (!IsSubscriptionActive(topic))
+            {
+                callbacksPersonalChallengeChanged.Add(topic, callback);
+                SubscribeToTopic(topic);
+            }
         }
 
         public void UnsubscribeFromTopic(string topic)
@@ -238,6 +265,7 @@ namespace ScillHelpers
 
         private void SubscribeToTopic(string topic, byte qoS = 0)
         {
+            // Debug.Log($"Requested subscription with topic: {topic}");
             ScillMqttPacketSubscribe subcribePacket = new ScillMqttPacketSubscribe();
             subcribePacket.PacketIdentifier = ++CurrentPacketIdentifier;
             subcribePacket.TopicFilter = new[] {topic};

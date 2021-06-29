@@ -39,7 +39,7 @@ public class SCILLPagination : MonoBehaviour
             _numItems = value;
             UpdateButtons();
             
-            Debug.Log("NUM ITEMS " + value);
+            // Debug.Log("NUM ITEMS " + value);
         }
     }
 

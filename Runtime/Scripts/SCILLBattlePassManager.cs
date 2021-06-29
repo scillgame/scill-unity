@@ -45,6 +45,9 @@ public class SCILLBattlePassManager : MonoBehaviour
 
     public static event SelectedBattlePassLevelChangedAction OnSelectedBattlePassLevelChanged;
 
+
+    private int NumUpdateRequests { get; set; } = 0;
+
     private void Awake()
     {
         if (Instance == null)
@@ -124,25 +127,40 @@ public class SCILLBattlePassManager : MonoBehaviour
 
     public void UpdateBattlePassLevelsFromServer()
     {
+        NumUpdateRequests++;
+
+        if (NumUpdateRequests > 1)
+        {
+            return;
+        }
+
+        SendUpdateRequest();
+    }
+
+    private void SendUpdateRequest()
+    {
         var levelsPromise =
             SCILLManager.Instance.SCILLClient.GetBattlePassLevelsAsync(SelectedBattlePass.battle_pass_id);
-
         // Debug.Log("Requested BP Update from Server");
 
         levelsPromise.Then(levels =>
         {
             BattlePassLevels = levels;
+
             int numBattlePassLevels = null == BattlePassLevels ? 0 : BattlePassLevels.Count;
-            // Debug.Log($"Received BP Update from server with {numBattlePassLevels} entries");
-
-            OnBattlePassLevelsUpdatedFromServer?.Invoke(levels);
-
+            Debug.Log($"Received BP Update from server with {numBattlePassLevels} entries");
 
             // If we have not selected a battle pass level, let's pick the current one
             if (_selectedBattlePassLevelIndex == 0)
             {
                 SelectedBattlePassLevelIndex = GetCurrentBattlePassLevel();
             }
+
+            OnBattlePassLevelsUpdatedFromServer?.Invoke(levels);
+
+            NumUpdateRequests--;
+            if (NumUpdateRequests > 0)
+                SendUpdateRequest();
         });
     }
 

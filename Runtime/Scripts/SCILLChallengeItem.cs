@@ -132,6 +132,16 @@ public class SCILLChallengeItem : MonoBehaviour
             if (activateButton) activateButton.gameObject.SetActive(false);
             if (cancelButton) cancelButton.gameObject.SetActive(false);
         }
+        else if (challenge.type == "finished")
+        {
+            if (challengeName) challengeName.text = StrikeThrough(challenge.challenge_name);
+            if (challengeProgress) challengeProgress.gameObject.SetActive(false);
+            if (actions) actions.gameObject.SetActive(false);
+            if (claimButton) claimButton.gameObject.SetActive(false);
+            if (unlockButton) unlockButton.gameObject.SetActive(false);
+            if (activateButton) activateButton.gameObject.SetActive(false);
+            if (cancelButton) cancelButton.gameObject.SetActive(false);
+        }
         else
         {
             if (challengeProgress) challengeProgress.gameObject.SetActive(false);

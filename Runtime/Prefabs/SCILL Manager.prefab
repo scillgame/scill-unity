@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 4109715407461212425}
   - component: {fileID: 4109715407461212424}
   - component: {fileID: 4109715407461212427}
+  - component: {fileID: 1911748034}
   m_Layer: 0
   m_Name: SCILL Manager
   m_TagString: Untagged
@@ -44,10 +45,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ba282a0b4fb304bb8a0d40aa74c5d544, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  APIKey: 
-  AppId: 
+  AppId: 623380080260612097
   environment: 0
-  UserId: 1234
+  language: 0
+  APIKey: x_Tc4uF9rf6ut4l2zZOoTtiersIeMUu-LX79T2Cbxi65h9aB9xia34Fi
+  UserId: 123
+  SessionId: 123
 --- !u!114 &4109715407461212427
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -58,5 +61,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: babef36b3d62e4f799ba4ccdd5f5bfd9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1911748034
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4109715407461212426}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c618d7a515f4ee49b6be0a9cb420609, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
