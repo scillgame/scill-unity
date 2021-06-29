@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4109715407461212425}
   - component: {fileID: 4109715407461212424}
   - component: {fileID: 4109715407461212427}
-  - component: {fileID: 1911748034}
+  - component: {fileID: 8570970829196123654}
   m_Layer: 0
   m_Name: SCILL Manager
   m_TagString: Untagged
@@ -49,8 +49,8 @@ MonoBehaviour:
   environment: 0
   language: 0
   APIKey: x_Tc4uF9rf6ut4l2zZOoTtiersIeMUu-LX79T2Cbxi65h9aB9xia34Fi
-  UserId: 123
-  SessionId: 123
+  UserId: 12345
+  SessionId: persistent
 --- !u!114 &4109715407461212427
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -63,7 +63,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: babef36b3d62e4f799ba4ccdd5f5bfd9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1911748034
+--- !u!114 &8570970829196123654
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

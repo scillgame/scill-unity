@@ -8,7 +8,11 @@
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
-    "precompiledReferences": [],
+    "precompiledReferences": [
+        "SCILL.dll",
+        "SCILL-Proyecto26.RestClient.dll",
+        "SCILL-RSG.Promise.dll"
+    ],
     "autoReferenced": true,
     "defineConstraints": [],
     "versionDefines": [],
