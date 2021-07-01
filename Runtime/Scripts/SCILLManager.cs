@@ -144,7 +144,7 @@ public class SCILLManager : MonoBehaviour
         }
     }
 
-    IEnumerator PingRoutine()
+    private IEnumerator PingRoutine()
     {
         while (true)
         {
@@ -158,9 +158,9 @@ public class SCILLManager : MonoBehaviour
     }
 
 
-    protected virtual void GenerateAccessToken(Action<string> callback, string userId)
+    protected virtual void GenerateAccessToken(Action<string> resolve, Action<Exception> reject, string userId)
     {
-        GenerateAccessToken(userId).Then(callback);
+        GenerateAccessToken(userId).Then(resolve).Catch(reject);
     }
 
     protected virtual IPromise<string> GenerateAccessToken(string userId)
@@ -170,7 +170,7 @@ public class SCILLManager : MonoBehaviour
         return _scillBackend.GetAccessTokenAsync(userId);
     }
 
-    public virtual void SetUserInfo(string username, string avatar, [CanBeNull] Action<bool> callback)
+    public virtual void SetUserInfoAsync(Action<bool> callback, string username, string avatar)
     {
         var userInfo = new UserInfo(username, avatar);
         var userInfoPromise = _scillClient.AuthApi.SetUserInfoAsync(userInfo);
@@ -188,13 +188,9 @@ public class SCILLManager : MonoBehaviour
         }
     }
 
-    public virtual void GetUserInfo(Action<UserInfo> callback)
+    public virtual void GetUserInfoAsync(Action<UserInfo> resolve, Action<Exception> reject)
     {
-        var resultPromise = _scillClient.AuthApi.GetUserInfoAsync();
-        if (null != callback)
-        {
-            resultPromise.Then(result => { callback(result); });
-        }
+        _scillClient.AuthApi.GetUserInfoAsync().Then(resolve).Catch(reject);
     }
 
     public virtual string GetUserId()
@@ -223,6 +219,11 @@ public class SCILLManager : MonoBehaviour
     }
 
 
+    public void SendEventAsync(string eventName, string eventType = "single", EventMetaData metaData = null)
+    {
+        SendEventAsync(eventName, eventType, SessionId, metaData);
+    }
+
     public void SendEventAsync(string eventName, string eventType = "single", string sessionId = null,
         EventMetaData metaData = null)
     {
@@ -230,20 +231,46 @@ public class SCILLManager : MonoBehaviour
         // to do that
         var payload = new EventPayload(GetUserId(), sessionId != null ? sessionId : SessionId, eventName, eventType,
             metaData);
+
         try
         {
-            var eventResponsePromise = EventsApi.SendEventAsync(payload);
-            // Debug.Log("SENT EVENT: " + payload.ToJson());
-            SCILLNotificationManager.Instance?.AddNotification(SCILLNotificationType.Success,
-                "Event sent: " + eventName);
+            SendEventAsync(eventName, payload);
         }
         catch (ApiException e)
         {
-            Debug.LogError("EVENT FAILED: " + payload.ToJson());
-            Debug.LogError(e);
-            SCILLNotificationManager.Instance?.AddNotification(SCILLNotificationType.Error,
-                "Event failed: " + eventName);
+            HandleEventApiException(eventName, payload, e);
         }
+    }
+
+    private void SendEventAsync(string eventName, EventPayload payload)
+    {
+        EventsApi.SendEventAsync(
+            response =>
+            {
+                SCILLNotificationManager.Instance?.AddNotification(SCILLNotificationType.Success,
+                    "Event sent: " + eventName);
+            },
+            e =>
+            {
+                if (e is ApiException apiException)
+                {
+                    HandleEventApiException(eventName, payload, apiException);
+                }
+                else
+                {
+                    Debug.LogError(e);
+                    throw e;
+                }
+            },
+            payload);
+    }
+
+    private static void HandleEventApiException(string eventName, EventPayload payload, ApiException e)
+    {
+        Debug.LogError("EVENT FAILED: " + payload.ToJson());
+        Debug.LogError(e);
+        SCILLNotificationManager.Instance?.AddNotification(SCILLNotificationType.Error,
+            "Event failed: " + eventName);
     }
 
     public void SendEventForUserIdAsync(string userId, string eventName, string eventType = "single",
@@ -261,33 +288,24 @@ public class SCILLManager : MonoBehaviour
             metaData);
         try
         {
-            var response = _scillBackend.EventsApi.SendEventAsync(payload);
-            Debug.Log("SENT EVENT: " + payload.ToJson());
-            SCILLNotificationManager.Instance?.AddNotification(SCILLNotificationType.Success,
-                $"Event sent, User: {userId}, Event: {eventName}");
+            SendEventAsync(eventName, payload);
         }
         catch (ApiException e)
         {
-            Debug.Log("EVENT FAILED: " + payload.ToJson());
-            Debug.Log(e);
-            SCILLNotificationManager.Instance?.AddNotification(SCILLNotificationType.Error,
-                $"Event failed, User: {userId}, Event: {eventName}");
+            HandleEventApiException(eventName, payload, e);
         }
     }
 
     // Basic wrapper for getting personal challenges
-    public void GetPersonalChallengesAsync(Action<List<ChallengeCategory>> callback)
+    public void GetPersonalChallengesAsync(Action<List<ChallengeCategory>> resolve, Action<Exception> reject)
     {
-        var challengesPromise = ChallengesApi.GetPersonalChallengesAsync(AppId);
-        if (null != callback)
-        {
-            challengesPromise.Then(challengeCategories => { callback(challengeCategories); });
-        }
+        ChallengesApi.GetPersonalChallengesAsync(AppId).Then(resolve).Catch(reject);
     }
 
-    public void GetPersonalRankingAsync(Action<LeaderboardMemberRanking> callback, string leaderboardId)
+    public void GetPersonalRankingAsync(Action<LeaderboardMemberRanking> resolve, Action<Exception> reject,
+        string leaderboardId)
     {
-        GetPersonalRankingAsync(leaderboardId).Then(callback);
+        GetPersonalRankingAsync(leaderboardId).Then(resolve).Catch(reject);
     }
 
     public IPromise<LeaderboardMemberRanking> GetPersonalRankingAsync(string leaderboardId)

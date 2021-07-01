@@ -30,16 +30,32 @@ public class SCILLLeaderboardManager : MonoBehaviour
     {
         if (leaderboardId != null)
         {
-            LoadPersonalRanking();
-
-            SCILLManager.Instance.StartLeaderboardUpdateNotifications(leaderboardId, OnLeaderboardChangedPayload);
+            if (!string.IsNullOrEmpty(SCILLManager.Instance.AccessToken))
+            {
+                InitLeaderboardData();
+            }
+            else
+            {
+                SCILLManager.OnSCILLManagerReady += InitLeaderboardData;
+            }
         }
+    }
+
+    private void InitLeaderboardData()
+    {
+        SCILLManager.OnSCILLManagerReady -= InitLeaderboardData;
+
+        LoadPersonalRanking();
+        SCILLManager.Instance.StartLeaderboardUpdateNotifications(leaderboardId, OnLeaderboardChangedPayload);
     }
 
     private void OnDisable()
     {
+        SCILLManager.OnSCILLManagerReady -= InitLeaderboardData;
+
         SCILLManager.Instance.StopLeaderboardUpdateNotifications(leaderboardId, OnLeaderboardChangedPayload);
     }
+
 
     private void OnLeaderboardChangedPayload(LeaderboardUpdatePayload payload)
     {
@@ -60,20 +76,36 @@ public class SCILLLeaderboardManager : MonoBehaviour
     {
         try
         {
-            var memberRankingPromise = SCILLManager.Instance.GetPersonalRankingAsync(leaderboardId);
-            memberRankingPromise.Then(memberRanking =>
-            {
-                if (memberRanking != null && memberRanking.member != null && memberRanking.member.rank >= 1)
+            SCILLManager.Instance.GetPersonalRankingAsync(memberRanking =>
                 {
-                    OnLeaderboardRankingLoaded?.Invoke(memberRanking.member);
-                }
-            });
+                    if (memberRanking != null && memberRanking.member != null && memberRanking.member.rank >= 1)
+                    {
+                        OnLeaderboardRankingLoaded?.Invoke(memberRanking.member);
+                    }
+                },
+                e =>
+                {
+                    if (e is ApiException apiException)
+                    {
+                        HandleApiException(apiException);
+                    }
+                    else
+                    {
+                        Debug.LogError(e);
+                        throw e;
+                    }
+                },
+                leaderboardId);
         }
         catch (ApiException e)
         {
-            Debug.Log("Failed to load leaderboard ranking " + leaderboardId);
-            Debug.Log(e.Message);
+            HandleApiException(e);
         }
     }
 
+    private void HandleApiException(ApiException e)
+    {
+        Debug.Log("Failed to load leaderboard ranking " + leaderboardId);
+        Debug.Log(e.Message);
+    }
 }

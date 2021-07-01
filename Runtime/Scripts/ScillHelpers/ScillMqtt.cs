@@ -147,7 +147,7 @@ namespace ScillHelpers
                 if (jObject != null)
                 {
                     string webhookType = jObject["webhook_type"].Value<string>();
-                    Debug.Log($"Webhooktype: {webhookType}");
+                    // Debug.Log($"Webhooktype: {webhookType}");
 
                     BattlePassChallengeChangedPayload payload =
                         JsonConvert.DeserializeObject<BattlePassChallengeChangedPayload>(publishPacket.Payload);
@@ -222,45 +222,48 @@ namespace ScillHelpers
 
         public void SubscribeToTopicBattlePass(string topic, BattlePassChangedNotificationHandler callback)
         {
-            if (!IsSubscriptionActive(topic))
-            {
-                callbacksBattlePassChanged.Add(topic, callback);
-                SubscribeToTopic(topic);
-            }
+            SubscribeToTopic(topic, callbacksBattlePassChanged, callback);
         }
 
         public void SubscribeToTopicLeaderboard(string topic, LeaderboardChangedNotificationHandler callback)
         {
-            if (!IsSubscriptionActive(topic))
-            {
-                callbacksLeaderboardChanged.Add(topic, callback);
-                SubscribeToTopic(topic);
-            }
+            SubscribeToTopic(topic, callbacksLeaderboardChanged, callback);
         }
 
         public void SubscribeToTopicChallenge(string topic, ChallengeChangedNotificationHandler callback)
         {
+            SubscribeToTopic(topic, callbacksPersonalChallengeChanged, callback);
+        }
+
+        private void SubscribeToTopic<T>(string topic, Dictionary<string, T> callbacks, T callback) where T : Delegate
+        {
+            if (string.IsNullOrEmpty(topic))
+                return;
             if (!IsSubscriptionActive(topic))
             {
-                callbacksPersonalChallengeChanged.Add(topic, callback);
+                callbacks.Add(topic, callback);
                 SubscribeToTopic(topic);
             }
         }
 
         public void UnsubscribeFromTopic(string topic)
         {
-            TryRemoveCallback(topic, callbacksBattlePassChanged);
-            TryRemoveCallback(topic, callbacksPersonalChallengeChanged);
-            ScillMqttPacketUnsubscribe unsubscribe = new ScillMqttPacketUnsubscribe();
-            unsubscribe.PacketIdentifier = ++CurrentPacketIdentifier;
-            unsubscribe.TopicFilter = new[] {topic};
-            unsubscribe.Buffer = unsubscribe.ToBuffer();
-            _mqttWS.Send(unsubscribe.Buffer);
+            if (!string.IsNullOrEmpty(topic))
+            {
+                TryRemoveCallback(topic, callbacksBattlePassChanged);
+                TryRemoveCallback(topic, callbacksPersonalChallengeChanged);
+                ScillMqttPacketUnsubscribe unsubscribe = new ScillMqttPacketUnsubscribe();
+                unsubscribe.PacketIdentifier = ++CurrentPacketIdentifier;
+                unsubscribe.TopicFilter = new[] {topic};
+                unsubscribe.Buffer = unsubscribe.ToBuffer();
+                _mqttWS.Send(unsubscribe.Buffer);
+            }
         }
 
         private void TryRemoveCallback<T>(string topic, Dictionary<string, T> fromDictionary)
         {
-            fromDictionary.Remove(topic);
+            if (!string.IsNullOrEmpty(topic))
+                fromDictionary.Remove(topic);
         }
 
         private void SubscribeToTopic(string topic, byte qoS = 0)

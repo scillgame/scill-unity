@@ -68,13 +68,34 @@ public class SCILLLeaderboard : MonoBehaviour
 
     private void Start()
     {
-        PollLeaderboard();
+        if (null != SCILLManager.Instance.SCILLClient)
+        {
+            InitLeaderboardData();
+        }
+        else
+        {
+            SCILLManager.OnSCILLManagerReady += OnScillReady;
+        }
+    }
 
+    private void OnScillReady()
+    {
+        InitLeaderboardData();
+        UpdateLeaderboard();
+    }
+
+    private void InitLeaderboardData()
+    {
+        SCILLManager.OnSCILLManagerReady -= InitLeaderboardData;
+
+        PollLeaderboard();
         SCILLManager.Instance.StartLeaderboardUpdateNotifications(leaderboardId, OnLeaderboardUpdated);
     }
 
     private void OnDestroy()
     {
+        SCILLManager.OnSCILLManagerReady -= InitLeaderboardData;
+
         SCILLManager.Instance.StopLeaderboardUpdateNotifications(leaderboardId, OnLeaderboardUpdated);
     }
 
@@ -148,7 +169,7 @@ public class SCILLLeaderboard : MonoBehaviour
         allContentLoaded = false;
         contentSize = 0;
 
-        if (SCILLManager.Instance == null)
+        if (SCILLManager.Instance == null || null == SCILLManager.Instance.SCILLClient)
         {
             return;
         }
@@ -196,40 +217,43 @@ public class SCILLLeaderboard : MonoBehaviour
 
     private void LoadLeaderboardRankings(int page, bool clear = false)
     {
-        //Debug.Log("LOAD LEADERBOARD RANKINGS " + page);
-        var loadPromise = SCILLManager.Instance.SCILLClient.GetLeaderboardAsync(leaderboardId, page, pageSize);
-        IsLoading = true;
-
-        loadPromise.Then(leaderboard =>
+        if (null != SCILLManager.Instance.SCILLClient)
         {
-            //Debug.Log(leaderboard.ToJson());
+            //Debug.Log("LOAD LEADERBOARD RANKINGS " + page);
+            var loadPromise = SCILLManager.Instance.SCILLClient.GetLeaderboardAsync(leaderboardId, page, pageSize);
+            IsLoading = true;
 
-            if (leaderboardName)
+            loadPromise.Then(leaderboard =>
             {
-                leaderboardName.text = leaderboard.name;
-            }
+                //Debug.Log(leaderboard.ToJson());
 
-            List<LeaderboardRanking> rankings = (memberType == SCILLMemberType.User)
-                ? leaderboard.grouped_by_users
-                : leaderboard.grouped_by_teams;
+                if (leaderboardName)
+                {
+                    leaderboardName.text = leaderboard.name;
+                }
 
-            //Debug.Log("Loaded leaderboard rankings, number of items: " + rankings.Count + ", Page-Size: " + pageSize);
+                List<LeaderboardRanking> rankings = (memberType == SCILLMemberType.User)
+                    ? leaderboard.grouped_by_users
+                    : leaderboard.grouped_by_teams;
 
-            // Make sure we stop loading new stuff if we are at the end of the list
-            if (rankings.Count < pageSize)
-            {
-                allContentLoaded = true;
-            }
+                //Debug.Log("Loaded leaderboard rankings, number of items: " + rankings.Count + ", Page-Size: " + pageSize);
 
-            if (clear)
-            {
-                ClearRankings();
-            }
+                // Make sure we stop loading new stuff if we are at the end of the list
+                if (rankings.Count < pageSize)
+                {
+                    allContentLoaded = true;
+                }
 
-            AddLeaderItems(rankings);
+                if (clear)
+                {
+                    ClearRankings();
+                }
 
-            IsLoading = false;
-        });
+                AddLeaderItems(rankings);
+
+                IsLoading = false;
+            });
+        }
     }
 
     protected virtual void AddNextPage()

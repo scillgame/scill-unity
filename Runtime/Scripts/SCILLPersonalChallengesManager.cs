@@ -56,7 +56,8 @@ public class SCILLPersonalChallengesManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        SCILLManager.Instance.StopChallengeUpdateNotifications(OnChallengeWebhookMessage);
+        if (SCILLManager.Instance)
+            SCILLManager.Instance.StopChallengeUpdateNotifications(OnChallengeWebhookMessage);
     }
 
     private Challenge FindChallengeById(string id)
@@ -128,5 +129,4 @@ public class SCILLPersonalChallengesManager : MonoBehaviour
     {
         UpdateChallenge(payload);
     }
-    
 }
