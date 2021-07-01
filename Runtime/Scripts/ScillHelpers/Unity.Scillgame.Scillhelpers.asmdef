@@ -9,7 +9,7 @@
     "allowUnsafeCode": false,
     "overrideReferences": true,
     "precompiledReferences": [
-        "SCILL-Newtonsoft.Json.dll",
+        "Newtonsoft.Json.dll",
         "SCILL.dll"
     ],
     "autoReferenced": false,

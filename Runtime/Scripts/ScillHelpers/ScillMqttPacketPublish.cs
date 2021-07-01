@@ -11,36 +11,33 @@
 
         public string Payload;
 
-        public static ScillMqttPacketPublish FromBuffer(byte[] buffer)
+        public ScillMqttPacketPublish(byte[] buffer)
         {
-            ScillMqttPacketPublish result = new ScillMqttPacketPublish();
             int pointer = 0;
 
-            result.CommandType = GetCommandTypeFromBuffer(buffer);
+            CommandType = GetCommandTypeFromBuffer(buffer);
 
             // Get the Packet Control Flags
-            result.PacketControlFlags = (byte) (buffer[0] & 0x0f); // set everything to zero except the last 8 bit
+            PacketControlFlags = (byte) (buffer[0] & 0x0f); // set everything to zero except the last 8 bit
 
-            result.Duplicate = (result.PacketControlFlags & 0x01) != 0;
-            result.QoS = (byte) ((result.PacketControlFlags & 0x06) >> 1);
-            result.Retain = (result.PacketControlFlags & 0x08) != 0;
+            Duplicate = (PacketControlFlags & 0x01) != 0;
+            QoS = (byte) ((PacketControlFlags & 0x06) >> 1);
+            Retain = (PacketControlFlags & 0x08) != 0;
 
-            result.RemainingLength = GetRemainingLengthFromBuffer(buffer);
-            result.Length = GetPacketLengthFromRemainingLength(result.RemainingLength);
-            pointer += GetFixedHeaderLengthFromRemaining(result.RemainingLength);
+            RemainingLength = GetRemainingLengthFromBuffer(buffer);
+            Length = GetPacketLengthFromRemainingLength(RemainingLength);
+            pointer += GetFixedHeaderLengthFromRemaining(RemainingLength);
 
             int topicLength = GetTwoByteNumberFromBuffer(buffer, ref pointer);
-            result.TopicName = GetStringFromBuffer(buffer, ref pointer, topicLength);
+            TopicName = GetStringFromBuffer(buffer, ref pointer, topicLength);
 
-            if (result.QoS > 0)
+            if (QoS > 0)
             {
-                result.PacketIdentifier = GetTwoByteNumberFromBuffer(buffer, ref pointer);
+                PacketIdentifier = GetTwoByteNumberFromBuffer(buffer, ref pointer);
             }
 
-            int payLoadLength = result.Length - pointer;
-            result.Payload = GetStringFromBuffer(buffer, ref pointer, payLoadLength);
-
-            return result;
+            int payLoadLength = Length - pointer;
+            Payload = GetStringFromBuffer(buffer, ref pointer, payLoadLength);
         }
     }
 }

@@ -40,12 +40,12 @@ namespace ScillHelpers
             MqttCommandType commandType = GetCommandTypeFromBuffer(buffer);
             if (MqttCommandType.CONNACK == commandType)
             {
-                return ScillMqttPacketConnack.FromBuffer(buffer);
+                return new ScillMqttPacketConnack(buffer);
             }
 
             if (MqttCommandType.PUBLISH == commandType)
             {
-                return ScillMqttPacketPublish.FromBuffer(buffer);
+                return new ScillMqttPacketPublish(buffer);
             }
 
             var packet = new ScillMqttPacketBase();

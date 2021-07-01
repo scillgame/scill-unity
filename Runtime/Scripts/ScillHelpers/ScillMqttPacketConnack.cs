@@ -23,24 +23,21 @@
         public ScillMqttConnackCode Code;
         public bool SessionPresent;
 
-        public static ScillMqttPacketConnack FromBuffer(byte[] buffer)
+        public ScillMqttPacketConnack(byte[] buffer)
         {
             int pointer = 0;
-            ScillMqttPacketConnack result = new ScillMqttPacketConnack();
-            result.CommandType = GetCommandTypeFromBuffer(buffer);
+            CommandType = GetCommandTypeFromBuffer(buffer);
             pointer++;
 
             // Skip remaining length since it is always 2
             pointer++;
 
             // session preset
-            result.SessionPresent = buffer[pointer] > 0 ? true : false;
+            SessionPresent = buffer[pointer] > 0 ? true : false;
             pointer++;
 
-            result.Code = (ScillMqttConnackCode) (buffer[pointer]);
+            Code = (ScillMqttConnackCode) (buffer[pointer]);
             pointer++;
-
-            return result;
         }
     }
 }
