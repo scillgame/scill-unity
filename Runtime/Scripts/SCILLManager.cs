@@ -117,7 +117,7 @@ public class SCILLManager : MonoBehaviour
 
     private string _personalChallengeNotificationTopic;
 
-    // Local instances of SCILLClient. Please note, that SCILLBackend should not be used in game clients in production!
+    // Local instance of SCILLBackend. Please note, that SCILLBackend should not be used in game clients in production!
     private SCILLBackend _scillBackend;
 
     /// <summary>
@@ -128,22 +128,22 @@ public class SCILLManager : MonoBehaviour
     // Simple wrappers to get SCILL product APIs
 
     /// <summary>
-    ///     Getter for the shared <see cref="EventsApi" /> instance.
+    ///     Getter for the shared <see cref="EventsApi" /> instance. It’s used to send events required for challenges and battle passes.
     /// </summary>
     public EventsApi EventsApi => SCILLClient.EventsApi;
 
     /// <summary>
-    ///     Getter for the shared <see cref="ChallengesApi" /> instance.
+    ///     Getter for the shared <see cref="ChallengesApi" /> instance. It’s used to handle challenges.
     /// </summary>
     public ChallengesApi ChallengesApi => SCILLClient.ChallengesApi;
 
     /// <summary>
-    ///     Getter for the shared <see cref="BattlePassesApi" /> instance.
+    ///     Getter for the shared <see cref="BattlePassesApi" /> instance. It’s used to handle battle passes.
     /// </summary>
     public BattlePassesApi BattlePassesApi => SCILLClient.BattlePassesApi;
 
     /// <summary>
-    ///     Getter for the shared <see cref="LeaderboardsApi" /> instance.
+    ///     Getter for the shared <see cref="LeaderboardsApi" /> instance. It’s used to handle leaderboards.
     /// </summary>
     public LeaderboardsApi LeaderboardsApi => SCILLClient.LeaderboardsApi;
 
@@ -221,6 +221,10 @@ public class SCILLManager : MonoBehaviour
     private event BattlePassChangedNotificationHandler OnBattlePassChangedNotification;
     private event LeaderboardChangedNotificationHandler OnLeaderboardChangedNotification;
 
+    /// <summary>
+    ///     Pings the API regularly to keep the websocket connection online.
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator PingRoutine()
     {
         while (true)
@@ -232,7 +236,7 @@ public class SCILLManager : MonoBehaviour
     }
 
     /// <summary>
-    ///     This class uses the <c>SCILLBackend</c>  class to call the <c>GenerateAccessToken</c>  function to directly call
+    ///     This uses the <c>SCILLBackend</c>  class to call the <c>GenerateAccessToken</c>  function to directly call
     ///     SCILL backend with
     ///     the API key provided in the inspector. This is not recommend in production and you should override this function to
     ///     call a backend function you control to hide the API key from the user.
@@ -260,6 +264,16 @@ public class SCILLManager : MonoBehaviour
         return _scillBackend.GetAccessTokenAsync(userId);
     }
 
+    /// <summary>
+    ///     Uses the <c>AuthApi</c> Sets user info like username and avatar image which is returned as part of the user
+    ///     rankings in leaderboards.
+    /// </summary>
+    /// <param name="callback">
+    ///     Called on API response with true, if user info was set successfully and false, if setting user
+    ///     info failed.
+    /// </param>
+    /// <param name="username">UserInfo object stored in the SCILL database for the user</param>
+    /// <param name="avatar">Avatar image for the user.</param>
     public virtual void SetUserInfoAsync(Action<bool> callback, string username, string avatar)
     {
         var userInfo = new UserInfo(username, avatar);
@@ -273,11 +287,36 @@ public class SCILLManager : MonoBehaviour
             }).Catch(err => callback(false));
     }
 
+
+    /// <summary>
+    ///     Returns additional info object with usernames and avatar image for a user which is used in the leaderboard system.
+    /// </summary>
+    /// <param name="resolve">Called on successful API response with an instance of UserInfo.</param>
+    /// <param name="reject">Called on API response failure.</param>
     public virtual void GetUserInfoAsync(Action<UserInfo> resolve, Action<Exception> reject)
     {
-        SCILLClient.AuthApi.GetUserInfoAsync().Then(resolve).Catch(reject);
+        try
+        {
+            SCILLClient.AuthApi.GetUserInfoAsync().Then(resolve).Catch(reject);
+        }
+        catch (ApiException e)
+        {
+            reject(e);
+        }
     }
 
+    /// <summary>
+    ///     Used to retrieve the UserId.
+    /// </summary>
+    /// <remarks>
+    ///     This class just returns the user id provided in the inspector. If no user is provided in the inspector, it will
+    ///     attempt to retrieve the device unique identifier. Some plattforms, i.e. WebGL,
+    ///     do not support device unique identifiers. For those, a new guid will be generated and stored in the player prefs.
+    ///     This is good to quickly test with one persistent
+    ///     user that you control. In production you need to override this function to return your own User ID depending on
+    ///     your game.
+    /// </remarks>
+    /// <returns>Returns the User ID which is then used in a call to <c>GenerateAccessToken</c>  to generate the access token.</returns>
     public virtual string GetUserId()
     {
         // Override this function to return a User Id
@@ -299,6 +338,11 @@ public class SCILLManager : MonoBehaviour
         return id;
     }
 
+    /// <summary>
+    ///     Change the Language in runtime. Will update the SCILLClient instance, references to the old instance will be
+    ///     invalid.
+    /// </summary>
+    /// <param name="newSupportedLanguage">The new language.</param>
     public virtual void SetLanguage(SupportedLanguages newSupportedLanguage)
     {
         language = newSupportedLanguage;
@@ -313,48 +357,11 @@ public class SCILLManager : MonoBehaviour
 
 
     /// <summary>
-    ///     <para>
-    ///         Sends an event using EventsApi.SendEvent method. Select a proper eventName for your event. A list of
-    ///         supported events can be found in our Event Reference Guide. Depending on the event type, different additional
-    ///         properties can be send in the meta-data object.
-    ///     </para>
-    ///     <para>
-    ///         Event type defines how the event is processed in the SCILL Backend. Two possible values are possible today:
-    ///         <list type="table">
-    ///             <item>
-    ///                 <term>single</term>
-    ///                 <description>
-    ///                     The amount value (can be a property like amount, score, distance, …) of the event is
-    ///                     incremented to the last event with the same structure. Use that for events that will collect skill
-    ///                     over
-    ///                     time (i.e. the number of kills in a shooter for example)
-    ///                 </description>
-    ///             </item>
-    ///             <item>
-    ///                 <term>group</term>
-    ///                 <description>
-    ///                     The amount value overrides the last events value. Use this type for events that don’t collect skill
-    ///                     over time, but where the current value defines the skill. A laptime in a racing game for example is
-    ///                     typically not summed up over time.
-    ///                 </description>
-    ///             </item>
-    ///         </list>
-    ///     </para>
-    ///     <para>
-    ///         The last parameter to be set is the SessionId. The SessionId defines how events of the single type are
-    ///         incremented together. Only events of the same SessionId will be incremented. If the SessionId changes, the
-    ///         counter starts at 0.
-    ///     </para>
+    ///     Sends an event using <c>EventsApi.SendEvent</c>  method. See
+    ///     <see cref="SendEventAsync(string,string,string,SCILL.Model.EventMetaData)" /> for further information.
     /// </summary>
-    /// <param name="eventName">
-    ///     This is the event type as a string. These have predefined event names for many games and
-    ///     applications. It’s wise to use those as this allows us to analyse data and help you balancing your application or
-    ///     game.
-    /// </param>
-    /// <param name="eventType">
-    ///     This is either single or group. You can send multiple events in one request (group) or send
-    ///     events in sequence. Please note, that depending on your tier you might run into rate limits.
-    /// </param>
+    /// <param name="eventName">The event name as a string.</param>
+    /// <param name="eventType">Either <c>"single"</c> or <c>"group"</c>.</param>
     /// <param name="metaData">A EventMetaData object that you can/must use to set property values for the respective event.</param>
     public void SendEventAsync(string eventName, string eventType = "single", EventMetaData metaData = null)
     {
@@ -396,15 +403,18 @@ public class SCILLManager : MonoBehaviour
     ///     </para>
     /// </summary>
     /// <param name="eventName">
-    ///     This is the event type as a string. These have predefined event names for many games and
+    ///     This is the event name as a string. These have predefined event names for many games and
     ///     applications. It’s wise to use those as this allows us to analyse data and help you balancing your application or
     ///     game.
     /// </param>
     /// <param name="eventType">
-    ///     This is either single or group. You can send multiple events in one request (group) or send
+    ///     Either <c>"single"</c> or <c>"group"</c>. You can send multiple events in one request (group) or send
     ///     events in sequence. Please note, that depending on your tier you might run into rate limits.
     /// </param>
-    /// <param name="sessionId">This is required if event_type is single and identifies a session. This can be anything used to group events together. For example this can be a level or a match id.</param>
+    /// <param name="sessionId">
+    ///     This is required if event_type is single and identifies a session. This can be anything used to
+    ///     group events together. For example this can be a level or a match id.
+    /// </param>
     /// <param name="metaData">A EventMetaData object that you can/must use to set property values for the respective event.</param>
     public void SendEventAsync(string eventName, string eventType = "single", string sessionId = null,
         EventMetaData metaData = null)
@@ -455,12 +465,32 @@ public class SCILLManager : MonoBehaviour
             "Event failed: " + eventName);
     }
 
+    /// <summary>
+    ///     Sends an event using <c>EventsApi.SendEvent</c> method for a specific <paramref name="userId" />. See
+    ///     <see cref="SendEventAsync(string,string,string,SCILL.Model.EventMetaData)" /> for further information.
+    /// </summary>
+    /// <param name="userId">The userId for which the event should be sent.</param>
+    /// <param name="eventName">This is the event name as a string.</param>
+    /// <param name="eventType">Either <c>"single"</c> or <c>"group"</c>.</param>
+    /// <param name="metaData">A EventMetaData object that you can/must use to set property values for the respective event.</param>
     public void SendEventForUserIdAsync(string userId, string eventName, string eventType = "single",
         EventMetaData metaData = null)
     {
         SendEventForUserIdAsync(userId, eventName, eventType, SessionId, metaData);
     }
 
+    /// <summary>
+    ///     Sends an event using <c>EventsApi.SendEvent</c> method for a specific <paramref name="userId" />. See
+    ///     <see cref="SendEventAsync(string,string,string,SCILL.Model.EventMetaData)" /> for further information.
+    /// </summary>
+    /// <param name="userId">The userId for which the event should be sent.</param>
+    /// <param name="eventName">This is the event name as a string.</param>
+    /// <param name="eventType">Either <c>"single"</c> or <c>"group"</c>.</param>
+    /// <param name="sessionId">
+    ///     This is required if event_type is single and identifies a session. This can be anything used to
+    ///     group events together. For example this can be a level or a match id.
+    /// </param>
+    /// <param name="metaData">A EventMetaData object that you can/must use to set property values for the respective event.</param>
     public void SendEventForUserIdAsync(string userId, string eventName, string eventType = "single",
         string sessionId = null, EventMetaData metaData = null)
     {
@@ -478,18 +508,42 @@ public class SCILLManager : MonoBehaviour
         }
     }
 
-    // Basic wrapper for getting personal challenges
+    /// <summary>
+    ///     Get personal challenges organized in categories. Basic wrapper for getting personal challenges from
+    ///     <see cref="ChallengesApi" />.
+    /// </summary>
+    /// <param name="resolve">Called on a successful API response with a List of <see cref="ChallengeCategory" />.</param>
+    /// <param name="reject">Called on API response failure.</param>
     public void GetPersonalChallengesAsync(Action<List<ChallengeCategory>> resolve, Action<Exception> reject)
     {
         ChallengesApi.GetPersonalChallengesAsync(AppId).Then(resolve).Catch(reject);
     }
 
+    /// <summary>
+    ///     Use this to get the position of a user in a specified leaderboard. Wrapper for
+    ///     <c>LeaderboardsApi.GetLeaderboardRankingAsync</c>
+    /// </summary>
+    /// <param name="resolve">
+    ///     Called on a successful API response with a <see cref="LeaderboardMemberRanking" /> item for the
+    ///     specified leaderboard.
+    /// </param>
+    /// <param name="reject">Called on API response failure.</param>
+    /// <param name="leaderboardId">The id of the leaderboard.</param>
     public void GetPersonalRankingAsync(Action<LeaderboardMemberRanking> resolve, Action<Exception> reject,
         string leaderboardId)
     {
         GetPersonalRankingAsync(leaderboardId).Then(resolve).Catch(reject);
     }
 
+    /// <summary>
+    ///     Use this to get the position of a user in a specified leaderboard. Wrapper for
+    ///     <c>LeaderboardsApi.GetLeaderboardRankingAsync</c>
+    /// </summary>
+    /// <param name="leaderboardId">The id of the leaderboard.</param>
+    /// <returns>
+    ///     Promise of a <see cref="LeaderboardMemberRanking" /> item for the
+    ///     specified leaderboard.
+    /// </returns>
     public IPromise<LeaderboardMemberRanking> GetPersonalRankingAsync(string leaderboardId)
     {
         return LeaderboardsApi.GetLeaderboardRankingAsync("user", GetUserId(), leaderboardId);
@@ -511,8 +565,10 @@ public class SCILLManager : MonoBehaviour
     #region Realtime Updates
 
     /// <summary>
+    /// Called when the connection to SCILLs MQTT server was successfully established. If there are already pending
+    /// subscriptions for any notification topic, this will handle starting those subscriptions.
     /// </summary>
-    /// <param name="mqttclient"></param>
+    /// <param name="mqttclient">The mqtt client which established the connection.</param>
     private void OnMqttConnectionEstablished(ScillMqtt mqttclient)
     {
         if (null != _personalChallengeNotificationTopic)
@@ -532,6 +588,10 @@ public class SCILLManager : MonoBehaviour
 
     #region Personal Challenge Updates
 
+    /// <summary>
+    /// Connects to SCILLs MQTT server and forwards incoming payloads to the provided handler function.
+    /// </summary>
+    /// <param name="handler">Provide a handler function that is called whenever new payloads are sent from the SCILL backend. </param>
     public void StartChallengeUpdateNotifications(ChallengeChangedNotificationHandler handler)
     {
         OnChallengeChangedNotification += handler;
@@ -557,6 +617,9 @@ public class SCILLManager : MonoBehaviour
         return !(null == _mqtt || !_mqtt.IsConnected);
     }
 
+    /// <summary>
+    /// Disconnect from the MQTT server and stop receiving notifications.
+    /// </summary>
     public void StopChallengeUpdateNotifications(ChallengeChangedNotificationHandler handler)
     {
         OnChallengeChangedNotification -= handler;
@@ -576,6 +639,11 @@ public class SCILLManager : MonoBehaviour
 
     #region Battlepass Realtime Updates
 
+    /// <summary>
+    /// Connects to SCILLs MQTT server and forwards incoming payloads to the provided handler function.
+    /// </summary>
+    /// <param name="battlePassId">Provide the battle pass id. This is the same as the <c>battle_pass_id</c>  property in the <see cref="BattlePass"/> object.</param>
+    /// <param name="handler">Provide a handler function that is called whenever new payloads are sent from the SCILL backend. </param>
     public void StartBattlePassUpdateNotifications(string battlePassId,
         BattlePassChangedNotificationHandler handler)
     {
@@ -590,6 +658,9 @@ public class SCILLManager : MonoBehaviour
             });
     }
 
+    /// <summary>
+    /// Disconnects from the MQTT server and stops receiving notifications.
+    /// </summary>
     public void StopBattlePassUpdateNotifications(string battlePassId, BattlePassChangedNotificationHandler handler)
     {
         OnBattlePassChangedNotification -= handler;
@@ -603,6 +674,11 @@ public class SCILLManager : MonoBehaviour
 
     #region Leaderboard Realtime Updates
 
+    /// <summary>
+    /// Connects to SCILLs MQTT server and forwards incoming payloads to the provided handler function.
+    /// </summary>
+    /// <param name="leaderboardId">Provide the leaderboard id. This is the same as the <c>leaderboard_id</c>  property in the <see cref="Leaderboard"/> object.</param>
+    /// <param name="handler">Provide a handler function that is called whenever new payloads are sent from the SCILL backend. </param>
     public void StartLeaderboardUpdateNotifications(string leaderboardId,
         LeaderboardChangedNotificationHandler handler)
     {
@@ -617,6 +693,9 @@ public class SCILLManager : MonoBehaviour
             });
     }
 
+    /// <summary>
+    /// Disconnects from the MQTT server and stops receiving notifications.
+    /// </summary>
     public void StopLeaderboardUpdateNotifications(string leaderboardId, LeaderboardChangedNotificationHandler handler)
     {
         OnLeaderboardChangedNotification -= handler;
@@ -627,8 +706,7 @@ public class SCILLManager : MonoBehaviour
     }
 
     #endregion
-
-
+    
     private bool ShouldStartMonitoring(IDictionary<string, string> idToTopicMap, string key)
     {
         // Start Monitoring if:
