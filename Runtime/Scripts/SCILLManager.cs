@@ -202,7 +202,23 @@ public class SCILLManager : MonoBehaviour
         }
         else
         {
-            return SystemInfo.deviceUniqueIdentifier;
+            string userIdPlayerPrefKey = "SCILL-Default-UserId";
+            string id = PlayerPrefs.GetString(userIdPlayerPrefKey, null);
+            if (string.IsNullOrEmpty(id))
+            {
+                id = SystemInfo.deviceUniqueIdentifier;
+            }
+
+            if (SystemInfo.unsupportedIdentifier == id)
+            {
+                id = System.Guid.NewGuid().ToString();
+                Debug.Log("SystemInfo.deviceUniqueIdentifier unsupported, falling back to generating a Guid.");
+            }
+
+            PlayerPrefs.SetString(userIdPlayerPrefKey, id);
+            PlayerPrefs.Save();
+
+            return id;
         }
     }
 
