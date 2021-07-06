@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using SCILL.Client;
 using SCILL.Model;
 using UnityEngine;
@@ -13,8 +12,19 @@ namespace SCILL
         Team
     }
 
+    /// <summary>
+    ///     <para>
+    ///         This component handles all communication with the SCILL backend to load and update leaderboards in real time.
+    ///         It also implements user interfaces.
+    ///     </para>
+    ///     <para>
+    ///         This class
+    ///     </para>
+    /// </summary>
     public class SCILLLeaderboard : MonoBehaviour
     {
+        public delegate void UsersLeaderboardRankingChangedAction(LeaderboardUpdatePayload payload);
+
         [Tooltip("The ID of the leaderboard. You find them in the Admin Panel.")]
         public string leaderboardId;
 
@@ -25,7 +35,7 @@ namespace SCILL
         public SCILLMemberType memberType = SCILLMemberType.User;
 
         [Tooltip("Set the number of decimals to shift the score")]
-        public int numberOfDecimals = 0;
+        public int numberOfDecimals;
 
         [Tooltip("Defines how many items are loaded per page")]
         public int pageSize = 25;
@@ -51,17 +61,14 @@ namespace SCILL
         [Tooltip("The prefab of a UI item that will be used for any other rankings")]
         public SCILLLeaderboardRankingItem defaultRankingPrefab;
 
-        public delegate void UsersLeaderboardRankingChangedAction(LeaderboardUpdatePayload payload);
+        private ScrollRect _scrollRect;
+        private bool allContentLoaded;
 
-        public static event UsersLeaderboardRankingChangedAction OnUsersLeaderboardRankingChanged;
+        private float contentSize;
 
         public int CurrentPage { get; private set; }
 
-        private float contentSize = 0;
-        private bool allContentLoaded = false;
-        private ScrollRect _scrollRect;
-
-        private bool IsLoading { get; set; } = false;
+        private bool IsLoading { get; set; }
 
         private void Awake()
         {
@@ -71,14 +78,33 @@ namespace SCILL
         private void Start()
         {
             if (null != SCILLManager.Instance.SCILLClient)
-            {
                 InitLeaderboardData();
-            }
             else
-            {
                 SCILLManager.OnSCILLManagerReady += OnScillReady;
-            }
         }
+
+        public void Update()
+        {
+            if (_scrollRect)
+                if (_scrollRect.normalizedPosition.y < 0.25)
+                    if (IsLoading == false && allContentLoaded == false)
+                        //Debug.Log("Bottom of page reached, adding next page, Loading: " + loading + ", All Content Loaded: " + allContentLoaded);
+                        AddNextPage();
+        }
+
+        private void OnEnable()
+        {
+            UpdateLeaderboard();
+        }
+
+        private void OnDestroy()
+        {
+            SCILLManager.OnSCILLManagerReady -= InitLeaderboardData;
+
+            SCILLManager.Instance.StopLeaderboardUpdateNotifications(leaderboardId, OnLeaderboardUpdated);
+        }
+
+        public static event UsersLeaderboardRankingChangedAction OnUsersLeaderboardRankingChanged;
 
         private void OnScillReady()
         {
@@ -94,37 +120,22 @@ namespace SCILL
             SCILLManager.Instance.StartLeaderboardUpdateNotifications(leaderboardId, OnLeaderboardUpdated);
         }
 
-        private void OnDestroy()
-        {
-            SCILLManager.OnSCILLManagerReady -= InitLeaderboardData;
-
-            SCILLManager.Instance.StopLeaderboardUpdateNotifications(leaderboardId, OnLeaderboardUpdated);
-        }
-
         private void OnLeaderboardUpdated(LeaderboardUpdatePayload payload)
         {
             // Make sure this this leaderboard has been updated
-            if (payload.leaderboard_data.leaderboard_id != leaderboardId)
-            {
-                return;
-            }
+            if (payload.leaderboard_data.leaderboard_id != leaderboardId) return;
 
             PollLeaderboard();
 
             if (payload.member_data.member_type == "user" &&
                 payload.member_data.member_id == SCILLManager.Instance.GetUserId())
-            {
                 OnUsersLeaderboardRankingChanged?.Invoke(payload);
-            }
         }
 
         private void PollLeaderboard()
         {
             // Don't poll while we are loading new content
-            if (IsLoading)
-            {
-                return;
-            }
+            if (IsLoading) return;
 
             // Reload all data currently visible
             var leaderboardPromise =
@@ -132,7 +143,7 @@ namespace SCILL
 
             leaderboardPromise.Then(leaderboard =>
             {
-                List<LeaderboardRanking> rankings = (memberType == SCILLMemberType.User)
+                var rankings = memberType == SCILLMemberType.User
                     ? leaderboard.grouped_by_users
                     : leaderboard.grouped_by_teams;
                 ClearRankings();
@@ -145,17 +156,12 @@ namespace SCILL
             foreach (var ranking in rankings)
             {
                 //Debug.Log("Adding ranking " + ranking.rank);
-                SCILLLeaderboardRankingItem prefab = defaultRankingPrefab;
+                var prefab = defaultRankingPrefab;
                 if (ranking.member_id == SCILLManager.Instance.GetUserId())
-                {
                     prefab = userRankingPrefab;
-                }
-                else if (ranking.rank <= numberOfTopEntries)
-                {
-                    prefab = topRankingPrefab;
-                }
+                else if (ranking.rank <= numberOfTopEntries) prefab = topRankingPrefab;
 
-                GameObject rankingGo = Instantiate(prefab.gameObject, rankingsContainer.transform, false);
+                var rankingGo = Instantiate(prefab.gameObject, rankingsContainer.transform, false);
                 var rankingItem = rankingGo.GetComponent<SCILLLeaderboardRankingItem>();
                 if (rankingItem)
                 {
@@ -171,10 +177,7 @@ namespace SCILL
             allContentLoaded = false;
             contentSize = 0;
 
-            if (SCILLManager.Instance == null || null == SCILLManager.Instance.SCILLClient)
-            {
-                return;
-            }
+            if (SCILLManager.Instance == null || null == SCILLManager.Instance.SCILLClient) return;
 
             LoadLeaderboardRankings(CurrentPage, true);
             UpdateUsersLeaderboardRanking();
@@ -182,10 +185,7 @@ namespace SCILL
 
         private void UpdateUsersLeaderboardRanking()
         {
-            if (!userRanking)
-            {
-                return;
-            }
+            if (!userRanking) return;
 
             // Load users ranking in this leaderboard
             try
@@ -230,27 +230,18 @@ namespace SCILL
                 {
                     //Debug.Log(leaderboard.ToJson());
 
-                    if (leaderboardName)
-                    {
-                        leaderboardName.text = leaderboard.name;
-                    }
+                    if (leaderboardName) leaderboardName.text = leaderboard.name;
 
-                    List<LeaderboardRanking> rankings = (memberType == SCILLMemberType.User)
+                    var rankings = memberType == SCILLMemberType.User
                         ? leaderboard.grouped_by_users
                         : leaderboard.grouped_by_teams;
 
                     //Debug.Log("Loaded leaderboard rankings, number of items: " + rankings.Count + ", Page-Size: " + pageSize);
 
                     // Make sure we stop loading new stuff if we are at the end of the list
-                    if (rankings.Count < pageSize)
-                    {
-                        allContentLoaded = true;
-                    }
+                    if (rankings.Count < pageSize) allContentLoaded = true;
 
-                    if (clear)
-                    {
-                        ClearRankings();
-                    }
+                    if (clear) ClearRankings();
 
                     AddLeaderItems(rankings);
 
@@ -263,19 +254,12 @@ namespace SCILL
         {
             // Dont load new data if we are at the end of the list
             if (allContentLoaded || IsLoading)
-            {
                 //Debug.Log("Skipping adding next page, Loading: " + loading + ", All content loaded: " + allContentLoaded);
                 return;
-            }
 
             CurrentPage++;
 
             LoadLeaderboardRankings(CurrentPage);
-        }
-
-        private void OnEnable()
-        {
-            UpdateLeaderboard();
         }
 
         protected virtual void ClearRankings()
@@ -284,26 +268,9 @@ namespace SCILL
 
             // Make sure we delete all items from the battle pass levels container
             // This way we can leave some dummy level items in Unity Editor which makes it easier to design UI
-            foreach (SCILLLeaderboardRankingItem child in rankingsContainer
+            foreach (var child in rankingsContainer
                 .GetComponentsInChildren<SCILLLeaderboardRankingItem>())
-            {
                 Destroy(child.gameObject);
-            }
-        }
-
-        public void Update()
-        {
-            if (_scrollRect)
-            {
-                if (_scrollRect.normalizedPosition.y < 0.25)
-                {
-                    if (IsLoading == false && allContentLoaded == false)
-                    {
-                        //Debug.Log("Bottom of page reached, adding next page, Loading: " + loading + ", All Content Loaded: " + allContentLoaded);
-                        AddNextPage();
-                    }
-                }
-            }
         }
     }
 }

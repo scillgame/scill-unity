@@ -61,20 +61,51 @@ namespace SCILL
         public RectTransform challengeProgress;
 
         /// <summary>
-        ///     Connect a <c>UnityEngine.UI.Text</c> component which will be used to set the remaining time of the challenge. Per
-        ///     default this will default to this format: <c>mm:hh:ss</c>.
+        ///     Connect a <c>UnityEngine.UI.Text</c> component which will be used to display the remaining time of the challenge.
+        ///     Per
+        ///     default this will use the format: <c>mm:hh:ss</c>.
         /// </summary>
         [Tooltip(
             "Connect a UnityEngine.UI.Text component which will be used to set the remaining time of the challenge. Per default this will default to this format: mm:hh:ss.")]
         public Text timeRemaining;
 
+        /// <summary>
+        ///     Challenges require a couple of user actions - typically implemented with buttons. All those buttons can be grouped
+        ///     in this transform which will be set to inactive if there are no user interactions allowed with this challenge.
+        /// </summary>
+        [Tooltip(
+            "Challenges require a couple of user actions - typically implemented with buttons. All those buttons can be grouped in this transform which will be set to inactive if there are no user interactions allowed with this challenge.")]
         public RectTransform actions;
+
+        /// <summary>
+        ///     A <c>UnityEngine.UI.Button</c> component that is connected to the <see cref="OnUnlockButtonPressed" /> function.
+        ///     The connection is NOT automatically added by this script. It
+        ///     will be visible if the challenge can be unlocked, otherwise it will be hidden.
+        /// </summary>
         public Button unlockButton;
+
+        /// <summary>
+        ///     A <c>UnityEngine.UI.Button</c> component that is connected to the <see cref="OnActivateButtonPressed" /> function.
+        ///     The connection is NOT automatically added by this script. It
+        ///     will be visible if the challenge can be activated, otherwise it will be hidden.
+        /// </summary>
         public Button activateButton;
+
+        /// <summary>
+        ///     A <c>UnityEngine.UI.Button</c> component that is connected to the <see cref="OnClaimButtonPressed" /> function.
+        ///     The connection is NOT automatically added by this script. It
+        ///     will be visible if the challenge can be claimed, otherwise it will be hidden.
+        /// </summary>
         public Button claimButton;
+
+        /// <summary>
+        ///     A <c>UnityEngine.UI.Button</c> component that is connected to the <see cref="OnCancelButtonPressed" /> function.
+        ///     The connection is NOT automatically added by this script. It
+        ///     will be visible if the challenge can be canceled, otherwise it will be hidden.
+        /// </summary>
         public Button cancelButton;
 
-        public Challenge challenge;
+        public Challenge challenge { get; set; }
 
         // Start is called before the first frame update
         private void Start()
@@ -98,7 +129,6 @@ namespace SCILL
             }
         }
 
-        // Update is called once per frame
         private void Update()
         {
             if (challenge == null) return;
@@ -106,8 +136,9 @@ namespace SCILL
             if (challengeName) challengeName.text = challenge.challenge_name;
             if (challenge.challenge_goal > 0)
                 if (challengeProgressSlider)
-                    challengeProgressSlider.value = (float) challenge.user_challenge_current_score /
-                                                    (float) challenge.challenge_goal;
+                    if (challenge.user_challenge_current_score != null)
+                        challengeProgressSlider.value = (float) challenge.user_challenge_current_score /
+                                                        (float) challenge.challenge_goal;
 
             if (challengeGoal)
                 challengeGoal.text = challenge.user_challenge_current_score + "/" +
@@ -142,7 +173,8 @@ namespace SCILL
 
                 var timeText = "";
                 var date = DateTime.Parse(challenge.user_challenge_activated_at);
-                date = date.AddMinutes((double) challenge.challenge_duration_time);
+                if (challenge.challenge_duration_time != null)
+                    date = date.AddMinutes((double) challenge.challenge_duration_time);
 
                 var now = DateTime.Now;
                 var diff = date.Subtract(now);
@@ -189,6 +221,12 @@ namespace SCILL
             return strikethrough;
         }
 
+        /// <summary>
+        ///     Connect this function to the <see cref="unlockButton" /> click event. It will unlock the challenge using the
+        ///     <see
+        ///         cref="SCILLClient.UnlockPersonalChallengeAsync(System.Action{SCILL.Model.ActionResponse},System.Action{System.Exception},string)" />
+        ///     method.
+        /// </summary>
         public void OnUnlockButtonPressed()
         {
             var personalChallenges = GetComponentInParent<SCILLPersonalChallenges>();
@@ -198,6 +236,12 @@ namespace SCILL
                 Debug.LogError("PersonalChallenge component not found in the parents");
         }
 
+        /// <summary>
+        ///     Connect this function to the <see cref="activateButton" /> click event. It will activate the challenge using the
+        ///     <see
+        ///         cref="SCILLClient.ActivatePersonalChallengeAsync(System.Action{SCILL.Model.ActionResponse},System.Action{System.Exception},string)" />
+        ///     method.
+        /// </summary>
         public void OnActivateButtonPressed()
         {
             var personalChallenges = GetComponentInParent<SCILLPersonalChallenges>();
@@ -207,6 +251,12 @@ namespace SCILL
                 Debug.LogError("PersonalChallenge component not found in the parents");
         }
 
+        /// <summary>
+        ///     Connect this function to the <see cref="claimButton" /> click event. It will claim the challenge using the
+        ///     <see
+        ///         cref="SCILLClient.ClaimPersonalChallengeRewardAsync(System.Action{SCILL.Model.ActionResponse},System.Action{System.Exception},string)" />
+        ///     method.
+        /// </summary>
         public void OnClaimButtonPressed()
         {
             var personalChallenges = GetComponentInParent<SCILLPersonalChallenges>();
@@ -216,6 +266,12 @@ namespace SCILL
                 Debug.LogError("PersonalChallenge component not found in the parents");
         }
 
+        /// <summary>
+        ///     Connect this function to the <see cref="cancelButton" /> click event. It will cancel the challenge using the
+        ///     <see
+        ///         cref="SCILLClient.CancelPersonalChallengeAsync(System.Action{SCILL.Model.ActionResponse},System.Action{System.Exception},string)" />
+        ///     method.
+        /// </summary>
         public void OnCancelButtonPressed()
         {
             var personalChallenges = GetComponentInParent<SCILLPersonalChallenges>();

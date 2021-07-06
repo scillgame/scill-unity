@@ -53,10 +53,7 @@ namespace SCILL
         private readonly Dictionary<string, GameObject> _challengeObjects = new Dictionary<string, GameObject>();
 
         [HideInInspector] public ChallengeCategory Category { get; set; }
-
-        private void Awake()
-        {
-        }
+        
 
         // Start is called before the first frame update
         private void Start()
@@ -105,7 +102,7 @@ namespace SCILL
         }
 
         /// <summary>
-        ///     Call this function to update the UI if data has been changing. The <see cref="SCILLPersonalChallenges" /> always
+        ///     Call this function to update the UI if challenge data has been changed. The <see cref="SCILLPersonalChallenges" /> script always
         ///     calls this function once data has been changed, either because of user interactions or incoming real time update
         ///     messages.
         /// </summary>

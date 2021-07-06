@@ -6,8 +6,8 @@ namespace SCILL
 {
     /// <summary>
     ///     <para>
-    ///         This component handles all communication with the SCILL backend to load and update personal challenges in real
-    ///         time. It also implements user interfaces.
+    ///         This component handles communication with the SCILL backend to load and update personal challenges in real
+    ///         time. It also implements user interfaces to display personal challenges.
     ///     </para>
     ///     <para>
     ///         This class does three things:
@@ -16,7 +16,7 @@ namespace SCILL
     ///         <item>
     ///             Load personal challenges with the
     ///             <see
-    ///                 cref="SCILLClient.GetPersonalChallengesAsync(System.Action{System.Collections.Generic.List{SCILL.Model.ChallengeCategory}},System.Action{System.Exception},System.Collections.Generic.List{string},System.Collections.Generic.List{string})" />
+    ///                 cref="SCILLClient.GetAllPersonalChallengesAsync(System.Action{System.Collections.Generic.List{SCILL.Model.ChallengeCategory}},System.Action{System.Exception},System.Collections.Generic.List{string},System.Collections.Generic.List{string})" />
     ///             method.
     ///         </item>
     ///         <item>
@@ -315,7 +315,7 @@ namespace SCILL
         ///     Called whenever the personal challenges has been marked as claimed in SCILL. Override this function to implement
         ///     your own business logic to unlock the reward set in the challenge provided.
         /// </summary>
-        /// <param name="challenge"></param>
+        /// <param name="challenge">The challenge for which the reward was claimed.</param>
         protected virtual void OnPersonalChallengeRewardClaimed(Challenge challenge)
         {
         }

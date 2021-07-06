@@ -7,6 +7,7 @@ using UnityEngine.UI;
 
 namespace SCILL
 {
+    
     public class SCILLBattlePassCurrentLevel : MonoBehaviour
     {
         [Tooltip("Set the name of the level, use {level} for the level number")]
