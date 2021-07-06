@@ -9,32 +9,36 @@ using System;
 using UnityEngine;
 using System.Collections;
 
-[ExecuteInEditMode]
-public class SCILLCameraOffset : MonoBehaviour
+namespace SCILL
 {
-	public float xOffset = 0.0F;
-	public float yOffset = 0.0F;
-
-	public void UpdateProjectionMatrix()
+	[ExecuteInEditMode]
+	public class SCILLCameraOffset : MonoBehaviour
 	{
-		Camera cam = GetComponent<Camera>();
-		Matrix4x4 m = Matrix4x4.Perspective(cam.fieldOfView,cam.aspect,cam.nearClipPlane,cam.farClipPlane);
-		
-		//cam.projectionMatrix = m;
-		m[0, 2] = xOffset;
-		m[1, 2] = yOffset;
+		public float xOffset = 0.0F;
+		public float yOffset = 0.0F;
 
-		cam.projectionMatrix = m;
-	}
+		public void UpdateProjectionMatrix()
+		{
+			Camera cam = GetComponent<Camera>();
+			Matrix4x4 m = Matrix4x4.Perspective(cam.fieldOfView, cam.aspect, cam.nearClipPlane, cam.farClipPlane);
 
-	void LateUpdate()
-	{
-		UpdateProjectionMatrix();
-	}
+			//cam.projectionMatrix = m;
+			m[0, 2] = xOffset;
+			m[1, 2] = yOffset;
 
-	private void OnDisable()
-	{
-		Camera cam = GetComponent<Camera>();
-		cam.ResetProjectionMatrix();
+			cam.projectionMatrix = m;
+		}
+
+		void LateUpdate()
+		{
+			UpdateProjectionMatrix();
+		}
+
+		private void OnDisable()
+		{
+			Camera cam = GetComponent<Camera>();
+			cam.ResetProjectionMatrix();
+		}
 	}
 }
+

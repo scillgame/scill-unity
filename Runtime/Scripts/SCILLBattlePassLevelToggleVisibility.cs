@@ -2,79 +2,81 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public enum SCILLBattlePassLevelVisibility
+namespace SCILL
 {
-    Visible,
-    Hidden,
-    DoNothing
-}
-
-public class SCILLBattlePassLevelToggleVisibility : MonoBehaviour
-{
-    public SCILLBattlePassLevelVisibility ifLocked;
-    public SCILLBattlePassLevelVisibility ifUnlocked;
-    public SCILLBattlePassLevelVisibility ifCompleted;
-    public SCILLBattlePassLevelVisibility ifUncompleted;
-
-    [HideInInspector]
-    public BattlePassLevel battlePassLevel;
-
-    private Image _image;
-
-    // Start is called before the first frame update
-    void Start()
+    public enum SCILLBattlePassLevelVisibility
     {
-        var battlePassLevelUI = GetComponentInParent<SCILLBattlePassLevel>();
-        if (battlePassLevelUI)
-        {
-            battlePassLevel = battlePassLevelUI.battlePassLevel;
-        }
-
-        _image = GetComponent<Image>();
+        Visible,
+        Hidden,
+        DoNothing
     }
 
-    void Show(bool show)
+    public class SCILLBattlePassLevelToggleVisibility : MonoBehaviour
     {
-        _image.enabled = show;
-    }
+        public SCILLBattlePassLevelVisibility ifLocked;
+        public SCILLBattlePassLevelVisibility ifUnlocked;
+        public SCILLBattlePassLevelVisibility ifCompleted;
+        public SCILLBattlePassLevelVisibility ifUncompleted;
 
-    // Update is called once per frame
-    void Update()
-    {
-        if (!_image || battlePassLevel == null)
+        [HideInInspector] public BattlePassLevel battlePassLevel;
+
+        private Image _image;
+
+        // Start is called before the first frame update
+        void Start()
         {
-            return;
+            var battlePassLevelUI = GetComponentInParent<SCILLBattlePassLevel>();
+            if (battlePassLevelUI)
+            {
+                battlePassLevel = battlePassLevelUI.battlePassLevel;
+            }
+
+            _image = GetComponent<Image>();
         }
 
-        if (ifLocked != SCILLBattlePassLevelVisibility.DoNothing)
+        void Show(bool show)
         {
-            if (battlePassLevel.activated_at == null)
-            {
-                Show(ifLocked == SCILLBattlePassLevelVisibility.Visible);
-            }
+            _image.enabled = show;
         }
-        
-        if (ifUnlocked != SCILLBattlePassLevelVisibility.DoNothing)
+
+        // Update is called once per frame
+        void Update()
         {
-            if (battlePassLevel.activated_at != null)
+            if (!_image || battlePassLevel == null)
             {
-                Show(ifUnlocked == SCILLBattlePassLevelVisibility.Visible);
+                return;
             }
-        }
-        
-        if (ifCompleted != SCILLBattlePassLevelVisibility.DoNothing)
-        {
-            if (battlePassLevel.level_completed == true)
+
+            if (ifLocked != SCILLBattlePassLevelVisibility.DoNothing)
             {
-                Show(ifCompleted == SCILLBattlePassLevelVisibility.Visible);
+                if (battlePassLevel.activated_at == null)
+                {
+                    Show(ifLocked == SCILLBattlePassLevelVisibility.Visible);
+                }
             }
-        }
-        
-        if (ifUncompleted != SCILLBattlePassLevelVisibility.DoNothing)
-        {
-            if (battlePassLevel.level_completed == false)
+
+            if (ifUnlocked != SCILLBattlePassLevelVisibility.DoNothing)
             {
-                Show(ifUncompleted == SCILLBattlePassLevelVisibility.Visible);
+                if (battlePassLevel.activated_at != null)
+                {
+                    Show(ifUnlocked == SCILLBattlePassLevelVisibility.Visible);
+                }
+            }
+
+            if (ifCompleted != SCILLBattlePassLevelVisibility.DoNothing)
+            {
+                if (battlePassLevel.level_completed == true)
+                {
+                    Show(ifCompleted == SCILLBattlePassLevelVisibility.Visible);
+                }
+            }
+
+            if (ifUncompleted != SCILLBattlePassLevelVisibility.DoNothing)
+            {
+                if (battlePassLevel.level_completed == false)
+                {
+                    Show(ifUncompleted == SCILLBattlePassLevelVisibility.Visible);
+                }
             }
         }
     }

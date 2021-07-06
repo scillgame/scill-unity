@@ -4,66 +4,70 @@ using SCILL.Model;
 using UnityEngine;
 using UnityEngine.UI;
 
-public enum SCILLBattlePassVisibility
+namespace SCILL
 {
-    Visible,
-    Hidden,
-    DoNothing
-}
-
-public class SCILLBattlePassToggleVisibility : MonoBehaviour
-{
-    public SCILLBattlePassVisibility ifLocked;
-    public SCILLBattlePassVisibility ifUnlocked;
-    
-    private BattlePass _battlePass;
-    
-    private Image _image;
-    
-    // Start is called before the first frame update
-    void Start()
+    public enum SCILLBattlePassVisibility
     {
-        _image = GetComponent<Image>();
-    }
-    
-    private void OnEnable()
-    {
-        SCILLBattlePassManager.OnBattlePassUpdatedFromServer += OnBattlePassUpdatedFromServer;
-    }
-    
-    private void OnDisable()
-    {
-        SCILLBattlePassManager.OnBattlePassUpdatedFromServer -= OnBattlePassUpdatedFromServer;
+        Visible,
+        Hidden,
+        DoNothing
     }
 
-    private void OnBattlePassUpdatedFromServer(BattlePass battlePass)
+    public class SCILLBattlePassToggleVisibility : MonoBehaviour
     {
-        _battlePass = battlePass;
-        UpdateUI();
-    }
+        public SCILLBattlePassVisibility ifLocked;
+        public SCILLBattlePassVisibility ifUnlocked;
 
-    // Update is called once per frame
-    void UpdateUI()
-    {
-        if (!_image || _battlePass == null)
+        private BattlePass _battlePass;
+
+        private Image _image;
+
+        // Start is called before the first frame update
+        void Start()
         {
-            return;
+            _image = GetComponent<Image>();
         }
 
-        if (ifLocked != SCILLBattlePassVisibility.DoNothing)
+        private void OnEnable()
         {
-            if (_battlePass.unlocked_at == null)
+            SCILLBattlePassManager.OnBattlePassUpdatedFromServer += OnBattlePassUpdatedFromServer;
+        }
+
+        private void OnDisable()
+        {
+            SCILLBattlePassManager.OnBattlePassUpdatedFromServer -= OnBattlePassUpdatedFromServer;
+        }
+
+        private void OnBattlePassUpdatedFromServer(BattlePass battlePass)
+        {
+            _battlePass = battlePass;
+            UpdateUI();
+        }
+
+        // Update is called once per frame
+        void UpdateUI()
+        {
+            if (!_image || _battlePass == null)
             {
-                _image.enabled = (ifLocked == SCILLBattlePassVisibility.Visible);
+                return;
+            }
+
+            if (ifLocked != SCILLBattlePassVisibility.DoNothing)
+            {
+                if (_battlePass.unlocked_at == null)
+                {
+                    _image.enabled = (ifLocked == SCILLBattlePassVisibility.Visible);
+                }
+            }
+
+            if (ifUnlocked != SCILLBattlePassVisibility.DoNothing)
+            {
+                if (_battlePass.unlocked_at != null)
+                {
+                    _image.enabled = (ifUnlocked == SCILLBattlePassVisibility.Visible);
+                }
             }
         }
-        
-        if (ifUnlocked != SCILLBattlePassVisibility.DoNothing)
-        {
-            if (_battlePass.unlocked_at != null)
-            {
-                _image.enabled = (ifUnlocked == SCILLBattlePassVisibility.Visible);
-            }
-        }
     }
+
 }

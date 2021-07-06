@@ -5,150 +5,156 @@ using SCILL.Model;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SCILLRewardPreview : MonoBehaviour
+namespace SCILL
 {
-    [Header("Required connections")]
-    [Tooltip("Connect to a text field to render the reward")]
-    public Text rewardName;
-    [Tooltip("Connect to a text field to render a description of the reward")]
-    public Text rewardDescription;
-    [Tooltip("Connect to a claim button which should have a Button attached. This item is hidden unless the reward can be claimed and has not been yet claimed")]
-    public GameObject claimButton;
-    
-    [Header("Optional connections")]
-    [Tooltip("Connect to a Reward Photobox which will be used to render a 3D representation of the reward")]
-    public GameObject photoBox;
-    
-    private SCILLReward _scillReward;
-    private GameObject _rewardModel;
-    private BattlePassLevel _selectedBattlePassLevel;
-
-    private void OnEnable()
+    public class SCILLRewardPreview : MonoBehaviour
     {
-        if (SCILLBattlePassManager.Instance)
-        {
-            OnSelectedBattlePassLevelChanged(SCILLBattlePassManager.Instance.SelectedBattlePassLevel);
-        }
-        SCILLBattlePassManager.OnSelectedBattlePassLevelChanged += OnSelectedBattlePassLevelChanged;
-        SCILLBattlePassManager.OnBattlePassLevelRewardClaimed += OnBattlePassLevelRewardClaimed;
-    }
+        [Header("Required connections")] [Tooltip("Connect to a text field to render the reward")]
+        public Text rewardName;
 
-    private void OnDisable()
-    {
-        SCILLBattlePassManager.OnSelectedBattlePassLevelChanged -= OnSelectedBattlePassLevelChanged;
-        SCILLBattlePassManager.OnBattlePassLevelRewardClaimed -= OnBattlePassLevelRewardClaimed;
-    }
+        [Tooltip("Connect to a text field to render a description of the reward")]
+        public Text rewardDescription;
 
-    private void OnSelectedBattlePassLevelChanged(BattlePassLevel selectedBattlePassLevel)
-    {
-        Debug.Log("SELECT BATTLE PASS LEVEL: " + selectedBattlePassLevel?.level_id);
-        _selectedBattlePassLevel = selectedBattlePassLevel;
-        if (selectedBattlePassLevel?.reward_amount != null)
-        {
-            SetRewardId(selectedBattlePassLevel.reward_amount);
-        }
-        else
-        {
-            ToggleUI(false);
-        }
-    }
+        [Tooltip(
+            "Connect to a claim button which should have a Button attached. This item is hidden unless the reward can be claimed and has not been yet claimed")]
+        public GameObject claimButton;
 
-    private void OnBattlePassLevelRewardClaimed(BattlePassLevel level)
-    {
-        if (level.level_id == _selectedBattlePassLevel.level_id)
-        {
-            _selectedBattlePassLevel.reward_claimed = level.reward_claimed;
-        }
-        
-        UpdateScillReward();
-    }
+        [Header("Optional connections")]
+        [Tooltip("Connect to a Reward Photobox which will be used to render a 3D representation of the reward")]
+        public GameObject photoBox;
 
-    private void SetRewardId(string rewardId)
-    {
-        _scillReward = Resources.Load<SCILLReward>(rewardId);
-        if (_scillReward)
-        {
-            UpdateScillReward();
-            ToggleUI(true);
-        }
-        else
-        {
-            // No reward found
-            ToggleUI(false);
-        }
-    }
+        private SCILLReward _scillReward;
+        private GameObject _rewardModel;
+        private BattlePassLevel _selectedBattlePassLevel;
 
-    private void UpdateScillReward()
-    {
-        if (_rewardModel)
+        private void OnEnable()
         {
-            DestroyImmediate(_rewardModel);
-        }
-
-        if (_scillReward.prefab)
-        {
-            _rewardModel = Instantiate(_scillReward.prefab, photoBox.transform);
-            //_rewardModel.transform.localPosition = Vector3.zero;
-        }
-
-        if (rewardDescription)
-        {
-            rewardDescription.text = _scillReward.description;
-        }
-
-        if (rewardName)
-        {
-            rewardName.text = _scillReward.name;
-        }
-
-        if (claimButton)
-        {
-            if (_selectedBattlePassLevel.activated_at == null || _selectedBattlePassLevel.level_completed == false)
+            if (SCILLBattlePassManager.Instance)
             {
-                claimButton.SetActive(false);
+                OnSelectedBattlePassLevelChanged(SCILLBattlePassManager.Instance.SelectedBattlePassLevel);
+            }
+
+            SCILLBattlePassManager.OnSelectedBattlePassLevelChanged += OnSelectedBattlePassLevelChanged;
+            SCILLBattlePassManager.OnBattlePassLevelRewardClaimed += OnBattlePassLevelRewardClaimed;
+        }
+
+        private void OnDisable()
+        {
+            SCILLBattlePassManager.OnSelectedBattlePassLevelChanged -= OnSelectedBattlePassLevelChanged;
+            SCILLBattlePassManager.OnBattlePassLevelRewardClaimed -= OnBattlePassLevelRewardClaimed;
+        }
+
+        private void OnSelectedBattlePassLevelChanged(BattlePassLevel selectedBattlePassLevel)
+        {
+            Debug.Log("SELECT BATTLE PASS LEVEL: " + selectedBattlePassLevel?.level_id);
+            _selectedBattlePassLevel = selectedBattlePassLevel;
+            if (selectedBattlePassLevel?.reward_amount != null)
+            {
+                SetRewardId(selectedBattlePassLevel.reward_amount);
             }
             else
             {
-                if (_selectedBattlePassLevel.reward_claimed == false)
-                {
-                    claimButton.SetActive(true);
-                }
-                else
+                ToggleUI(false);
+            }
+        }
+
+        private void OnBattlePassLevelRewardClaimed(BattlePassLevel level)
+        {
+            if (level.level_id == _selectedBattlePassLevel.level_id)
+            {
+                _selectedBattlePassLevel.reward_claimed = level.reward_claimed;
+            }
+
+            UpdateScillReward();
+        }
+
+        private void SetRewardId(string rewardId)
+        {
+            _scillReward = Resources.Load<SCILLReward>(rewardId);
+            if (_scillReward)
+            {
+                UpdateScillReward();
+                ToggleUI(true);
+            }
+            else
+            {
+                // No reward found
+                ToggleUI(false);
+            }
+        }
+
+        private void UpdateScillReward()
+        {
+            if (_rewardModel)
+            {
+                DestroyImmediate(_rewardModel);
+            }
+
+            if (_scillReward.prefab)
+            {
+                _rewardModel = Instantiate(_scillReward.prefab, photoBox.transform);
+                //_rewardModel.transform.localPosition = Vector3.zero;
+            }
+
+            if (rewardDescription)
+            {
+                rewardDescription.text = _scillReward.description;
+            }
+
+            if (rewardName)
+            {
+                rewardName.text = _scillReward.name;
+            }
+
+            if (claimButton)
+            {
+                if (_selectedBattlePassLevel.activated_at == null || _selectedBattlePassLevel.level_completed == false)
                 {
                     claimButton.SetActive(false);
                 }
+                else
+                {
+                    if (_selectedBattlePassLevel.reward_claimed == false)
+                    {
+                        claimButton.SetActive(true);
+                    }
+                    else
+                    {
+                        claimButton.SetActive(false);
+                    }
+                }
             }
         }
-    }
 
-    private void ToggleUI(bool show)
-    {
-        transform.GetChild(0).gameObject.SetActive(show);
-    }
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        ToggleUI(false);
-
-        if (claimButton)
+        private void ToggleUI(bool show)
         {
-            Button button = claimButton.GetComponent<Button>();
-            if (button && button.onClick.GetPersistentEventCount() <= 0)
+            transform.GetChild(0).gameObject.SetActive(show);
+        }
+
+        // Start is called before the first frame update
+        void Start()
+        {
+            ToggleUI(false);
+
+            if (claimButton)
             {
-                 button.onClick.AddListener(OnClaimButtonPassRewardButtonClicked);
+                Button button = claimButton.GetComponent<Button>();
+                if (button && button.onClick.GetPersistentEventCount() <= 0)
+                {
+                    button.onClick.AddListener(OnClaimButtonPassRewardButtonClicked);
+                }
             }
+        }
+
+        // Update is called once per frame
+        void Update()
+        {
+        }
+
+        public void OnClaimButtonPassRewardButtonClicked()
+        {
+            SCILLBattlePassManager.Instance.ClaimBattlePassLevelReward(_selectedBattlePassLevel);
         }
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-    public void OnClaimButtonPassRewardButtonClicked()
-    {
-        SCILLBattlePassManager.Instance.ClaimBattlePassLevelReward(_selectedBattlePassLevel);
-    }
 }

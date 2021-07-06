@@ -5,77 +5,66 @@ using UnityEngine;
 using SCILL.Model;
 using UnityEngine.UI;
 
-public class SCILLCategoryItem : MonoBehaviour
+namespace SCILL
 {
-    [Tooltip("The prefab used for instantiating SCILLChallengeItem instances. If you leave this blank, the challengePrefab setting of the parent SCILLPersonalChallenges will be used instead.")]
-    public SCILLChallengeItem challengePrefab;
-    [Tooltip("Categories can be collapsed. With this setting you can set the default state of this category. Per default it will be expanded.")]
-    public bool expanded = true;
-    [Tooltip("A UnityEngine.UI.Text component that will be used to set the categories name")]
-    public Text categoryName;
-    [Tooltip("Challenges instantiated will be added as children into this transform if set, otherwise it will be directly added as child to this game object.")]
-    public Transform challengesContainer;
-    
-    private Dictionary<string, GameObject> _challengeObjects = new Dictionary<string, GameObject>();
-    private ChallengeCategory _category;
-
-    private void Awake()
+    public class SCILLCategoryItem : MonoBehaviour
     {
+        [Tooltip(
+            "The prefab used for instantiating SCILLChallengeItem instances. If you leave this blank, the challengePrefab setting of the parent SCILLPersonalChallenges will be used instead.")]
+        public SCILLChallengeItem challengePrefab;
 
-    }
+        [Tooltip(
+            "Categories can be collapsed. With this setting you can set the default state of this category. Per default it will be expanded.")]
+        public bool expanded = true;
 
-    [HideInInspector]
-    public ChallengeCategory Category
-    {
-        get => _category;
-        set
+        [Tooltip("A UnityEngine.UI.Text component that will be used to set the categories name")]
+        public Text categoryName;
+
+        [Tooltip(
+            "Challenges instantiated will be added as children into this transform if set, otherwise it will be directly added as child to this game object.")]
+        public Transform challengesContainer;
+
+        private Dictionary<string, GameObject> _challengeObjects = new Dictionary<string, GameObject>();
+        private ChallengeCategory _category;
+
+        private void Awake()
         {
-            _category = value;
         }
-    }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        if (challengePrefab == null)
+        [HideInInspector]
+        public ChallengeCategory Category
         {
-            SCILLPersonalChallenges personalChallenges = GetComponentInParent<SCILLPersonalChallenges>();
-            if (personalChallenges)
+            get => _category;
+            set { _category = value; }
+        }
+
+        // Start is called before the first frame update
+        void Start()
+        {
+            if (challengePrefab == null)
             {
-                challengePrefab = personalChallenges.challengePrefab;
-            }            
+                SCILLPersonalChallenges personalChallenges = GetComponentInParent<SCILLPersonalChallenges>();
+                if (personalChallenges)
+                {
+                    challengePrefab = personalChallenges.challengePrefab;
+                }
+            }
+
+            UpdateChallengeList();
         }
-        
-        UpdateChallengeList();           
-    }
 
-    public void OnToggleExpanded()
-    {
-        expanded = !expanded;
-
-        var challengeItems = GetComponentsInChildren<SCILLChallengeItem>(true);
-        foreach (var challengeItem in challengeItems)
+        public void OnToggleExpanded()
         {
-            challengeItem.gameObject.SetActive(expanded);
-        }
-    }
+            expanded = !expanded;
 
-    public void UpdateChallenge(Challenge challenge)
-    {
-        GameObject challengeGO = null;
-        if (_challengeObjects.TryGetValue(challenge.challenge_id, out challengeGO))
-        {
-            var challengeItem = challengeGO.GetComponent<SCILLChallengeItem>();
-            if (challengeItem)
+            var challengeItems = GetComponentsInChildren<SCILLChallengeItem>(true);
+            foreach (var challengeItem in challengeItems)
             {
-                challengeItem.challenge = challenge;
+                challengeItem.gameObject.SetActive(expanded);
             }
         }
-    }
 
-    public void UpdateChallengeList()
-    {
-        foreach (var challenge in _category.challenges)
+        public void UpdateChallenge(Challenge challenge)
         {
             GameObject challengeGO = null;
             if (_challengeObjects.TryGetValue(challenge.challenge_id, out challengeGO))
@@ -86,28 +75,47 @@ public class SCILLCategoryItem : MonoBehaviour
                     challengeItem.challenge = challenge;
                 }
             }
-            else
-            {
-                challengeGO = Instantiate(challengePrefab.gameObject, challengesContainer ? challengesContainer : transform, false);
-                var challengeItem = challengeGO.GetComponent<SCILLChallengeItem>();
-                if (challengeItem)
-                {
-                    challengeItem.challenge = challenge;
-                }
+        }
 
-                _challengeObjects.Add(challenge.challenge_id, challengeGO);
+        public void UpdateChallengeList()
+        {
+            foreach (var challenge in _category.challenges)
+            {
+                GameObject challengeGO = null;
+                if (_challengeObjects.TryGetValue(challenge.challenge_id, out challengeGO))
+                {
+                    var challengeItem = challengeGO.GetComponent<SCILLChallengeItem>();
+                    if (challengeItem)
+                    {
+                        challengeItem.challenge = challenge;
+                    }
+                }
+                else
+                {
+                    challengeGO = Instantiate(challengePrefab.gameObject,
+                        challengesContainer ? challengesContainer : transform, false);
+                    var challengeItem = challengeGO.GetComponent<SCILLChallengeItem>();
+                    if (challengeItem)
+                    {
+                        challengeItem.challenge = challenge;
+                    }
+
+                    _challengeObjects.Add(challenge.challenge_id, challengeGO);
+                }
             }
+        }
+
+        // Update is called once per frame
+        void Update()
+        {
+            if (_category == null)
+            {
+                return;
+            }
+
+            categoryName.text = _category.category_name;
         }
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        if (_category == null)
-        {
-            return;
-        } 
-        
-        categoryName.text = _category.category_name;
-    }
 }
+
