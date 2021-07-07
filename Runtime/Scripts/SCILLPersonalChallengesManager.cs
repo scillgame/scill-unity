@@ -18,7 +18,10 @@ namespace SCILL
     /// <summary>
     ///     <para>
     ///         This class is designed as a “Singleton” and should be attached to the same GameObject that you have
-    ///         <see cref="SCILLManager" /> attached. This class gives access to the Personal Challenge Categories and
+    ///         <see cref="SCILLManager" /> attached.
+    ///     </para>
+    ///     <para>
+    ///         This class gives access to the Personal Challenge Categories and
     ///         Challenges and
     ///         provides events you can listen to in your own classes, to receive updates whenever Personal Challenge data
     ///         changes.
@@ -30,6 +33,20 @@ namespace SCILL
 
         public delegate void PersonalChallengeUpdatedFromServerAction(Challenge challenge,
             SCILLPersonalChallengeModificationType modificationType);
+        
+        /// <summary>
+        ///     This event is called whenever an update of the personal challenges list is requested and the response was received.
+        ///     This will happen on startup and when manually requesting an update using the
+        ///     <see cref="UpdatePersonalChallengesList" /> method. It will supply all of the users challenge categories as
+        ///     <see cref="ChallengeCategory" /> objects.
+        /// </summary>
+        public static event PersonalChallengesUpdatedFromServerAction OnPersonalChallengesUpdatedFromServer;
+
+        /// <summary>
+        ///     This event is called whenever a personal challenge is changed, e.g. when a challenge is unlocked, activated,
+        ///     claimed, canceled or the progress was updated.
+        /// </summary>
+        public static event PersonalChallengeUpdatedFromServerAction OnPersonalChallengeUpdatedFromServer;
 
         /// <summary>
         ///     As this class is designed as a singleton you can use this getter to get a reference to the instance. It allows you
@@ -65,20 +82,6 @@ namespace SCILL
             if (SCILLManager.Instance)
                 SCILLManager.Instance.StopChallengeUpdateNotifications(OnChallengeWebhookMessage);
         }
-
-        /// <summary>
-        ///     This event is called whenever an update of the personal challenges list is requested and the response was received.
-        ///     This will happen on startup and when manually requesting an update using the
-        ///     <see cref="UpdatePersonalChallengesList" /> method. It will supply all of the users challenge categories as
-        ///     <see cref="ChallengeCategory" /> objects.
-        /// </summary>
-        public static event PersonalChallengesUpdatedFromServerAction OnPersonalChallengesUpdatedFromServer;
-
-        /// <summary>
-        ///     This event is called whenever a personal challenge is changed, e.g. when a challenge is unlocked, activated,
-        ///     claimed, canceled or the progress was updated.
-        /// </summary>
-        public static event PersonalChallengeUpdatedFromServerAction OnPersonalChallengeUpdatedFromServer;
 
         private void OnSCILLManagerReady()
         {

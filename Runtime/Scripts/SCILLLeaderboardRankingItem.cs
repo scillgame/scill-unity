@@ -1,22 +1,57 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Xml;
-using SCILL.Model;
-using UnityEditor;
+﻿using SCILL.Model;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace SCILL
 {
+    /// <summary>
+    ///     This class implements user interface for a leaderboard ranking (i.e. rank position in a leaderboard table). It gets
+    ///     a <see cref="LeaderboardRanking" /> via its <c>ranking</c> property and updates text and images provided in
+    ///     properties.
+    /// </summary>
     public class SCILLLeaderboardRankingItem : MonoBehaviour
     {
+        /// <summary>
+        ///     Connect a <c>UnityEngine.UI.Text</c> component which will be set with the username of the user. The username must
+        ///     be retrieved using the <see cref="SCILLManager.SetUserInfoAsync" /> beforehand. If no user info is available the
+        ///     string <c>Guest</c> will be used.
+        /// </summary>
         public Text username;
+
+        /// <summary>
+        ///     The rank of the user will be set into this <c>UnityEngine.UI.Text</c> component as text with the
+        ///     <see cref="rankSuffix" /> suffix, e.g. <c>1.</c> or <c>10.</c>.
+        /// </summary>
         public Text rank;
+
+        /// <summary>
+        ///     The suffix to use for displaying the users rank. Default is ".", displaying a rank as <c>1.</c> or <c>10.</c>.
+        /// </summary>
+        public string rankSuffix = ".";
+
+        /// <summary>
+        ///     The score of the user will be set into this <c>UnityEngine.UI.Text</c> component as text. You can use the
+        ///     <c>numberOfDecimals</c> setting in the <see cref="SCILLLeaderboard" /> item to format the score into a decimal
+        ///     value.
+        /// </summary>
         public Text score;
+
+        /// <summary>
+        ///     The <c>avatarImage</c> of the additional user info will be used to load a sprite from the <c>Resources</c> folder.
+        /// </summary>
+        /// <remarks>
+        ///     Please note: The sprite is loaded at runtime and must be within a <c>Resources</c> folder in your Asset database so
+        ///     that Unity exposes the asset for dynamic loading.
+        /// </remarks>
         public Image image;
+
+        private int _numberOfDecimals;
 
         private LeaderboardRanking _ranking;
 
+        /// <summary>
+        ///     The leaderboard ranking data for this component. Setting this value will automatically update the UI.
+        /// </summary>
         public LeaderboardRanking ranking
         {
             get => _ranking;
@@ -27,8 +62,13 @@ namespace SCILL
             }
         }
 
-        private int _numberOfDecimals = 0;
-
+        /// <summary>
+        ///     The number of decimals after which the decimal delimiter ("." in this case) is inserted into the score. Setting
+        ///     this value will automatically update the UI.
+        /// </summary>
+        /// <remarks>
+        ///     See <see cref="SCILLLeaderboard.numberOfDecimals" /> for an in-depth explanation.
+        /// </remarks>
         public int numberOfDecimals
         {
             get => _numberOfDecimals;
@@ -39,55 +79,33 @@ namespace SCILL
             }
         }
 
-        // Start is called before the first frame update
-        void Start()
-        {
-        }
 
-        // Update is called once per frame
-        void UpdateUI()
+        private void UpdateUI()
         {
-            if (ranking == null)
-            {
-                return;
-            }
+            if (ranking == null) return;
 
             if (username)
             {
                 if (ranking.additional_info != null && !string.IsNullOrEmpty(ranking.additional_info.username))
-                {
                     username.text = ranking.additional_info.username;
-                }
                 else
-                {
                     username.text = "Guest";
-                }
             }
 
             if (image)
-            {
                 if (ranking.additional_info != null && !string.IsNullOrEmpty(ranking.additional_info.avatarImage))
                 {
-                    Sprite sprite = Resources.Load<Sprite>("Avatars/" + ranking.additional_info.avatarImage);
-                    if (sprite)
-                    {
-                        image.sprite = sprite;
-                    }
+                    var sprite = Resources.Load<Sprite>("Avatars/" + ranking.additional_info.avatarImage);
+                    if (sprite) image.sprite = sprite;
                 }
-            }
 
-            if (rank)
-            {
-                rank.text = ranking.rank.ToString() + ".";
-            }
+            if (rank) rank.text = ranking.rank + rankSuffix;
 
             if (score)
             {
                 score.text = ranking.score.ToString();
                 if (numberOfDecimals > 0 && score.text.Length > numberOfDecimals)
-                {
                     score.text = score.text.Insert(score.text.Length - numberOfDecimals, ".");
-                }
             }
         }
     }
