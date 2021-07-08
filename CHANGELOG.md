@@ -4,6 +4,64 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2021-07-08
+
+This release adds support for WebGL builds to the SCILL Unity SDK.
+
+### Changed
+* Reworked API to use UnityWebRequest, adding support for WebGL
+* Changed API from using async/await to promise/callback based requests
+* Removed synchronous API calls
+* Moved the Start and Stop Update Notification methods (i.e. `StartChallengeUpdateNotifications`, `StartBattlePassUpdateNotifications` and `StartLeaderboardUpdateNotifications`) from `SCILLClient` to `SCILLManager`
+* SCILL API has been updated to the latest version
+* Removed `SCILLThreadSafety` class
+
+
+### Added
+* Realtime Leaderboard Updates
+* SCILL Notifications, allowing simple notifications to be displayed on the screen
+* `SCILLPersonalChallengesManager`, giving centralized access to personal challenge categories, challenges and update notifications
+* Added namespaces
+
+### Fixed
+* Issues with IL2CPP managed code stripping
+
+### How to upgrade
+
+ This release adds breaking changes to projects using a 1.x.y version of the SDK. In order to upgrade your project to this version, you will need to do the following:
+* Switch direct API requests from using to async to using callbacks. Example: 
+
+Old v1.x.y:
+``` csharp 
+try{
+   var categories = await SCILLManager.Instance.SCILLClient.GetAllPersonalChallengesAsync();
+   UpdateCategories(categories);
+}
+catch(APIException e)
+{
+   Handle(e);
+}
+```
+New v2.0.0:
+``` csharp 
+SCILLManager.Instance.SCILLClient.GetAllPersonalChallengesAsync(
+   categories =>
+   {
+      UpdateCategories(categories);
+   },
+   e =>
+   {
+      if(e is APIException apiException){
+         Handle(apiException);
+      }
+   });
+```
+
+* Remove all synchronous API calls and replace them with async calls
+* Ensure that all "Start Update Notifications" calls are directly called in the `SCILLManager.Instance` instead of `SCILLManager.Instance.SCILLClient`, e.g. use `SCILLManager.Instance.StartChallengeUpdateNotifications(OnChallengeWebhookMessage);` instead of `SCILLManager.Instance.SCILLClient.StartChallengeUpdateNotifications(OnChallengeWebhookMessage);`
+* Ensure that the SCILL namespace is used
+
+
 ## [1.4.0] - 2021-03-26
 
 This release primary focus has been on adding leaderboards to SCILL Unity SDK. We added ready-to-use leaderboard prefabs. More Info on the leaderboards can be found in our [developer documentation](https://developers.scillgame.com/sdks/unity/classes/scillleaderboard.html)
