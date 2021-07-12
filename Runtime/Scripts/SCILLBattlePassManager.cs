@@ -401,7 +401,7 @@ namespace SCILL
                 BattlePassLevels = levels;
 
                 var numBattlePassLevels = null == BattlePassLevels ? 0 : BattlePassLevels.Count;
-                Debug.Log($"Received BP Update from server with {numBattlePassLevels} entries");
+                // Debug.Log($"Received BP Update from server with {numBattlePassLevels} entries");
 
                 // If we have not selected a battle pass level, let's pick the current one
                 if (_selectedBattlePassLevelIndex == 0) SelectedBattlePassLevelIndex = GetCurrentBattlePassLevelIndex();

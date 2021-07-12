@@ -99,7 +99,7 @@ namespace ScillHelpers
 
         private void MqttWSOnOnOpen()
         {
-            Debug.Log("TCP connection opened");
+            // Debug.Log("TCP connection opened");
             ScillMqttPacketConnect connectPacket = new ScillMqttPacketConnect
             {
                 KeepAlive = 300, WillRetain = false, WillQoS = 0, CleanSession = true
