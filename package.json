@@ -25,5 +25,8 @@
       "description": "Fully working battle pass and challenges UI in various designs with example app",
       "path": "Samples/Sample 1"
     }
-  ]
+  ],
+  "dependencies": {
+    "jillejr.newtonsoft.json-for-unity": "13.0.102"
+  }
 }
