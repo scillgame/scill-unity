@@ -21,12 +21,16 @@ namespace SCILL
 
 
     /// <summary>
-    ///     This class is designed as a “Singleton” and uses <c>DontDestroyOnLoad</c>  to make sure, that the class instance persists
+    ///     This class is designed as a “Singleton” and uses <c>DontDestroyOnLoad</c>  to make sure, that the class instance
+    ///     persists
     ///     even after scene changes. It provides access to the SCILL SDK APIs and provides some convenience functions to make
     ///     it easier to work with SCILL from your own code.
-    ///     Create an empty <c>GameObject</c> in your Scene and add this script. Then set your API key, AppId and the language. If
-    ///     your app supports multiple languages, you can use the <see cref="SetLanguage"/> method to set the language via Script.
-    ///     You can also choose an environment: You should leave that in <c>Production</c>. Sometimes, when working closely with our
+    ///     Create an empty <c>GameObject</c> in your Scene and add this script. Then set your API key, AppId and the language.
+    ///     If
+    ///     your app supports multiple languages, you can use the <see cref="SetLanguage" /> method to set the language via
+    ///     Script.
+    ///     You can also choose an environment: You should leave that in <c>Production</c>. Sometimes, when working closely
+    ///     with our
     ///     development team we might ask you to choose a different value but usually <c>Production</c> is the correct setting.
     /// </summary>
     /// <remarks>
@@ -167,26 +171,27 @@ namespace SCILL
                 Instance = this;
 
                 _scillBackend = new SCILLBackend(APIKey, environment);
-                var accessTokenPromise = GenerateAccessToken(GetUserId());
-                accessTokenPromise.Then(accessToken =>
-                {
-                    AccessToken = accessToken;
-                    Debug.Log(AccessToken);
+                GenerateAccessToken(
+                    accessToken =>
+                    {
+                        AccessToken = accessToken;
 
+                        SCILLClient = new SCILLClient(AccessToken, AppId, language.ToString(), environment);
+                        _mqtt = new ScillMqtt();
+                        ScillMqtt.OnMqttConnectionEstablished += OnMqttConnectionEstablished;
 
-                    SCILLClient = new SCILLClient(AccessToken, AppId, language.ToString(), environment);
-                    _mqtt = new ScillMqtt();
-                    ScillMqtt.OnMqttConnectionEstablished += OnMqttConnectionEstablished;
+                        OnSCILLManagerReady?.Invoke();
 
-                    OnSCILLManagerReady?.Invoke();
+                        StartCoroutine(PingRoutine());
+                    },
+                    e =>
+                    {
+                        SCILLNotificationManager.Instance?.AddNotification(SCILLNotificationType.Error,
+                            "Failed to generate access token");
+                        Debug.LogError(e.Message);
+                    },
+                    GetUserId());
 
-                    StartCoroutine(PingRoutine());
-                }).Catch(e =>
-                {
-                    SCILLNotificationManager.Instance?.AddNotification(SCILLNotificationType.Error,
-                        "Failed to generate access token");
-                    Debug.LogError(e.Message);
-                });
 
                 DontDestroyOnLoad(gameObject);
             }
@@ -252,21 +257,22 @@ namespace SCILL
         /// <param name="userId">The userId for which the access token should be generated.</param>
         public virtual void GenerateAccessToken(Action<string> resolve, Action<Exception> reject, string userId)
         {
+            // Override this function and generate an access token in the backend!
             GenerateAccessToken(userId).Then(resolve).Catch(reject);
         }
 
         /// <summary>
-        ///     This class uses the <c>SCILLBackend</c>  class to call the <c>GenerateAccessToken</c>  function to directly call
+        ///     This uses the <c>SCILLBackend</c>  class to call the <c>GenerateAccessToken</c>  function to directly call
         ///     SCILL backend with
-        ///     the API key provided in the inspector. This is not recommend in production and you should override this function to
-        ///     call a backend function you control to hide the API key from the user.
+        ///     the API key provided in the inspector. This is not recommend in production. You should override the
+        ///     <see cref="GenerateAccessToken(System.Action{string},System.Action{System.Exception},string)" /> function to call a
+        ///     backend function you control to hide the API key from the user.
         /// </summary>
         /// <param name="userId">The userId for which the access token should be generated.</param>
-        /// <returns>Promise of Access Token.</returns>
+        /// <returns>Promise of access token, given as string</returns>
         public virtual IPromise<string> GenerateAccessToken(string userId)
         {
             // Override this function and generate an access token in the backend!
-            _scillBackend = new SCILLBackend(APIKey, environment);
             return _scillBackend.GetAccessTokenAsync(userId);
         }
 
@@ -361,7 +367,20 @@ namespace SCILL
         {
         }
 
-#region APIWrappers
+#if UNITY_EDITOR
+        [ContextMenu("Open SCILL Playground")]
+        public void OpenPlayground()
+        {
+            var url = "https://playground.scillgame.com?appId=" + UnityWebRequest.EscapeURL(AppId) + "&apiKey=" +
+                      UnityWebRequest.EscapeURL(APIKey) +
+                      "&environment=" + UnityWebRequest.EscapeURL(environment.ToString().ToLower()) + "&userId=" +
+                      UnityWebRequest.EscapeURL(UserId);
+            Help.BrowseURL(url);
+        }
+#endif
+
+        #region APIWrappers
+
         /// <summary>
         ///     Sends an event using <c>EventsApi.SendEvent</c>  method. See
         ///     <see cref="SendEventAsync(string,string,string,SCILL.Model.EventMetaData)" /> for further information.
@@ -554,19 +573,8 @@ namespace SCILL
         {
             return LeaderboardsApi.GetLeaderboardRankingAsync("user", GetUserId(), leaderboardId);
         }
-#endregion
 
-#if UNITY_EDITOR
-        [ContextMenu("Open SCILL Playground")]
-        public void OpenPlayground()
-        {
-            var url = "https://playground.scillgame.com?appId=" + UnityWebRequest.EscapeURL(AppId) + "&apiKey=" +
-                      UnityWebRequest.EscapeURL(APIKey) +
-                      "&environment=" + UnityWebRequest.EscapeURL(environment.ToString().ToLower()) + "&userId=" +
-                      UnityWebRequest.EscapeURL(UserId);
-            Help.BrowseURL(url);
-        }
-#endif
+        #endregion
 
         #region Realtime Updates
 

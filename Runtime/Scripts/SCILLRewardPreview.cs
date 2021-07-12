@@ -106,7 +106,7 @@ namespace SCILL
 
         private void OnSelectedBattlePassLevelChanged(BattlePassLevel selectedBattlePassLevel)
         {
-            Debug.Log("SELECT BATTLE PASS LEVEL: " + selectedBattlePassLevel?.level_id);
+            // Debug.Log("SELECT BATTLE PASS LEVEL: " + selectedBattlePassLevel?.level_id);
             _selectedBattlePassLevel = selectedBattlePassLevel;
             if (selectedBattlePassLevel?.reward_amount != null)
                 SetRewardId(selectedBattlePassLevel.reward_amount);

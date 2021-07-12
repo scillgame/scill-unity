@@ -308,17 +308,22 @@ namespace SCILL
         public virtual void OnBattlePassUnlockButtonPressed()
         {
             var purchaseInfo = new BattlePassUnlockPayload(0, "EUR");
-            SCILLManager.Instance.SCILLClient.UnlockBattlePassAsync(
-                unlockInfo =>
-                {
-                    if (unlockInfo != null)
+
+            if (null != battlePass)
+            {
+                SCILLManager.Instance.SCILLClient.UnlockBattlePassAsync(
+                    unlockInfo =>
                     {
-                        battlePass.unlocked_at = unlockInfo.purchased_at;
-                        OnBattlePassUnlocked?.Invoke(battlePass);
-                        UpdateUI();
-                    }
-                }, null,
-                battlePass.battle_pass_id, purchaseInfo);
+                        if (unlockInfo != null)
+                        {
+                            battlePass.unlocked_at = unlockInfo.purchased_at;
+                            OnBattlePassUnlocked?.Invoke(battlePass);
+                            UpdateUI();
+                        }
+                    }, null,
+                    battlePass.battle_pass_id, purchaseInfo);
+            }
+            
         }
     }
 }
