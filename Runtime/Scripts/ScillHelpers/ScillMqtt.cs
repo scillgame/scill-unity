@@ -147,51 +147,76 @@ namespace ScillHelpers
             ScillMqttPacketPublish publishPacket = (ScillMqttPacketPublish) packet;
             if (callbacksPersonalChallengeChanged.ContainsKey(publishPacket.TopicName))
             {
-                ChallengeWebhookPayload payload =
-                    JsonConvert.DeserializeObject<ChallengeWebhookPayload>(publishPacket.Payload);
+                HandleChallengeUpdate(publishPacket);
+            }
+            else if (callbacksBattlePassChanged.ContainsKey(publishPacket.TopicName))
+            {
+                HandleBattlePassUpdate(publishPacket);
+            }else if (callbacksLeaderboardChanged.ContainsKey(publishPacket.TopicName))
+            {
+                HandleLeaderboardUpdate(publishPacket);
+            }
+        }
 
-                var callback = callbacksPersonalChallengeChanged[publishPacket.TopicName];
+        private void HandleLeaderboardUpdate(ScillMqttPacketPublish publishPacket)
+        {
+            LeaderboardUpdatePayload payload =
+                JsonConvert.DeserializeObject<LeaderboardUpdatePayload>(publishPacket.Payload);
+
+            var callback = callbacksLeaderboardChanged[publishPacket.TopicName];
+            if (null != callback)
+            {
+                callback.Invoke(payload);
+            }
+        }
+
+        private void HandleBattlePassUpdate(ScillMqttPacketPublish publishPacket)
+        {
+            var jObject = (JObject) JsonConvert.DeserializeObject(publishPacket.Payload);
+            if (jObject != null)
+            {
+                string webhookType = jObject["webhook_type"].Value<string>();
+                // Debug.Log($"Webhooktype: {webhookType}");
+
+                BattlePassChallengeChangedPayload payload =
+                    JsonConvert.DeserializeObject<BattlePassChallengeChangedPayload>(publishPacket.Payload);
+                BattlePassChangedNotificationHandler callback =
+                    callbacksBattlePassChanged[publishPacket.TopicName];
                 if (null != callback)
                 {
                     callback.Invoke(payload);
                 }
+
+                // TODO: deserialize the payloads correctly according to webhook type
+                // switch (webhookType)
+                // {
+                //     case "battlepass-challenge-changed":
+                //         BattlePassChallengeChangedPayload payload =
+                //             JsonConvert.DeserializeObject<BattlePassChallengeChangedPayload>(publishPacket.Payload);
+                //         BattlePassChangedNotificationHandler callback =
+                //             callbacksBattlePassChanged[publishPacket.TopicName];
+                //         if (null != callback)
+                //         {
+                //             callback.Invoke(payload);
+                //         }
+                //         break;
+                //     case "battlepass-level-reward-claimed":
+                //         break;
+                //     case "battlepass-expired":
+                //         break;
+                // }
             }
-            else if (callbacksBattlePassChanged.ContainsKey(publishPacket.TopicName))
+        }
+
+        private void HandleChallengeUpdate(ScillMqttPacketPublish publishPacket)
+        {
+            ChallengeWebhookPayload payload =
+                JsonConvert.DeserializeObject<ChallengeWebhookPayload>(publishPacket.Payload);
+
+            var callback = callbacksPersonalChallengeChanged[publishPacket.TopicName];
+            if (null != callback)
             {
-                var jObject = (JObject) JsonConvert.DeserializeObject(publishPacket.Payload);
-                if (jObject != null)
-                {
-                    string webhookType = jObject["webhook_type"].Value<string>();
-                    // Debug.Log($"Webhooktype: {webhookType}");
-
-                    BattlePassChallengeChangedPayload payload =
-                        JsonConvert.DeserializeObject<BattlePassChallengeChangedPayload>(publishPacket.Payload);
-                    BattlePassChangedNotificationHandler callback =
-                        callbacksBattlePassChanged[publishPacket.TopicName];
-                    if (null != callback)
-                    {
-                        callback.Invoke(payload);
-                    }
-
-                    // TODO: deserialize the payloads correctly according to webhook type
-                    // switch (webhookType)
-                    // {
-                    //     case "battlepass-challenge-changed":
-                    //         BattlePassChallengeChangedPayload payload =
-                    //             JsonConvert.DeserializeObject<BattlePassChallengeChangedPayload>(publishPacket.Payload);
-                    //         BattlePassChangedNotificationHandler callback =
-                    //             callbacksBattlePassChanged[publishPacket.TopicName];
-                    //         if (null != callback)
-                    //         {
-                    //             callback.Invoke(payload);
-                    //         }
-                    //         break;
-                    //     case "battlepass-level-reward-claimed":
-                    //         break;
-                    //     case "battlepass-expired":
-                    //         break;
-                    // }
-                }
+                callback.Invoke(payload);
             }
         }
 

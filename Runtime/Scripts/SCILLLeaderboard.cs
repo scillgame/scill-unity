@@ -265,6 +265,7 @@ namespace SCILL
             if (payload.leaderboard_data.leaderboard_id != leaderboardId) return;
 
             PollLeaderboard();
+            UpdateUsersLeaderboardRanking();
 
             if (payload.member_data.member_type == "user" &&
                 payload.member_data.member_id == SCILLManager.Instance.GetUserId())
