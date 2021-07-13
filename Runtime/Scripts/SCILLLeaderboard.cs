@@ -244,7 +244,7 @@ namespace SCILL
         /// </summary>
         public static event UsersLeaderboardRankingChangedAction OnUsersLeaderboardRankingChanged;
 
-        private void OnScillReady()
+        protected virtual void OnScillReady()
         {
             InitLeaderboardData();
             UpdateLeaderboard();
@@ -259,24 +259,25 @@ namespace SCILL
         }
 
 
-        private void OnLeaderboardUpdated(LeaderboardUpdatePayload payload)
+        protected virtual void OnLeaderboardUpdated(LeaderboardUpdatePayload payload)
         {
             // Make sure this this leaderboard has been updated
             if (payload.leaderboard_data.leaderboard_id != leaderboardId) return;
 
             PollLeaderboard();
-            UpdateUsersLeaderboardRanking();
+            // RequestUsersHeaderRankingDisplayUpdate();
 
             if (payload.member_data.member_type == "user" &&
                 payload.member_data.member_id == SCILLManager.Instance.GetUserId())
                 OnUsersLeaderboardRankingChanged?.Invoke(payload);
         }
 
-        private void PollLeaderboard()
+        protected virtual void PollLeaderboard()
         {
             // Don't poll while we are loading new content
             if (IsLoading) return;
 
+            IsLoading = true;
             // Reload all data currently visible
             var leaderboardPromise =
                 SCILLManager.Instance.SCILLClient.GetLeaderboardAsync(leaderboardId, 1, pageSize * CurrentPage);
@@ -288,17 +289,21 @@ namespace SCILL
                     : leaderboard.grouped_by_teams;
                 ClearRankings();
                 AddLeaderItems(rankings);
+                IsLoading = false;
             });
         }
 
-        private void AddLeaderItems(List<LeaderboardRanking> rankings)
+        protected virtual void AddLeaderItems(List<LeaderboardRanking> rankings)
         {
             foreach (var ranking in rankings)
             {
                 //Debug.Log("Adding ranking " + ranking.rank);
                 var prefab = defaultRankingPrefab;
                 if (ranking.member_id == SCILLManager.Instance.GetUserId())
+                {
                     prefab = userRankingPrefab;
+                    UpdateUsersHeaderRankingDisplay(ranking);
+                }
                 else if (ranking.rank <= numberOfTopEntries) prefab = topRankingPrefab;
 
                 var rankingGo = Instantiate(prefab.gameObject, rankingsContainer.transform, false);
@@ -317,7 +322,7 @@ namespace SCILL
         ///     loading the leaderboard. You can also use this function to reset and load the leaderboard if you have changed the
         ///     <c>leaderboardId</c> via script.
         /// </summary>
-        public void UpdateLeaderboard()
+        public virtual void UpdateLeaderboard()
         {
             CurrentPage = 1;
             _allContentLoaded = false;
@@ -326,10 +331,10 @@ namespace SCILL
             if (SCILLManager.Instance == null || null == SCILLManager.Instance.SCILLClient) return;
 
             LoadLeaderboardRankings(CurrentPage, true);
-            UpdateUsersLeaderboardRanking();
+            RequestUsersHeaderRankingDisplayUpdate();
         }
 
-        private void UpdateUsersLeaderboardRanking()
+        protected virtual void RequestUsersHeaderRankingDisplayUpdate()
         {
             if (!userRanking) return;
 
@@ -341,20 +346,10 @@ namespace SCILL
                         SCILLManager.Instance.GetUserId(),
                         leaderboardId);
 
-                leaderboardRankingPromise.Then(leaderboardRanking =>
+                leaderboardRankingPromise.Then(leaderboardMemberRanking =>
                 {
-                    // If user is not in leaderboard, hide it
-                    if (leaderboardRanking.member.rank < 0)
-                    {
-                        userRanking.gameObject.SetActive(false);
-                    }
-                    else
-                    {
-                        // Update the header element with the latest ranking values
-                        userRanking.numberOfDecimals = numberOfDecimals;
-                        userRanking.ranking = leaderboardRanking.member;
-                        userRanking.gameObject.SetActive(true);
-                    }
+                    var ranking = leaderboardMemberRanking.member;
+                    UpdateUsersHeaderRankingDisplay(ranking);
                 });
             }
             catch (ApiException e)
@@ -364,7 +359,23 @@ namespace SCILL
             }
         }
 
-        private void LoadLeaderboardRankings(int page, bool clear = false)
+        protected virtual void UpdateUsersHeaderRankingDisplay(LeaderboardRanking ranking)
+        {
+            // If user is not in leaderboard, hide it
+            if (ranking.rank < 0)
+            {
+                userRanking.gameObject.SetActive(false);
+            }
+            else
+            {
+                // Update the header element with the latest ranking values
+                userRanking.numberOfDecimals = numberOfDecimals;
+                userRanking.ranking = ranking;
+                userRanking.gameObject.SetActive(true);
+            }
+        }
+
+        protected virtual void LoadLeaderboardRankings(int page, bool clear = false)
         {
             if (null != SCILLManager.Instance.SCILLClient)
             {
