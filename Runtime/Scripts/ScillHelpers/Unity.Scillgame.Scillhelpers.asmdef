@@ -1,5 +1,5 @@
 {
-    "name": "Scillgame.Scillhelpers.ScillMqtt",
+    "name": "Unity.Scillgame.Scillhelpers",
     "rootNamespace": "",
     "references": [
         "GUID:04376767bc1f3b428aefa3d20743e819"
