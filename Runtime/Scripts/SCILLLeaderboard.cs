@@ -195,7 +195,9 @@ namespace SCILL
         /// </summary>
         public int CurrentPage { get; private set; }
 
-        private bool IsLoading { get; set; }
+        private bool IsLoading { get; set; } = false;
+
+        private bool IsInitialized { get; set; } = false;
 
         private void Awake()
         {
@@ -212,7 +214,7 @@ namespace SCILL
 
         private void Update()
         {
-            if (_scrollRect)
+            if (IsInitialized && _scrollRect)
                 if (_scrollRect.normalizedPosition.y < 0.25)
                     if (IsLoading == false && _allContentLoaded == false)
                         //Debug.Log("Bottom of page reached, adding next page, Loading: " + loading + ", All Content Loaded: " + allContentLoaded);
@@ -254,8 +256,9 @@ namespace SCILL
         {
             SCILLManager.OnSCILLManagerReady -= InitLeaderboardData;
 
-            PollLeaderboard();
+            RequestFullLeaderboardReload();
             SCILLManager.Instance.StartLeaderboardUpdateNotifications(leaderboardId, OnLeaderboardUpdated);
+            IsInitialized = true;
         }
 
 
@@ -264,33 +267,11 @@ namespace SCILL
             // Make sure this this leaderboard has been updated
             if (payload.leaderboard_data.leaderboard_id != leaderboardId) return;
 
-            PollLeaderboard();
-            // RequestUsersHeaderRankingDisplayUpdate();
-
+            RequestFullLeaderboardReload();
+            
             if (payload.member_data.member_type == "user" &&
                 payload.member_data.member_id == SCILLManager.Instance.GetUserId())
                 OnUsersLeaderboardRankingChanged?.Invoke(payload);
-        }
-
-        protected virtual void PollLeaderboard()
-        {
-            // Don't poll while we are loading new content
-            if (IsLoading) return;
-
-            IsLoading = true;
-            // Reload all data currently visible
-            var leaderboardPromise =
-                SCILLManager.Instance.SCILLClient.GetLeaderboardAsync(leaderboardId, 1, pageSize * CurrentPage);
-
-            leaderboardPromise.Then(leaderboard =>
-            {
-                var rankings = memberType == SCILLMemberType.User
-                    ? leaderboard.grouped_by_users
-                    : leaderboard.grouped_by_teams;
-                ClearRankings();
-                AddLeaderItems(rankings);
-                IsLoading = false;
-            });
         }
 
         protected virtual void AddLeaderItems(List<LeaderboardRanking> rankings)
@@ -375,13 +356,24 @@ namespace SCILL
             }
         }
 
+        protected virtual void RequestFullLeaderboardReload()
+        {
+            LoadLeaderboardRankings(1, pageSize * CurrentPage, true);   
+        }
+
         protected virtual void LoadLeaderboardRankings(int page, bool clear = false)
         {
-            if (null != SCILLManager.Instance.SCILLClient)
+            LoadLeaderboardRankings(page, pageSize, clear);
+        } 
+
+        protected virtual void LoadLeaderboardRankings(int page,int customPageSize, bool clear = false )
+        {
+            if (null != SCILLManager.Instance.SCILLClient && !IsLoading)
             {
                 //Debug.Log("LOAD LEADERBOARD RANKINGS " + page);
-                var loadPromise = SCILLManager.Instance.SCILLClient.GetLeaderboardAsync(leaderboardId, page, pageSize);
                 IsLoading = true;
+
+                var loadPromise = SCILLManager.Instance.SCILLClient.GetLeaderboardAsync(leaderboardId, page, customPageSize);
 
                 loadPromise.Then(leaderboard =>
                 {
@@ -415,7 +407,7 @@ namespace SCILL
                 return;
 
             CurrentPage++;
-
+            Debug.Log("Adding next page");
             LoadLeaderboardRankings(CurrentPage);
         }
 
