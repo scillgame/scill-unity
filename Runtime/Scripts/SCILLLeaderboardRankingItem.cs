@@ -1,5 +1,6 @@
 ﻿using SCILL.Model;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace SCILL
@@ -43,7 +44,15 @@ namespace SCILL
         ///     Please note: The sprite is loaded at runtime and must be within a <c>Resources</c> folder in your Asset database so
         ///     that Unity exposes the asset for dynamic loading.
         /// </remarks>
-        public Image image;
+        [FormerlySerializedAs("image")] public Image avatarImage;
+
+        /// <summary>
+        ///     The path from a Resources folder to a folder in which the avatar images are stored. E.g. if the
+        ///     <c>avatarResourcesPath</c> is <c>"Avatars/"</c>,
+        ///     this class will attempt to load the avatar image from a <c>"Resources/Avatars"</c> folder located in your Unity
+        ///     Assets.
+        /// </summary>
+        public string avatarResourcesPath = "Avatars/";
 
         private int _numberOfDecimals;
 
@@ -80,7 +89,12 @@ namespace SCILL
         }
 
 
-        private void UpdateUI()
+        /// <summary>
+        ///     Called on changes to <see cref="ranking" /> or <see cref="numberOfDecimals" /> for updating the UI elements.
+        ///     Override this function,
+        ///     if you'd like to adjust the way the UI is displayed.
+        /// </summary>
+        protected virtual void UpdateUI()
         {
             if (ranking == null) return;
 
@@ -92,11 +106,11 @@ namespace SCILL
                     username.text = "Guest";
             }
 
-            if (image)
+            if (avatarImage)
                 if (ranking.additional_info != null && !string.IsNullOrEmpty(ranking.additional_info.avatarImage))
                 {
-                    var sprite = Resources.Load<Sprite>("Avatars/" + ranking.additional_info.avatarImage);
-                    if (sprite) image.sprite = sprite;
+                    var sprite = Resources.Load<Sprite>(avatarResourcesPath + ranking.additional_info.avatarImage);
+                    if (sprite) avatarImage.sprite = sprite;
                 }
 
             if (rank) rank.text = ranking.rank + rankSuffix;
