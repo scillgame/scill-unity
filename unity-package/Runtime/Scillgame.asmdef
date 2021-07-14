@@ -1,5 +1,5 @@
 {
-    "name": "Unity.Scillgame.Runtime",
+    "name": "Scillgame",
     "rootNamespace": "",
     "references": [
         "GUID:21bf07b167f3b1a48b2a83076f372430"
