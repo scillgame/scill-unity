@@ -141,7 +141,7 @@ namespace SCILL
         {
             if (_rewardModel) DestroyImmediate(_rewardModel);
 
-            if (_scillReward.prefab)
+            if (_scillReward.prefab && photoBox)
                 _rewardModel = Instantiate(_scillReward.prefab, photoBox.transform);
             //_rewardModel.transform.localPosition = Vector3.zero;
 
