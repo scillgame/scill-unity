@@ -33,20 +33,6 @@ namespace SCILL
 
         public delegate void PersonalChallengeUpdatedFromServerAction(Challenge challenge,
             SCILLPersonalChallengeModificationType modificationType);
-        
-        /// <summary>
-        ///     This event is called whenever an update of the personal challenges list is requested and the response was received.
-        ///     This will happen on startup and when manually requesting an update using the
-        ///     <see cref="UpdatePersonalChallengesList" /> method. It will supply all of the users challenge categories as
-        ///     <see cref="ChallengeCategory" /> objects.
-        /// </summary>
-        public static event PersonalChallengesUpdatedFromServerAction OnPersonalChallengesUpdatedFromServer;
-
-        /// <summary>
-        ///     This event is called whenever a personal challenge is changed, e.g. when a challenge is unlocked, activated,
-        ///     claimed, canceled or the progress was updated.
-        /// </summary>
-        public static event PersonalChallengeUpdatedFromServerAction OnPersonalChallengeUpdatedFromServer;
 
         /// <summary>
         ///     As this class is designed as a singleton you can use this getter to get a reference to the instance. It allows you
@@ -83,6 +69,20 @@ namespace SCILL
                 SCILLManager.Instance.StopChallengeUpdateNotifications(OnChallengeWebhookMessage);
         }
 
+        /// <summary>
+        ///     This event is called whenever an update of the personal challenges list is requested and the response was received.
+        ///     This will happen on startup and when manually requesting an update using the
+        ///     <see cref="UpdatePersonalChallengesList" /> method. It will supply all of the users challenge categories as
+        ///     <see cref="ChallengeCategory" /> objects.
+        /// </summary>
+        public static event PersonalChallengesUpdatedFromServerAction OnPersonalChallengesUpdatedFromServer;
+
+        /// <summary>
+        ///     This event is called whenever a personal challenge is changed, e.g. when a challenge is unlocked, activated,
+        ///     claimed, canceled or the progress was updated.
+        /// </summary>
+        public static event PersonalChallengeUpdatedFromServerAction OnPersonalChallengeUpdatedFromServer;
+
         private void OnSCILLManagerReady()
         {
             UpdatePersonalChallengesList();
@@ -93,9 +93,11 @@ namespace SCILL
         private Challenge FindChallengeById(string id)
         {
             foreach (var category in Categories)
-            foreach (var challenge in category.challenges)
-                if (challenge.challenge_id == id)
-                    return challenge;
+                if (null != category)
+                    foreach (var challenge in category.challenges)
+                        if (null != challenge && challenge.challenge_id == id)
+                            return challenge;
+
 
             return null;
         }

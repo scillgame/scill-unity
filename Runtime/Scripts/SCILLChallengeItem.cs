@@ -105,7 +105,12 @@ namespace SCILL
         /// </summary>
         public Button cancelButton;
 
-        public Challenge challenge { get; set; }
+        private Challenge _challenge;
+        public Challenge challenge
+        {
+            get => _challenge;
+            set => _challenge = value;
+        }
 
         // Start is called before the first frame update
         private void Start()
@@ -152,6 +157,7 @@ namespace SCILL
                 if (claimButton) claimButton.gameObject.SetActive(false);
                 if (cancelButton) cancelButton.gameObject.SetActive(false);
                 if (challengeProgress) challengeProgress.gameObject.SetActive(false);
+                
             }
             else if (challenge.type == "unlocked")
             {
@@ -161,9 +167,11 @@ namespace SCILL
                 if (claimButton) claimButton.gameObject.SetActive(false);
                 if (cancelButton) cancelButton.gameObject.SetActive(false);
                 if (challengeProgress) challengeProgress.gameObject.SetActive(false);
+
             }
             else if (challenge.type == "in-progress")
             {
+
                 if (challengeProgress) challengeProgress.gameObject.SetActive(true);
                 if (actions) actions.gameObject.SetActive(true);
                 if (unlockButton) unlockButton.gameObject.SetActive(false);
@@ -208,8 +216,8 @@ namespace SCILL
             }
             else
             {
-                if (challengeProgress) challengeProgress.gameObject.SetActive(false);
-                if (actions) actions.gameObject.SetActive(false);
+                // if (challengeProgress) challengeProgress.gameObject.SetActive(false);
+                // if (actions) actions.gameObject.SetActive(false);
             }
         }
 
