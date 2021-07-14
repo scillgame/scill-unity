@@ -18,4 +18,16 @@ Developer documentation can be found here: [https://developers.scillgame.com](ht
 
 ## Getting Started
 
+To add the Package using the Unity Package Manager:
+
+### Unity 2020.1.a21 and newer
+
+Use "add a package from git URL..." and use this URL: https://github.com/crystal-mesh/scill-unity.git?path=/unity-package
+
+### Older than Unity 2020.1.a21
+
+Clone the repository to your local disk and use "add package from disk...". Navigate to "repository-path/unity-package" and select the package.json file.
+
+## Documentation
+
 Extensive documentation, getting started guides and example code can be found in our [SCILL Unity SDK documentation](https://developers.scillgame.com/sdks/unity.html).
