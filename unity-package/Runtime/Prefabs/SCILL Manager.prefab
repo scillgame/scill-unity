@@ -49,7 +49,7 @@ MonoBehaviour:
   environment: 0
   language: 0
   APIKey: 
-  UserId: 1234
+  UserId: 
   SessionId: persistent
 --- !u!114 &4109715407461212427
 MonoBehaviour:

@@ -92,11 +92,12 @@ namespace SCILL
 
         private Challenge FindChallengeById(string id)
         {
-            foreach (var category in Categories)
-                if (null != category)
-                    foreach (var challenge in category.challenges)
-                        if (null != challenge && challenge.challenge_id == id)
-                            return challenge;
+            if (null != Categories)
+                foreach (var category in Categories)
+                    if (null != category)
+                        foreach (var challenge in category.challenges)
+                            if (null != challenge && challenge.challenge_id == id)
+                                return challenge;
 
 
             return null;
@@ -117,7 +118,8 @@ namespace SCILL
         }
 
         private void UpdateChallenge(ChallengeWebhookPayload payload)
-        {
+        {   
+            
             var challenge = FindChallengeById(payload.new_challenge.challenge_id);
             if (challenge != null)
             {
@@ -149,6 +151,7 @@ namespace SCILL
 
         private void OnChallengeWebhookMessage(ChallengeWebhookPayload payload)
         {
+            Debug.Log("Received Challenge Webhook message");
             UpdateChallenge(payload);
         }
     }
