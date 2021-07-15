@@ -23,7 +23,7 @@ To add the Package using the Unity Package Manager:
 
 ### Unity 2020.1.a21 and newer
 
-Use "add a package from git URL..." and use this URL: https://github.com/crystal-mesh/scill-unity.git?path=/unity-package
+Use "add a package from git URL..." and use this URL: https://github.com/scillgame/scill-unity.git?path=/unity-package
 
 ### Older than Unity 2020.1.a21
 
