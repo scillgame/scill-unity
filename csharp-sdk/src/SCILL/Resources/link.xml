@@ -1,0 +1,16 @@
+
+<!-- This resource is required for Unity - when building targets requiring the IL2CPP generator, the generator will otherwise remove types and members that are not directly used, 
+e.g. when generating an object of a type using reflection, the constructor of that type might never be used directly and will therefore be stripped from the byte code,
+resulting in errors on the IL2CPP based build target. 
+The link.xml is embedded as an resource in the SCILL.csproj definiton. This is required for unity to recognize the link.xml file, even if used inside a package. If the línk.xml file
+were to be placed directly inside a package, Unity would not recognize it at build time.
+ -->
+<linker>
+    <!--
+    Preserve types and members in an assembly
+    -->
+    <!--    <assembly fullname="SCILL.Api" preserve="all"/>-->
+    <assembly fullname="SCILL" preserve="all"/>
+    <!--    <assembly fullname="SCILL.Client" preserve="all"/>-->
+    <assembly fullname="SCILL.Model" preserve="all"/>
+</linker>

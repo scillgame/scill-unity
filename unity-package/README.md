@@ -5,9 +5,6 @@ in the gaming industry: Gamification. We take care of the services and technolog
 
 This SDK is built on top of the SCILL C# SDK and adds Components, Prefabs and fully functional implementations for Challenges, Battle Passes and Leaderboards.
 
-This repository contains the SCILL Unity SDK as a Unity package, which can be added to a Unity project using the Unity Package Manager. Additionally it contains the SCILL C# SDK project
-for access to the source code that generates the SCILL.dll used in the package.
-
 ## About SCILL
 
 SCILL is a fully customizable toolkit that enables you to integrate tailored challenges, full-fledged Battle Passes and Leaderboards to your game, app and website. SCILL connects seamlessly to your user account and payment systems, adding new retention 

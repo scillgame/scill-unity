@@ -1,0 +1,20 @@
+{
+    "name": "Scillgame",
+    "rootNamespace": "",
+    "references": [
+        "GUID:21bf07b167f3b1a48b2a83076f372430"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [
+        "SCILL.dll",
+        "SCILL-Proyecto26.RestClient.dll",
+        "SCILL-RSG.Promise.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
