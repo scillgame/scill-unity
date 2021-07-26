@@ -407,7 +407,7 @@ namespace SCILL
                 return;
 
             CurrentPage++;
-            Debug.Log("Adding next page");
+            // Debug.Log("Adding next page");
             LoadLeaderboardRankings(CurrentPage);
         }
 
