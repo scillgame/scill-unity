@@ -151,7 +151,7 @@ namespace SCILL
 
         private void OnChallengeWebhookMessage(ChallengeWebhookPayload payload)
         {
-            Debug.Log("Received Challenge Webhook message");
+            // Debug.Log("Received Challenge Webhook message");
             UpdateChallenge(payload);
         }
     }
