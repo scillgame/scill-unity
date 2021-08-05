@@ -372,7 +372,7 @@ GameObject:
   - component: {fileID: 8498635224867952871}
   - component: {fileID: 484600047738318107}
   m_Layer: 5
-  m_Name: Category
+  m_Name: Personal Challenge Category
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

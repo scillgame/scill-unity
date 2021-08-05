@@ -943,7 +943,7 @@ MonoBehaviour:
   userRanking: {fileID: 1848455447017322898}
   userRankingPrefab: {fileID: 933242812411766172, guid: 3b3a0c2f58cba4068860539c09ce7a90,
     type: 3}
-  topRankingPrefab: {fileID: 3497909810294737907, guid: 4c8dcbd01cb5b4da28ab77444fc85943,
+  topRankingPrefab: {fileID: 5331684948025266324, guid: 593261c6d2cb95a4f9dad8309d09b345,
     type: 3}
   defaultRankingPrefab: {fileID: 1596775380487954249, guid: fb02981c8e05243adb290161ac35e1fb,
     type: 3}

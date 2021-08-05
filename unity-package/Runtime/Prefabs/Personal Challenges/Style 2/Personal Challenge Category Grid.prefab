@@ -188,7 +188,7 @@ GameObject:
   - component: {fileID: 5085082995189844152}
   - component: {fileID: 7557485526903370380}
   m_Layer: 5
-  m_Name: Category Grid
+  m_Name: Personal Challenge Category Grid
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

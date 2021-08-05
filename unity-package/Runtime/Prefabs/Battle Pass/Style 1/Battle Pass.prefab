@@ -101,7 +101,7 @@ GameObject:
   - component: {fileID: 5961519794696112095}
   - component: {fileID: 5961519794696112092}
   m_Layer: 5
-  m_Name: Reward Icon
+  m_Name: Battle Pass
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
