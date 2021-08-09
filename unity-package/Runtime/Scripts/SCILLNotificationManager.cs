@@ -172,8 +172,8 @@ namespace SCILL
         /// </summary>
         /// <param name="text">The message to display on the notification.</param>
         /// <param name="image">
-        ///     The image to load from the <c>Resources</c> folder for displaying on the notification. (Not yet
-        ///     supported)
+        ///     The image to load from the <c>Resources</c> folder for displaying on the notification. This is not used in the base method,
+        /// so if you'd like to display an image on the center notification, please override this method.
         /// </param>
         /// <param name="duration">The notifications lifetime.</param>
         public virtual void AddCenterNotification(string text, string image = null, float duration = 2.0f)
