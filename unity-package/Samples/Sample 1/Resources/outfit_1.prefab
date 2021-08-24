@@ -197,6 +197,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4321396278253706285}
   - component: {fileID: 4321396278267661583}
+  - component: {fileID: 234176033154301401}
   m_Layer: 0
   m_Name: characterLargeMale
   m_TagString: Untagged
@@ -212,7 +213,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4321396278253993997}
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0, y: 0, z: 0}
+  m_LocalPosition: {x: -0, y: 0.08, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 4321396278253706287}
@@ -233,6 +234,7 @@ SkinnedMeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -314,6 +316,20 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.0000100270845, y: 0.002461249, z: -0.0006835642}
     m_Extent: {x: 0.01557407, y: 0.016389642, z: 0.0037034317}
   m_DirtyAABB: 0
+--- !u!136 &234176033154301401
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4321396278253993997}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 0.35
+  m_Height: 3.13
+  m_Direction: 1
+  m_Center: {x: -0.0022546728, y: 1.4747667, z: 0.0005228296}
 --- !u!1 &4321396278253993999
 GameObject:
   m_ObjectHideFlags: 0

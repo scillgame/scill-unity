@@ -1060,6 +1060,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6851877572847985733}
   - component: {fileID: 6851877572859852135}
+  - component: {fileID: 7281289889834332950}
   m_Layer: 0
   m_Name: characterLargeFemale
   m_TagString: Untagged
@@ -1096,6 +1097,7 @@ SkinnedMeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1177,6 +1179,20 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.000010501593, y: 0.0024612872, z: -0.0005622512}
     m_Extent: {x: 0.015137687, y: 0.01638968, z: 0.0037129386}
   m_DirtyAABB: 0
+--- !u!136 &7281289889834332950
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6851877572848285797}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 0.26
+  m_Height: 2.96
+  m_Direction: 1
+  m_Center: {x: -0.0023043915, y: 1.474763, z: 0.012654126}
 --- !u!1 &6851877572848285799
 GameObject:
   m_ObjectHideFlags: 0
@@ -1188,7 +1204,7 @@ GameObject:
   - component: {fileID: 6851877572847985735}
   - component: {fileID: 6851877572855663527}
   m_Layer: 0
-  m_Name: characterLargeFemale
+  m_Name: outfit_3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
