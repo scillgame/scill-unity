@@ -8,19 +8,22 @@ namespace SCILL.Effects
     {
         [Header("Personal Challenge Sounds")] [SerializeField]
         private AudioClip challengeUnlockedSound;
+
         [SerializeField] private AudioClip challengeActivatedSound;
         [SerializeField] private AudioClip challengeOvertimeSound;
         [SerializeField] private AudioClip challengeUnclaimedSound;
         [SerializeField] private AudioClip challengeFinishedSound;
+        [field: SerializeField] public AudioClip ChallengeUpdatedSound { get; private set; }
 
-        [Header("Battle Pass Sounds")] [SerializeField]
-        private AudioClip battlePassUnlockedSound;
-        [SerializeField] private AudioClip battlePassLevelCompletedSound;
-        [SerializeField] private AudioClip battlePassLevelRewardClaimedSound;
-        
-        public AudioClip BattlePassLevelCompletedSound => battlePassLevelCompletedSound;
-        public AudioClip BattlePassLevelRewardClaimedSound => battlePassLevelRewardClaimedSound;
-        public AudioClip BattlePassUnlockedSound => battlePassUnlockedSound;
+
+        [field: Header("Battle Pass Sounds")]
+        [field: SerializeField]
+        public AudioClip BattlePassUnlockedSound { get; private set; }
+
+        [field: SerializeField] public AudioClip BattlePassLevelCompletedSound { get; private set; }
+        [field: SerializeField] public AudioClip BattlePassLevelRewardClaimedSound { get; private set; }
+        [field: SerializeField] public AudioClip BattlePassLevelChallengeUpdatedSound { get; private set; }
+
 
         private Dictionary<string, AudioClip> _challengeClips = new Dictionary<string, AudioClip>();
 

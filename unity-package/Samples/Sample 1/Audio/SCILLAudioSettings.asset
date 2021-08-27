@@ -22,9 +22,13 @@ MonoBehaviour:
     type: 3}
   challengeFinishedSound: {fileID: 8300000, guid: c1503fb334222b440b52693823629a3f,
     type: 3}
-  battlePassUnlockedSound: {fileID: 8300000, guid: 78f4a69c1b11f9644a81624cf3a840f5,
+  <ChallengeUpdatedSound>k__BackingField: {fileID: 8300000, guid: 153818d451159e2499b07d5bcb93ed18,
     type: 3}
-  battlePassLevelCompletedSound: {fileID: 8300000, guid: 94d81d0799683804ca224944b3e6decf,
+  <BattlePassUnlockedSound>k__BackingField: {fileID: 8300000, guid: 78f4a69c1b11f9644a81624cf3a840f5,
     type: 3}
-  battlePassLevelRewardClaimedSound: {fileID: 8300000, guid: 69dafefe37577964f84e19a40355f2dd,
+  <BattlePassLevelCompletedSound>k__BackingField: {fileID: 8300000, guid: 94d81d0799683804ca224944b3e6decf,
+    type: 3}
+  <BattlePassLevelRewardClaimedSound>k__BackingField: {fileID: 8300000, guid: 69dafefe37577964f84e19a40355f2dd,
+    type: 3}
+  <BattlePassLevelChallengeUpdatedSound>k__BackingField: {fileID: 8300000, guid: 153818d451159e2499b07d5bcb93ed18,
     type: 3}

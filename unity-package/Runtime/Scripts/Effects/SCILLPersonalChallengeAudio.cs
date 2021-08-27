@@ -27,10 +27,19 @@ namespace SCILL.Effects
             if (typeChanged)
             {
                 AudioClip feedbackAudioClip = audioSettings.GetChallengeAudioFromType(newChallenge.type);
-                if (feedbackAudioClip && audioSource)
-                {
-                    audioSource.PlayOneShot(feedbackAudioClip);
-                }
+                Play(feedbackAudioClip);
+            }
+            else
+            {
+                Play(audioSettings.ChallengeUpdatedSound);
+            }
+        }
+
+        private void Play(AudioClip feedbackAudioClip)
+        {
+            if (feedbackAudioClip && audioSource)
+            {
+                audioSource.PlayOneShot(feedbackAudioClip);
             }
         }
     }
