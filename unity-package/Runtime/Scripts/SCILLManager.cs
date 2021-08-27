@@ -610,13 +610,15 @@ namespace SCILL
         {
             OnChallengeChangedNotification += handler;
 
-            if (ShouldShartupChallengeMonitoring())
+            if (ShouldShartupChallengeMonitoring() && null != SCILLClient)
+            {
                 SCILLClient.AuthApi.GetUserChallengesNotificationTopicAsync().Then(topicRequestResult =>
                 {
                     _personalChallengeNotificationTopic = topicRequestResult.topic;
                     if (IsMqttConnectionAvailable())
                         _mqtt.SubscribeToTopicChallenge(topicRequestResult.topic, OnChallengeChangedNotification);
                 });
+            }
         }
 
         private bool ShouldShartupChallengeMonitoring()
@@ -666,7 +668,7 @@ namespace SCILL
         {
             OnBattlePassChangedNotification += handler;
 
-            if (ShouldStartMonitoring(_battlepassIdToTopicMap, battlePassId))
+            if (ShouldStartMonitoring(_battlepassIdToTopicMap, battlePassId) && null != SCILLClient)
                 SCILLClient.AuthApi.GetUserBattlePassNotificationTopicAsync(battlePassId).Then(topicRequestResult =>
                 {
                     _battlepassIdToTopicMap[battlePassId] = topicRequestResult.topic;
@@ -704,7 +706,7 @@ namespace SCILL
         {
             OnLeaderboardChangedNotification += handler;
 
-            if (ShouldStartMonitoring(_leaderboardIdToTopicMap, leaderboardId))
+            if (ShouldStartMonitoring(_leaderboardIdToTopicMap, leaderboardId) && null != SCILLClient)
                 SCILLClient.AuthApi.GetLeaderboardNotificationTopicAsync(leaderboardId).Then(topicRequestResult =>
                 {
                     _leaderboardIdToTopicMap[leaderboardId] = topicRequestResult.topic;

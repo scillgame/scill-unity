@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ddab3b464f6963146a777a28701f9f62, type: 3}
+  m_Name: SCILLAudioSettings
+  m_EditorClassIdentifier: 
+  challengeUnlockedSound: {fileID: 8300000, guid: 7a796e289a6280947946351d4a40c44d,
+    type: 3}
+  challengeActivatedSound: {fileID: 8300000, guid: 78f4a69c1b11f9644a81624cf3a840f5,
+    type: 3}
+  challengeOvertimeSound: {fileID: 8300000, guid: e32e663717dd17c4eaf65b7c9b173b12,
+    type: 3}
+  challengeUnclaimedSound: {fileID: 8300000, guid: 24444b79fd364bd45858ccd16fbf352a,
+    type: 3}
+  challengeFinishedSound: {fileID: 8300000, guid: c1503fb334222b440b52693823629a3f,
+    type: 3}
+  battlePassUnlockedSound: {fileID: 8300000, guid: 78f4a69c1b11f9644a81624cf3a840f5,
+    type: 3}
+  battlePassLevelCompletedSound: {fileID: 8300000, guid: 94d81d0799683804ca224944b3e6decf,
+    type: 3}
+  battlePassLevelRewardClaimedSound: {fileID: 8300000, guid: 69dafefe37577964f84e19a40355f2dd,
+    type: 3}
