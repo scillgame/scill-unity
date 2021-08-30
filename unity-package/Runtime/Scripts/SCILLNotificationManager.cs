@@ -284,7 +284,7 @@ namespace SCILL
         {
             var challengeGo = Object.Instantiate(Prefab, container, false);
             var challengeItem = challengeGo.GetComponent<SCILLChallengeItem>();
-            if (challengeItem) challengeItem.challenge = Challenge;
+            if (challengeItem) challengeItem.UpdateChallenge(Challenge);
 
             var notification = challengeGo.GetComponent<SCILLNotification>();
             if (notification && notification.message) notification.message.text = Text;

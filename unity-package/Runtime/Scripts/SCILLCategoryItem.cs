@@ -50,10 +50,11 @@ namespace SCILL
             "Challenges instantiated will be added as children into this transform if set, otherwise it will be directly added as child to this game object.")]
         public Transform challengesContainer;
 
-        private readonly Dictionary<string, GameObject> _challengeObjects = new Dictionary<string, GameObject>();
+        private readonly Dictionary<string, SCILLChallengeItem> _challengeObjects =
+            new Dictionary<string, SCILLChallengeItem>();
 
         [HideInInspector] public ChallengeCategory Category { get; set; }
-        
+
 
         // Start is called before the first frame update
         private void Start()
@@ -90,14 +91,14 @@ namespace SCILL
         /// <summary>
         ///     Call this function to update an individual challenge in the categories challenges list.
         /// </summary>
-        /// <param name="challenge">The challenge to update</param>
-        public void UpdateChallenge(Challenge challenge)
+        /// <param name="updatedChallengeData">The challenge to update</param>
+        public void UpdateChallenge(Challenge updatedChallengeData)
         {
-            GameObject challengeGO = null;
-            if (_challengeObjects.TryGetValue(challenge.challenge_id, out challengeGO))
+            string challengeID = updatedChallengeData.challenge_id;
+            if (_challengeObjects.ContainsKey(challengeID))
             {
-                var challengeItem = challengeGO.GetComponent<SCILLChallengeItem>();
-                if (challengeItem) challengeItem.challenge = challenge;
+                SCILLChallengeItem challengeItem = _challengeObjects[challengeID];
+                if (challengeItem) challengeItem.UpdateChallenge(updatedChallengeData);
             }
         }
 
@@ -108,24 +109,33 @@ namespace SCILL
         /// </summary>
         public void UpdateChallengeList()
         {
-            foreach (var challenge in Category.challenges)
+            foreach (Challenge challenge in Category.challenges)
             {
-                GameObject challengeGO = null;
-                if (_challengeObjects.TryGetValue(challenge.challenge_id, out challengeGO))
+                string challengeID = challenge.challenge_id;
+                if (_challengeObjects.ContainsKey(challengeID))
                 {
-                    var challengeItem = challengeGO.GetComponent<SCILLChallengeItem>();
-                    if (challengeItem) challengeItem.challenge = challenge;
+                    UpdateChallenge(challenge);
                 }
                 else
                 {
-                    challengeGO = Instantiate(challengePrefab.gameObject,
-                        challengesContainer ? challengesContainer : transform, false);
-                    var challengeItem = challengeGO.GetComponent<SCILLChallengeItem>();
-                    if (challengeItem) challengeItem.challenge = challenge;
+                    SCILLChallengeItem challengeItem = Instantiate(challengePrefab.gameObject,
+                            challengesContainer ? challengesContainer : transform, false)
+                        .GetComponent<SCILLChallengeItem>();
+                    if (challengeItem) challengeItem.UpdateChallenge(challenge);
 
-                    _challengeObjects.Add(challenge.challenge_id, challengeGO);
+                    _challengeObjects.Add(challengeID, challengeItem);
                 }
             }
+        }
+
+        /// <summary>
+        /// Determines whether the Category contains the <see cref="SCILLChallengeItem"/> with the given <see cref="challengeId"/>.
+        /// </summary>
+        /// <param name="challengeId">The id to search for.</param>
+        /// <returns>True, if the <see cref="SCILLChallengeItem"/> with the given <see cref="challengeId"/> belongs to this Category object.</returns>
+        public bool ContainsChallenge(string challengeId)
+        {
+            return _challengeObjects.ContainsKey(challengeId);
         }
     }
 }

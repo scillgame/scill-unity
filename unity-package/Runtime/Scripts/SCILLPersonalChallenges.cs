@@ -108,7 +108,7 @@ namespace SCILL
             "A prefab that will be used for each challenge. It will be instantiated and added as child to the category game object")]
         public SCILLChallengeItem challengePrefab;
 
-        private readonly Dictionary<string, GameObject> _categoryObjects = new Dictionary<string, GameObject>();
+        private readonly Dictionary<string, SCILLCategoryItem> _categoryObjects = new Dictionary<string, SCILLCategoryItem>();
 
         private List<ChallengeCategory> _categories;
 
@@ -148,16 +148,7 @@ namespace SCILL
             _categories = categories;
             UpdateCategories(_categories);
         }
-
-        private Challenge FindChallengeById(string id)
-        {
-            foreach (var category in _categories)
-            foreach (var challenge in category.challenges)
-                if (challenge.challenge_id == id)
-                    return challenge;
-
-            return null;
-        }
+        
 
         /// <summary>
         ///     This function loads the challenges with the
@@ -179,40 +170,33 @@ namespace SCILL
         {
             foreach (var category in categories)
             {
-                GameObject categoryGO = null;
-                if (_categoryObjects.TryGetValue(category.category_id, out categoryGO))
+                string categoryID = category.category_id;
+                if (_categoryObjects.ContainsKey(categoryID))
                 {
-                    var categoryItem = categoryGO.GetComponent<SCILLCategoryItem>();
+                    SCILLCategoryItem categoryItem = _categoryObjects[categoryID];
                     categoryItem.Category = category;
                     categoryItem.UpdateChallengeList();
                 }
                 else
                 {
-                    categoryGO = Instantiate(categoryPrefab.gameObject, transform, false);
-                    var categoryItem = categoryGO.GetComponent<SCILLCategoryItem>();
+                    SCILLCategoryItem categoryItem = Instantiate(categoryPrefab.gameObject, transform, false).GetComponent<SCILLCategoryItem>();
                     if (categoryItem) categoryItem.Category = category;
-
-                    _categoryObjects.Add(category.category_id, categoryGO);
+                    _categoryObjects.Add(categoryID, categoryItem);
                 }
             }
         }
 
-        private void UpdateChallenge(Challenge newChallenge)
+        private void UpdateChallenge(Challenge toUpdate)
         {
-            var challenge = FindChallengeById(newChallenge.challenge_id);
-            if (challenge != null)
+            foreach (SCILLCategoryItem categoryItem in _categoryObjects.Values)
             {
-                challenge.type = newChallenge.type;
-                challenge.user_challenge_current_score = newChallenge.user_challenge_current_score;
-                challenge.user_challenge_activated_at = newChallenge.user_challenge_activated_at;
-                challenge.user_challenge_unlocked_at = newChallenge.user_challenge_unlocked_at;
+                if (categoryItem.ContainsChallenge(toUpdate.challenge_id))
+                {
+                    categoryItem.UpdateChallenge(toUpdate);
+                }
             }
         }
-
-        private void OnChallengeWebhookMessage(ChallengeWebhookPayload payload)
-        {
-            UpdateChallenge(payload.new_challenge);
-        }
+        
 
         /// <summary>
         ///     Unlocks the personal challenge provided and will update UI elements if required. The default prefabs connect

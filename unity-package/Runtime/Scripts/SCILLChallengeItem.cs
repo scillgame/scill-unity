@@ -109,7 +109,7 @@ namespace SCILL
         public Challenge challenge
         {
             get => _challenge;
-            set => _challenge = value;
+            private set => _challenge = value;
         }
 
         // Start is called before the first frame update
@@ -134,8 +134,10 @@ namespace SCILL
             }
         }
 
-        private void Update()
+        public void UpdateChallenge(Challenge newChallenge)
         {
+            this.challenge = newChallenge;
+            
             if (challenge == null) return;
 
             if (challengeName) challengeName.text = challenge.challenge_name;
