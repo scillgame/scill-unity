@@ -1,6 +1,7 @@
 ﻿using System;
 using SCILL.Model;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace SCILL
@@ -112,6 +113,8 @@ namespace SCILL
             private set => _challenge = value;
         }
 
+        public UnityEvent onChallengeScoreChanged;
+
         // Start is called before the first frame update
         private void Start()
         {
@@ -136,6 +139,16 @@ namespace SCILL
 
         public void UpdateChallenge(Challenge newChallenge)
         {
+
+            if (null != newChallenge && null != challenge)
+            {
+                if (newChallenge.user_challenge_current_score != challenge.user_challenge_current_score)
+                {
+                    onChallengeScoreChanged?.Invoke();
+                }
+            }
+            
+            
             this.challenge = newChallenge;
             
             if (challenge == null) return;

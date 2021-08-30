@@ -108,7 +108,8 @@ namespace SCILL
             "A prefab that will be used for each challenge. It will be instantiated and added as child to the category game object")]
         public SCILLChallengeItem challengePrefab;
 
-        private readonly Dictionary<string, SCILLCategoryItem> _categoryObjects = new Dictionary<string, SCILLCategoryItem>();
+        private readonly Dictionary<string, SCILLCategoryItem> _categoryObjects =
+            new Dictionary<string, SCILLCategoryItem>();
 
         private List<ChallengeCategory> _categories;
 
@@ -148,7 +149,7 @@ namespace SCILL
             _categories = categories;
             UpdateCategories(_categories);
         }
-        
+
 
         /// <summary>
         ///     This function loads the challenges with the
@@ -163,29 +164,31 @@ namespace SCILL
             {
                 _categories = categories;
                 UpdateCategories(categories);
-            });
+            }).Catch(exception => Debug.LogError("UpdatePersonalChallengesList: " + exception.Message));
         }
 
-        private void UpdateCategories(List<ChallengeCategory> categories)
+        private void UpdateCategories(List<ChallengeCategory> updatedCategories)
         {
-            foreach (var category in categories)
+            foreach (var categoryData in updatedCategories)
             {
-                string categoryID = category.category_id;
+                string categoryID = categoryData.category_id;
+                SCILLCategoryItem categoryItem = null;
                 if (_categoryObjects.ContainsKey(categoryID))
                 {
-                    SCILLCategoryItem categoryItem = _categoryObjects[categoryID];
-                    categoryItem.Category = category;
-                    categoryItem.UpdateChallengeList();
+                    categoryItem = _categoryObjects[categoryID];
+                    categoryItem.UpdateCategory(categoryData);
                 }
                 else
                 {
-                    SCILLCategoryItem categoryItem = Instantiate(categoryPrefab.gameObject, transform, false).GetComponent<SCILLCategoryItem>();
-                    if (categoryItem) categoryItem.Category = category;
-                    _categoryObjects.Add(categoryID, categoryItem);
+                    categoryItem = Instantiate(categoryPrefab.gameObject, transform, false)
+                        .GetComponent<SCILLCategoryItem>();
+                    if (categoryItem) _categoryObjects.Add(categoryID, categoryItem);
+                    categoryItem.UpdateCategory(categoryData);
+
                 }
             }
         }
-
+ 
         private void UpdateChallenge(Challenge toUpdate)
         {
             foreach (SCILLCategoryItem categoryItem in _categoryObjects.Values)
@@ -196,7 +199,7 @@ namespace SCILL
                 }
             }
         }
-        
+
 
         /// <summary>
         ///     Unlocks the personal challenge provided and will update UI elements if required. The default prefabs connect

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using SCILL.Model;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.UI;
 
 namespace SCILL
@@ -53,27 +54,32 @@ namespace SCILL
         private readonly Dictionary<string, SCILLChallengeItem> _challengeObjects =
             new Dictionary<string, SCILLChallengeItem>();
 
-        [HideInInspector] public ChallengeCategory Category { get; set; }
-
+        private ChallengeCategory _category;
 
         // Start is called before the first frame update
         private void Start()
         {
             if (challengePrefab == null)
             {
-                var personalChallenges = GetComponentInParent<SCILLPersonalChallenges>();
-                if (personalChallenges) challengePrefab = personalChallenges.challengePrefab;
+                TryGetChallengePrefab();
+
+                Assert.IsNotNull(challengePrefab, "Challenge Prefab in SCILLCategoryItem is null.");
             }
 
             UpdateChallengeList();
         }
 
-        // Update is called once per frame
-        private void Update()
+        private void TryGetChallengePrefab()
         {
-            if (Category == null) return;
+            var personalChallenges = GetComponentInParent<SCILLPersonalChallenges>();
+            if (personalChallenges) challengePrefab = personalChallenges.challengePrefab;
+        }
 
-            categoryName.text = Category.category_name;
+        public void UpdateCategory(ChallengeCategory updatedCategoryData)
+        {
+            if (updatedCategoryData == null) return;
+            _category = updatedCategoryData;
+            UpdateChallengeList();
         }
 
         /// <summary>
@@ -109,7 +115,7 @@ namespace SCILL
         /// </summary>
         public void UpdateChallengeList()
         {
-            foreach (Challenge challenge in Category.challenges)
+            foreach (Challenge challenge in _category.challenges)
             {
                 string challengeID = challenge.challenge_id;
                 if (_challengeObjects.ContainsKey(challengeID))
@@ -118,12 +124,23 @@ namespace SCILL
                 }
                 else
                 {
-                    SCILLChallengeItem challengeItem = Instantiate(challengePrefab.gameObject,
-                            challengesContainer ? challengesContainer : transform, false)
-                        .GetComponent<SCILLChallengeItem>();
-                    if (challengeItem) challengeItem.UpdateChallenge(challenge);
+                    if(!challengePrefab)
+                        TryGetChallengePrefab();
 
-                    _challengeObjects.Add(challengeID, challengeItem);
+                    if (challengePrefab)
+                    {
+                        GameObject go = Instantiate(challengePrefab.gameObject,
+                            challengesContainer ? challengesContainer : transform, false);
+                        if (go)
+                        {
+                            SCILLChallengeItem challengeItem =
+                                go.GetComponent<SCILLChallengeItem>();
+                            if (challengeItem) challengeItem.UpdateChallenge(challenge);
+
+                            _challengeObjects.Add(challengeID, challengeItem);
+                        }
+                    }
+                    
                 }
             }
         }
