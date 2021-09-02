@@ -146,7 +146,6 @@ namespace SCILL
                 {
                     onChallengeScoreChanged?.Invoke();
                 }
-                // Debug.Log("Current: " + newChallenge.user_challenge_current_score + " Old: " + challenge.user_challenge_current_score);
             }
             
             this.challenge = newChallenge;

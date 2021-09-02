@@ -60,7 +60,14 @@ namespace SCILL
 
         private void Start()
         {
-            SCILLManager.OnSCILLManagerReady += OnSCILLManagerReady;
+            if (SCILLManager.Instance && SCILLManager.Instance.IsConnected)
+            {
+                OnSCILLManagerReady();
+            }
+            else
+            {
+                SCILLManager.OnSCILLManagerReady += OnSCILLManagerReady;
+            }
         }
 
         private void OnDestroy()
@@ -86,7 +93,6 @@ namespace SCILL
         private void OnSCILLManagerReady()
         {
             UpdatePersonalChallengesList();
-
             SCILLManager.Instance.StartChallengeUpdateNotifications(UpdateChallenge);
         }
 

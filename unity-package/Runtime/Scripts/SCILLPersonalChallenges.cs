@@ -140,14 +140,14 @@ namespace SCILL
         private void OnPersonalChallengeUpdated(Challenge challenge,
             SCILLPersonalChallengeModificationType modificationtype)
         {
-            Debug.Log("OnPersonalChallengeUpdated");
+            // Debug.Log("OnPersonalChallengeUpdated");
             UpdateChallenge(challenge);
             
         }
 
         private void OnPersonalChallengesUpdated(List<ChallengeCategory> categories)
         {
-            Debug.Log("OnPersonalChallengesUpdated");
+            // Debug.Log("OnPersonalChallengesUpdated");
             UpdateCategories(categories);
             _categories = categories;
         }
@@ -213,9 +213,14 @@ namespace SCILL
                 SCILLManager.Instance.SCILLClient.UnlockPersonalChallengeAsync(challenge.challenge_id);
             responsePromise.Then(response =>
             {
+                // Debug.Log("UnlockPersonalChallenge Answer");
+
                 if (response.status >= 200 && response.status < 300)
                     if (response.challenge != null)
-                        UpdateChallenge(response.challenge);
+                        UpdatePersonalChallengesList();
+            }).Catch(exception =>
+            {
+                Debug.LogError("ActivatePersonalChallenge failed: " + exception.Message);
             });
         }
 
@@ -231,9 +236,15 @@ namespace SCILL
                 SCILLManager.Instance.SCILLClient.ActivatePersonalChallengeAsync(challenge.challenge_id);
             responsePromise.Then(response =>
             {
+                // Debug.Log("ActivatePersonalChallenge Answer");
+
                 if (response.status >= 200 && response.status < 300)
                     if (response.challenge != null)
-                        UpdateChallenge(response.challenge);
+                        UpdatePersonalChallengesList();
+
+            }).Catch(exception =>
+            {
+                Debug.LogError("ActivatePersonalChallenge failed: " + exception.Message);
             });
         }
 
@@ -261,12 +272,16 @@ namespace SCILL
                 SCILLManager.Instance.SCILLClient.ClaimPersonalChallengeRewardAsync(challenge.challenge_id);
             responsePromise.Then(response =>
             {
+                // Debug.Log("ClaimPersonalChallengeReward Answer");
                 if (response.status >= 200 && response.status < 300)
                     if (response.challenge != null)
                     {
-                        UpdateChallenge(response.challenge);
+                        UpdatePersonalChallengesList();
                         OnPersonalChallengeRewardClaimed(response.challenge);
                     }
+            }).Catch(exception =>
+            {
+                Debug.LogError("ClaimPersonalChallengeReward failed: " + exception.Message);
             });
         }
 
@@ -290,11 +305,16 @@ namespace SCILL
                 SCILLManager.Instance.SCILLClient.CancelPersonalChallengeAsync(challenge.challenge_id);
             responsePromise.Then(response =>
             {
+                // Debug.Log("CancelPersonalChallenge Answer");
+
                 if (response.status >= 200 && response.status < 300)
                     if (response.challenge != null)
                         // In this case we need to reload the list from the server as we don't know if this challenge will
                         // be available as it's set to repeatable or not. 
                         UpdatePersonalChallengesList();
+            }).Catch(exception =>
+            {
+                Debug.LogError("CancelPersonalChallenge failed: " + exception.Message);
             });
         }
 

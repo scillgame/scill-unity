@@ -162,6 +162,11 @@ namespace SCILL
         /// </summary>
         public SCILLClient SCILLClient { get; private set; }
 
+        /// <summary>
+        /// Returns true, if the <c>SCILLManager</c> Instance successfully generated an access token.
+        /// </summary>
+        public bool IsConnected { get; private set; } = false;
+
 
         private void Awake()
         {
@@ -180,6 +185,7 @@ namespace SCILL
                         _mqtt = new ScillMqtt();
                         ScillMqtt.OnMqttConnectionEstablished += OnMqttConnectionEstablished;
 
+                        IsConnected = true;
                         OnSCILLManagerReady?.Invoke();
 
                         StartCoroutine(PingRoutine());
