@@ -117,6 +117,9 @@ namespace SCILL
         {
             // Remove any dummies
             foreach (var child in GetComponentsInChildren<SCILLCategoryItem>()) Destroy(child.gameObject);
+            
+            SCILLPersonalChallengesManager.OnPersonalChallengesUpdatedFromServer += OnPersonalChallengesUpdated;
+            SCILLPersonalChallengesManager.OnPersonalChallengeUpdatedFromServer += OnPersonalChallengeUpdated;
         }
 
         // Start is called before the first frame update
@@ -124,12 +127,8 @@ namespace SCILL
         {
             if (SCILLPersonalChallengesManager.Instance.Categories != null)
             {
-                _categories = SCILLPersonalChallengesManager.Instance.Categories;
-                UpdateCategories(_categories);
+                UpdateCategories(SCILLPersonalChallengesManager.Instance.Categories);
             }
-
-            SCILLPersonalChallengesManager.OnPersonalChallengesUpdatedFromServer += OnPersonalChallengesUpdated;
-            SCILLPersonalChallengesManager.OnPersonalChallengeUpdatedFromServer += OnPersonalChallengeUpdated;
         }
 
         private void OnDestroy()
@@ -141,13 +140,16 @@ namespace SCILL
         private void OnPersonalChallengeUpdated(Challenge challenge,
             SCILLPersonalChallengeModificationType modificationtype)
         {
+            Debug.Log("OnPersonalChallengeUpdated");
             UpdateChallenge(challenge);
+            
         }
 
         private void OnPersonalChallengesUpdated(List<ChallengeCategory> categories)
         {
+            Debug.Log("OnPersonalChallengesUpdated");
+            UpdateCategories(categories);
             _categories = categories;
-            UpdateCategories(_categories);
         }
 
 
@@ -162,8 +164,7 @@ namespace SCILL
             var categoriesPromise = SCILLManager.Instance.SCILLClient.GetAllPersonalChallengesAsync();
             categoriesPromise.Then(categories =>
             {
-                _categories = categories;
-                UpdateCategories(categories);
+                OnPersonalChallengesUpdated(categories);
             }).Catch(exception => Debug.LogError("UpdatePersonalChallengesList: " + exception.Message));
         }
 
@@ -176,16 +177,14 @@ namespace SCILL
                 if (_categoryObjects.ContainsKey(categoryID))
                 {
                     categoryItem = _categoryObjects[categoryID];
-                    categoryItem.UpdateCategory(categoryData);
                 }
                 else
                 {
                     categoryItem = Instantiate(categoryPrefab.gameObject, transform, false)
                         .GetComponent<SCILLCategoryItem>();
                     if (categoryItem) _categoryObjects.Add(categoryID, categoryItem);
-                    categoryItem.UpdateCategory(categoryData);
-
                 }
+                categoryItem.UpdateCategory(categoryData);
             }
         }
  
@@ -196,6 +195,7 @@ namespace SCILL
                 if (categoryItem.ContainsChallenge(toUpdate.challenge_id))
                 {
                     categoryItem.UpdateChallenge(toUpdate);
+                    break;
                 }
             }
         }

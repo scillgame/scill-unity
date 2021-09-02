@@ -142,12 +142,12 @@ namespace SCILL
 
             if (null != newChallenge && null != challenge)
             {
-                if (newChallenge.user_challenge_current_score != challenge.user_challenge_current_score)
+                if (challenge.type=="in-progress" && newChallenge.user_challenge_current_score != challenge.user_challenge_current_score)
                 {
                     onChallengeScoreChanged?.Invoke();
                 }
+                // Debug.Log("Current: " + newChallenge.user_challenge_current_score + " Old: " + challenge.user_challenge_current_score);
             }
-            
             
             this.challenge = newChallenge;
             

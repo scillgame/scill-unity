@@ -66,7 +66,7 @@ namespace SCILL
         private void OnDestroy()
         {
             if (SCILLManager.Instance)
-                SCILLManager.Instance.StopChallengeUpdateNotifications(OnChallengeWebhookMessage);
+                SCILLManager.Instance.StopChallengeUpdateNotifications(UpdateChallenge);
         }
 
         /// <summary>
@@ -87,7 +87,7 @@ namespace SCILL
         {
             UpdatePersonalChallengesList();
 
-            SCILLManager.Instance.StartChallengeUpdateNotifications(OnChallengeWebhookMessage);
+            SCILLManager.Instance.StartChallengeUpdateNotifications(UpdateChallenge);
         }
 
         private Challenge FindChallengeById(string id)
@@ -118,16 +118,10 @@ namespace SCILL
         }
 
         private void UpdateChallenge(ChallengeWebhookPayload payload)
-        {   
-            
-            var challenge = FindChallengeById(payload.new_challenge.challenge_id);
-            if (challenge != null)
+        {
+            var oldChallenge = FindChallengeById(payload.new_challenge.challenge_id);
+            if (oldChallenge != null)
             {
-                challenge.type = payload.new_challenge.type;
-                challenge.user_challenge_current_score = payload.new_challenge.user_challenge_current_score;
-                challenge.user_challenge_activated_at = payload.new_challenge.user_challenge_activated_at;
-                challenge.user_challenge_unlocked_at = payload.new_challenge.user_challenge_unlocked_at;
-
                 var type = SCILLPersonalChallengeModificationType.Unknown;
                 if (payload.old_challenge.type != payload.new_challenge.type)
                 {
@@ -145,14 +139,21 @@ namespace SCILL
                         type = SCILLPersonalChallengeModificationType.Progress;
                 }
 
-                OnPersonalChallengeUpdatedFromServer?.Invoke(challenge, type);
-            }
-        }
+                // webhook payload only sends limited information, all else has to be updated from previous challenge data.
+                Challenge newChallenge = payload.new_challenge;
 
-        private void OnChallengeWebhookMessage(ChallengeWebhookPayload payload)
-        {
-            // Debug.Log("Received Challenge Webhook message");
-            UpdateChallenge(payload);
+                newChallenge.challenge_name = oldChallenge.challenge_name;
+                newChallenge.challenge_description = oldChallenge.challenge_description;
+                newChallenge.challenge_duration_time = oldChallenge.challenge_duration_time;
+                newChallenge.live_date = oldChallenge.live_date;
+                newChallenge.challenge_icon = oldChallenge.challenge_icon;
+                newChallenge.challenge_icon_hd = oldChallenge.challenge_icon_hd;
+                newChallenge.challenge_reward = oldChallenge.challenge_reward;
+                newChallenge.repeatable = oldChallenge.repeatable;
+                newChallenge.is_claimed = oldChallenge.is_claimed;
+
+                OnPersonalChallengeUpdatedFromServer?.Invoke(newChallenge, type);
+            }
         }
     }
 }

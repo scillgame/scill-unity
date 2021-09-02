@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 9150730791580321275}
   - component: {fileID: 7474841332959364545}
   - component: {fileID: 1104998596}
-  - component: {fileID: 7599934860924018127}
   m_Layer: 5
   m_Name: SCILLChallengeFlash
   m_TagString: Untagged
@@ -123,15 +122,3 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   Duration: 0.5
---- !u!114 &7599934860924018127
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1553402102498238696}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 799ca36f0b13c7a43bd88782e219e2b0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 

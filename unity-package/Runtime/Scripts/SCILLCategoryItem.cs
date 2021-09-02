@@ -65,8 +65,6 @@ namespace SCILL
 
                 Assert.IsNotNull(challengePrefab, "Challenge Prefab in SCILLCategoryItem is null.");
             }
-
-            UpdateChallengeList();
         }
 
         private void TryGetChallengePrefab()
@@ -75,11 +73,16 @@ namespace SCILL
             if (personalChallenges) challengePrefab = personalChallenges.challengePrefab;
         }
 
+        /// <summary>
+        ///     Call this function to update the UI if category data has been changed. The <see cref="SCILLPersonalChallenges" /> script always
+        ///     calls this function once data has been changed, either because of user interactions or incoming real time update
+        ///     messages.
+        /// </summary>
         public void UpdateCategory(ChallengeCategory updatedCategoryData)
         {
             if (updatedCategoryData == null) return;
+            UpdateChallengeList(updatedCategoryData);
             _category = updatedCategoryData;
-            UpdateChallengeList();
         }
 
         /// <summary>
@@ -106,6 +109,31 @@ namespace SCILL
                 SCILLChallengeItem challengeItem = _challengeObjects[challengeID];
                 if (challengeItem) challengeItem.UpdateChallenge(updatedChallengeData);
             }
+            else
+            {
+                InstantiateNewChallengeItem(updatedChallengeData);
+            }
+        }
+
+        private void InstantiateNewChallengeItem(Challenge updatedChallengeData)
+        {
+            string challengeID = updatedChallengeData.challenge_id;
+            if (!challengePrefab)
+                TryGetChallengePrefab();
+
+            if (challengePrefab)
+            {
+                GameObject go = Instantiate(challengePrefab.gameObject,
+                    challengesContainer ? challengesContainer : transform, false);
+                if (go)
+                {
+                    SCILLChallengeItem challengeItem =
+                        go.GetComponent<SCILLChallengeItem>();
+                    if (challengeItem) challengeItem.UpdateChallenge(updatedChallengeData);
+
+                    _challengeObjects.Add(challengeID, challengeItem);
+                }
+            }
         }
 
         /// <summary>
@@ -113,34 +141,13 @@ namespace SCILL
         ///     calls this function once data has been changed, either because of user interactions or incoming real time update
         ///     messages.
         /// </summary>
-        public void UpdateChallengeList()
+        public void UpdateChallengeList(ChallengeCategory updatedCategoryData)
         {
-            foreach (Challenge challenge in _category.challenges)
+            if (null != updatedCategoryData)
             {
-                string challengeID = challenge.challenge_id;
-                if (_challengeObjects.ContainsKey(challengeID))
+                foreach (Challenge challenge in updatedCategoryData.challenges)
                 {
                     UpdateChallenge(challenge);
-                }
-                else
-                {
-                    if(!challengePrefab)
-                        TryGetChallengePrefab();
-
-                    if (challengePrefab)
-                    {
-                        GameObject go = Instantiate(challengePrefab.gameObject,
-                            challengesContainer ? challengesContainer : transform, false);
-                        if (go)
-                        {
-                            SCILLChallengeItem challengeItem =
-                                go.GetComponent<SCILLChallengeItem>();
-                            if (challengeItem) challengeItem.UpdateChallenge(challenge);
-
-                            _challengeObjects.Add(challengeID, challengeItem);
-                        }
-                    }
-                    
                 }
             }
         }
