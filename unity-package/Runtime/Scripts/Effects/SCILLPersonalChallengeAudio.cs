@@ -34,13 +34,5 @@ namespace SCILL.Effects
                 Play(audioSettings.ChallengeUpdatedSound);
             }
         }
-
-        private void Play(AudioClip feedbackAudioClip)
-        {
-            if (feedbackAudioClip && audioSource)
-            {
-                audioSource.PlayOneShot(feedbackAudioClip);
-            }
-        }
     }
 }

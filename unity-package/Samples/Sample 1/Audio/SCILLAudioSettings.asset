@@ -32,3 +32,5 @@ MonoBehaviour:
     type: 3}
   <BattlePassLevelChallengeUpdatedSound>k__BackingField: {fileID: 8300000, guid: 153818d451159e2499b07d5bcb93ed18,
     type: 3}
+  <LeaderboardUserRankingUpdatedSound>k__BackingField: {fileID: 8300000, guid: 11def009d8124104b8699c495a3ff30b,
+    type: 3}

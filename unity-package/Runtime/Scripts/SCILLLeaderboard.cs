@@ -264,7 +264,7 @@ namespace SCILL
 
         protected virtual void OnLeaderboardUpdated(LeaderboardUpdatePayload payload)
         {
-            // Make sure this this leaderboard has been updated
+            // Make sure this  leaderboard has been updated
             if (payload.leaderboard_data.leaderboard_id != leaderboardId) return;
 
             RequestFullLeaderboardReload();

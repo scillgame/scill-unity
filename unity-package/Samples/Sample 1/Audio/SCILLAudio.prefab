@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 1688819204911921096}
   - component: {fileID: 601087721}
   - component: {fileID: 601087722}
+  - component: {fileID: 1205020141}
   m_Layer: 0
   m_Name: SCILLAudio
   m_TagString: Untagged
@@ -46,7 +47,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 0.25
+  m_Volume: 0.15
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -182,3 +183,18 @@ MonoBehaviour:
   onLevelCompleted:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1205020141
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1688819204911921098}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d07eb49bacdd97f40a44e178cf151cf1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  audioSource: {fileID: 1688819204911921097}
+  audioSettings: {fileID: 11400000, guid: 3830be5c1a2119b4cb7005867f567eb1, type: 2}
+  leaderboardID: 671385819804106763

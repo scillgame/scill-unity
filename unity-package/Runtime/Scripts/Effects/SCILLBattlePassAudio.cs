@@ -11,8 +11,9 @@ namespace SCILL.Effects
     {
         private SCILLBattlePassEvents _bpEvents;
 
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             _bpEvents = GetComponent<SCILLBattlePassEvents>();
             Assert.IsNotNull(_bpEvents, "SCILLBattlePassAudio Script on object " + gameObject.name + " requires a SCILLBattlePassEvents script.");
         }
@@ -53,15 +54,6 @@ namespace SCILL.Effects
         private void OnBattlePassLevelRewardClaimed(BattlePassLevel level)
         {
             Play(audioSettings.BattlePassLevelRewardClaimedSound);
-        }
-
-        
-        private void Play(AudioClip feedbackAudioClip)
-        {
-            if (feedbackAudioClip && audioSource)
-            {
-                audioSource.PlayOneShot(feedbackAudioClip);
-            }
         }
     }
 }

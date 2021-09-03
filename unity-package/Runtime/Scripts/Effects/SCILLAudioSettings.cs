@@ -24,6 +24,10 @@ namespace SCILL.Effects
         [field: SerializeField] public AudioClip BattlePassLevelRewardClaimedSound { get; private set; }
         [field: SerializeField] public AudioClip BattlePassLevelChallengeUpdatedSound { get; private set; }
 
+        [field: Header("LeaderboardSounds Sounds")]
+        [field: SerializeField]
+        public AudioClip LeaderboardUserRankingUpdatedSound { get; private set; }
+
 
         private Dictionary<string, AudioClip> _challengeClips = new Dictionary<string, AudioClip>();
 

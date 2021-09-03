@@ -1,5 +1,6 @@
 ﻿using SCILL.Model;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
@@ -54,6 +55,10 @@ namespace SCILL
         /// </summary>
         public string avatarResourcesPath = "Avatars/";
 
+
+        [SerializeField] private UnityEvent onRankingChanged;
+        
+
         private int _numberOfDecimals;
 
         private LeaderboardRanking _ranking;
@@ -64,11 +69,20 @@ namespace SCILL
         public LeaderboardRanking ranking
         {
             get => _ranking;
-            set
+            set => UpdateRanking(value);
+        }
+
+        public void UpdateRanking(LeaderboardRanking newRanking)
+        {
+            LeaderboardRanking oldRanking = _ranking;
+            _ranking = newRanking;
+
+            if (null != oldRanking && oldRanking.rank != newRanking.rank)
             {
-                _ranking = value;
-                UpdateUI();
+                onRankingChanged.Invoke();
             }
+            
+            UpdateUI();
         }
 
         /// <summary>
