@@ -106,13 +106,12 @@ namespace SCILL
         /// </summary>
         public Button cancelButton;
 
-        private Challenge _challenge;
-        public Challenge challenge
-        {
-            get => _challenge;
-            private set => _challenge = value;
-        }
+        public Challenge challenge { get; set; }
 
+        /// <summary>
+        /// <para><c>UnityEvent</c> that gets called when the score of the challenge, which this <c>SCILLChallengeItem</c> represents, changes. Can be used e.g. for triggering UI effects.</para>
+        /// <para>For an example of how to use this event, take a look at the <c>Personal Challenge With Effects</c> prefab in the Samples.</para>
+        /// </summary>
         public UnityEvent onChallengeScoreChanged;
 
         // Start is called before the first frame update
@@ -137,27 +136,48 @@ namespace SCILL
             }
         }
 
-        public void UpdateChallenge(Challenge newChallenge)
+        /// <summary>
+        /// Triggers an UI update. This is done automatically whenever the challenge changes. However, you might also want to trigger an update of the UI manually.
+        /// </summary>
+        /// <param name="newChallengeData">New Challenge Data.</param>
+        public void UpdateChallenge(Challenge newChallengeData)
         {
-
-            if (null != newChallenge && null != challenge)
+            if (null != newChallengeData && null != challenge)
             {
-                if (challenge.type=="in-progress" && newChallenge.user_challenge_current_score != challenge.user_challenge_current_score)
+                if (challenge.type == "in-progress" && newChallengeData.user_challenge_current_score !=
+                    challenge.user_challenge_current_score)
                 {
                     onChallengeScoreChanged?.Invoke();
                 }
             }
-            
-            this.challenge = newChallenge;
-            
-            if (challenge == null) return;
+
+            if (null == challenge)
+            {
+                challenge = newChallengeData;
+            }
+
+            if (null == challenge || null == newChallengeData) return;
+
+            // webhook payload only sends limited information, all else has to be updated from previous challenge data.
+            challenge.challenge_goal = newChallengeData.challenge_goal;
+            challenge.user_challenge_current_score = newChallengeData.user_challenge_current_score;
+            challenge.challenge_price = newChallengeData.challenge_price;
+            challenge.challenge_goal_condition = newChallengeData.challenge_goal_condition;
+            challenge.challenge_xp = newChallengeData.challenge_xp;
+            challenge.type = newChallengeData.type;
+            challenge.is_claimed = newChallengeData.is_claimed;
+            challenge.user_challenge_unlocked_at = newChallengeData.user_challenge_unlocked_at;
+            challenge.user_challenge_activated_at = newChallengeData.user_challenge_activated_at;
+            challenge.user_challenge_is_claimed = newChallengeData.user_challenge_is_claimed;
+            challenge.user_challenge_status = newChallengeData.user_challenge_status;
+
 
             if (challengeName) challengeName.text = challenge.challenge_name;
             if (challenge.challenge_goal > 0)
                 if (challengeProgressSlider)
                     if (challenge.user_challenge_current_score != null)
-                        challengeProgressSlider.value = (float) challenge.user_challenge_current_score /
-                                                        (float) challenge.challenge_goal;
+                        challengeProgressSlider.value = (float)challenge.user_challenge_current_score /
+                                                        (float)challenge.challenge_goal;
 
             if (challengeGoal)
                 challengeGoal.text = challenge.user_challenge_current_score + "/" +
@@ -171,7 +191,6 @@ namespace SCILL
                 if (claimButton) claimButton.gameObject.SetActive(false);
                 if (cancelButton) cancelButton.gameObject.SetActive(false);
                 if (challengeProgress) challengeProgress.gameObject.SetActive(false);
-                
             }
             else if (challenge.type == "unlocked")
             {
@@ -181,11 +200,9 @@ namespace SCILL
                 if (claimButton) claimButton.gameObject.SetActive(false);
                 if (cancelButton) cancelButton.gameObject.SetActive(false);
                 if (challengeProgress) challengeProgress.gameObject.SetActive(false);
-
             }
             else if (challenge.type == "in-progress")
             {
-
                 if (challengeProgress) challengeProgress.gameObject.SetActive(true);
                 if (actions) actions.gameObject.SetActive(true);
                 if (unlockButton) unlockButton.gameObject.SetActive(false);
@@ -196,7 +213,7 @@ namespace SCILL
                 var timeText = "";
                 var date = DateTime.Parse(challenge.user_challenge_activated_at);
                 if (challenge.challenge_duration_time != null)
-                    date = date.AddMinutes((double) challenge.challenge_duration_time);
+                    date = date.AddMinutes((double)challenge.challenge_duration_time);
 
                 var now = DateTime.Now;
                 var diff = date.Subtract(now);

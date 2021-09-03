@@ -154,6 +154,7 @@ namespace SCILL
         {
             foreach (var child in GetComponentsInChildren<SCILLBattlePassLevel>()) Destroy(child.gameObject);
 
+            
             _levels = battlePassLevels;
             UpdateBattlePassLevelUI();
 
@@ -191,7 +192,9 @@ namespace SCILL
                         if (_levels[levelIndex].level_completed == true)
                             levelGO = Instantiate(levelPrefab.gameObject, transform, false);
                         else
+                        {
                             levelGO = Instantiate(currentLevelPrefab.gameObject, transform, false);
+                        }
                     }
                     else
                     {
@@ -216,6 +219,8 @@ namespace SCILL
                     }
                 }
             }
+
+            
         }
 
         /// <summary>

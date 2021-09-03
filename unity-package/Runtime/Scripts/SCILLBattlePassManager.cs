@@ -383,15 +383,12 @@ namespace SCILL
         /// </summary>
         public void UpdateBattlePassLevelsFromServer()
         {
-            NumUpdateRequests++;
-
-            if (NumUpdateRequests > 1) return;
-
             SendUpdateRequest();
         }
 
         private void SendUpdateRequest()
         {
+
             var levelsPromise =
                 SCILLManager.Instance.SCILLClient.GetBattlePassLevelsAsync(SelectedBattlePass.battle_pass_id);
             // Debug.Log("Requested BP Update from Server");
@@ -400,17 +397,19 @@ namespace SCILL
             {
                 BattlePassLevels = levels;
 
-                var numBattlePassLevels = null == BattlePassLevels ? 0 : BattlePassLevels.Count;
+                // var numBattlePassLevels = null == BattlePassLevels ? 0 : BattlePassLevels.Count;
                 // Debug.Log($"Received BP Update from server with {numBattlePassLevels} entries");
 
                 // If we have not selected a battle pass level, let's pick the current one
                 if (_selectedBattlePassLevelIndex == 0) SelectedBattlePassLevelIndex = GetCurrentBattlePassLevelIndex();
+                
+                
 
                 OnBattlePassLevelsUpdatedFromServer?.Invoke(levels);
 
-                NumUpdateRequests--;
-                if (NumUpdateRequests > 0)
-                    SendUpdateRequest();
+            }).Catch(exception =>
+            {
+                Debug.LogError(exception.Message);
             });
         }
 
@@ -452,17 +451,28 @@ namespace SCILL
             {
                 // Check if the challenge is still in-progress. If not, we need to reload the levels to update
                 // current state - as change is not isolated to one challenge
-                if (payload.new_battle_pass_challenge.type == "in-progress")
+                if (payload.new_battle_pass_challenge is { type: "in-progress" })
                     // Inform all delegates of the challenge update
                     OnBattlePassChallengeUpdate?.Invoke(payload);
                 else
                     // Reload the levels from the server and update UI
-                    UpdateBattlePassLevelsFromServer();
+                    StartCoroutine(SendMultipleLevelUpdateRequests());
             }
             else
             {
-                // Reload the levels from the server and update UI
-                UpdateBattlePassLevelsFromServer();
+                // Reload the levels from the server and update UI. Send multiple requests to ensure that newest Level was activated.
+                StartCoroutine(SendMultipleLevelUpdateRequests());
+            }
+        }
+        private IEnumerator SendMultipleLevelUpdateRequests(int numRequests = 2, float duration = 0.2f)
+        {
+            SendUpdateRequest();
+            int numSentRequests = 1;
+            while (numSentRequests < numRequests)
+            {
+                yield return new WaitForSeconds(duration);
+                SendUpdateRequest();
+                numSentRequests++;
             }
         }
 

@@ -9,8 +9,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1688819204911921103}
-  - component: {fileID: 1688819204911921096}
   - component: {fileID: 1688819204911921097}
+  - component: {fileID: 1688819204911921096}
+  - component: {fileID: 601087721}
+  - component: {fileID: 601087722}
   m_Layer: 0
   m_Name: SCILLAudio
   m_TagString: Untagged
@@ -32,20 +34,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1688819204911921096
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1688819204911921098}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2f6ad1119fe497246af244a4911cc9f0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  audioSource: {fileID: 1688819204911921097}
-  audioSettings: {fileID: 11400000, guid: 3830be5c1a2119b4cb7005867f567eb1, type: 2}
 --- !u!82 &1688819204911921097
 AudioSource:
   m_ObjectHideFlags: 0
@@ -142,3 +130,55 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &1688819204911921096
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1688819204911921098}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f6ad1119fe497246af244a4911cc9f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  audioSource: {fileID: 1688819204911921097}
+  audioSettings: {fileID: 11400000, guid: 3830be5c1a2119b4cb7005867f567eb1, type: 2}
+--- !u!114 &601087721
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1688819204911921098}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c4eda60d7f204244e9abf84c14c78dca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  audioSource: {fileID: 1688819204911921097}
+  audioSettings: {fileID: 11400000, guid: 3830be5c1a2119b4cb7005867f567eb1, type: 2}
+--- !u!114 &601087722
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1688819204911921098}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 270276b7b6cee2448a8820a9c91c74d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onUnlocked:
+    m_PersistentCalls:
+      m_Calls: []
+  onChallengeProgressUpdated:
+    m_PersistentCalls:
+      m_Calls: []
+  onLevelRewardClaimed:
+    m_PersistentCalls:
+      m_Calls: []
+  onLevelCompleted:
+    m_PersistentCalls:
+      m_Calls: []

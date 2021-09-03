@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 7474841332959364545}
   - component: {fileID: 1104998596}
   m_Layer: 5
-  m_Name: SCILLChallengeFlash
+  m_Name: Effect_SCILLUIFlash
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

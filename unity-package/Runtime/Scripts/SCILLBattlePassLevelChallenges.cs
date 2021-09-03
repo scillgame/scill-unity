@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using SCILL.Model;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.UI;
 
 namespace SCILL
@@ -66,20 +67,22 @@ namespace SCILL
         [Tooltip("A text field that will contain the challenge stats in the form 1/2")]
         public Text challengeStats;
 
-        private BattlePassLevel battlePassLevel;
+        private BattlePassLevel battlePassLevel { get; set; }
 
         private void Awake()
         {
-            if (!challengePrefab)
-                Debug.LogError("SCILL Battle Pass Challenges: You need to assign a prefab to challengePrefab");
-
+            
+            Assert.IsNotNull(challengePrefab, "SCILL Battle Pass Challenges: You need to assign a prefab to challengePrefab");
+            Assert.IsNotNull(completedChallengePrefab, "SCILL Battle Pass Challenges: You need to assign a prefab to completedChallengePrefab");
+            
             ClearChallenges();
         }
 
         // Start is called before the first frame update
         private void Start()
         {
-            OnBattlePassLevelsUpdatedFromServer(SCILLBattlePassManager.Instance.BattlePassLevels);
+            if(SCILLBattlePassManager.Instance)
+                OnBattlePassLevelsUpdatedFromServer(SCILLBattlePassManager.Instance.BattlePassLevels);
         }
 
         // Update is called once per frame
@@ -100,10 +103,13 @@ namespace SCILL
         private void OnBattlePassLevelsUpdatedFromServer(List<BattlePassLevel> battlePassLevels)
         {
             if (battlePassLevels == null || battlePassLevels.Count <= 0) return;
-
+            
             var currentLevelIndex = SCILLBattlePassManager.Instance.GetCurrentBattlePassLevelIndex();
-            battlePassLevel = battlePassLevels[currentLevelIndex];
-            UpdateChallengeList();
+            if (currentLevelIndex > -1 && currentLevelIndex < battlePassLevels.Count)
+            {
+                battlePassLevel = battlePassLevels[currentLevelIndex];
+                UpdateChallengeList();
+            }
         }
 
         /// <summary>
@@ -124,16 +130,19 @@ namespace SCILL
         /// </summary>
         protected virtual void UpdateChallengeList()
         {
+
             // Make sure we remove old challenges from the list
             ClearChallenges();
 
             // If there is no level or it's not activated yet, don't show anything
-            if (battlePassLevel == null || battlePassLevel.activated_at == null) return;
+            if (battlePassLevel == null) return;
+
 
             var numberOfChallengesShown = 0;
             var numberOfChallengesCompleted = 0;
             foreach (var challenge in battlePassLevel.challenges)
             {
+
                 numberOfChallengesShown++;
 
                 // Only add active challenges to the list
@@ -148,8 +157,7 @@ namespace SCILL
                         var challengeItem = challengeGO.GetComponent<SCILLBattlePassChallengeItem>();
                         if (challengeItem)
                         {
-                            challengeItem.challenge = challenge;
-                            challengeItem.UpdateUI();
+                            challengeItem.UpdateChallenge(challenge);
                         }
                     }
                 }
@@ -159,8 +167,7 @@ namespace SCILL
                     var challengeItem = challengeGO.GetComponent<SCILLBattlePassChallengeItem>();
                     if (challengeItem)
                     {
-                        challengeItem.challenge = challenge;
-                        challengeItem.UpdateUI();
+                        challengeItem.UpdateChallenge(challenge);
                     }
                 }
             }

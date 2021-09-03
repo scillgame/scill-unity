@@ -1,5 +1,6 @@
 ﻿using SCILL.Model;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace SCILL
@@ -61,7 +62,23 @@ namespace SCILL
         [Tooltip("An image component that will be used to render the challenge icon")]
         public Image challengeIcon;
 
-        public BattlePassLevelChallenge challenge;
+
+        public BattlePassLevelChallenge challenge { get; set; }
+
+        /// <summary>
+        /// <para><c>UnityEvent</c> that gets called when the score of the challenge, which this <c>SCILLBattlePassChallengeItem</c> represents, changes. Can be used e.g. for triggering UI effects.</para>
+        /// 
+        ///<para>For an example of how to use this event, take a look at the <c>Battle Pass Challenge With Effects</c> prefab in the Samples.</para>
+        /// 
+        /// </summary>
+        public UnityEvent onChallengeScoreChanged;
+
+        /// <summary>
+        /// <para><c>UnityEvent</c> that gets called when the challenge is finished.</para>
+        ///
+        /// <para>For an example of how to use this event, take a look at the <c>Battle Pass Challenge Completed With Effects</c> prefab in the Samples.</para>
+        /// </summary>
+        public UnityEvent onChallengeFinished;
 
         // Start is called before the first frame update
         private void Start()
@@ -82,13 +99,58 @@ namespace SCILL
         private void OnBattlePassChallengeUpdate(BattlePassChallengeChangedPayload challengeChangedPayload)
         {
             // Update local challenge object if it has the same id
-            if (challengeChangedPayload.new_battle_pass_challenge.challenge_id == challenge.challenge_id)
+            BattlePassChallengeState newBattlePassChallenge = challengeChangedPayload.new_battle_pass_challenge;
+            if (newBattlePassChallenge.challenge_id == challenge.challenge_id)
             {
-                challenge.type = challengeChangedPayload.new_battle_pass_challenge.type;
+                BroadcastEvents(newBattlePassChallenge);
+
+                challenge.type = newBattlePassChallenge.type;
                 challenge.user_challenge_current_score =
-                    challengeChangedPayload.new_battle_pass_challenge.user_challenge_current_score;
+                    newBattlePassChallenge.user_challenge_current_score;
                 UpdateUI();
             }
+        }
+
+        private void BroadcastEvents(BattlePassChallengeState newChallenge)
+        {
+            if (null != newChallenge)
+            {
+                BroadcastEvents(newChallenge.user_challenge_current_score, newChallenge.type);
+            }
+        }
+
+        private void BroadcastEvents(BattlePassLevelChallenge newChallenge)
+        {
+            if (null != newChallenge)
+            {
+                BroadcastEvents(newChallenge.user_challenge_current_score, newChallenge.type);
+            }
+        }
+
+        private void BroadcastEvents(int? newScore, string newType)
+        {
+            if ("finished" == newType)
+            {
+                onChallengeFinished.Invoke();
+            }
+            
+            if (null == challenge)
+                return;
+
+            if (newType == "in-progress" && newScore.HasValue && challenge.user_challenge_current_score != newScore)
+                onChallengeScoreChanged.Invoke();
+
+        }
+
+        /// <summary>
+        /// Updates the Battle Pass Challenge Data, Broadcasts Events and triggers an UI update.
+        /// </summary>
+        /// <param name="newChallengeData">The new challenge data structure.</param>
+        public virtual void UpdateChallenge(BattlePassLevelChallenge newChallengeData)
+        {
+            BroadcastEvents(newChallengeData);
+            challenge = newChallengeData;
+            UpdateUI();
         }
 
         /// <summary>
@@ -111,14 +173,14 @@ namespace SCILL
                         // If the challenge_goal_condition is 0 then counter must be greater than the goal, so progress is the
                         // relation between the counter and the goal
 
-                        challengeProgressSlider.value = (float) challenge.user_challenge_current_score /
-                                                        (float) challenge.challenge_goal;
+                        challengeProgressSlider.value = (float)challenge.user_challenge_current_score /
+                                                        (float)challenge.challenge_goal;
                     else if (challenge.challenge_goal_condition == 1)
                         // If the challenge_goal_condition is 1 then counter must be smaller than the goal, so progress is the
                         // inverted relation between the counter and the goal
 
-                        challengeProgressSlider.value = 1.0f / ((float) challenge.user_challenge_current_score /
-                                                                (float) challenge.challenge_goal);
+                        challengeProgressSlider.value = 1.0f / ((float)challenge.user_challenge_current_score /
+                                                                (float)challenge.challenge_goal);
                 }
                 else
                 {

@@ -1,19 +1,46 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using SCILL.Model;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace SCILL.Effects
 {
+    [RequireComponent(typeof(SCILLBattlePassEvents))]
     public class SCILLBattlePassAudio : SCILLAudioBase
     {
-        protected Dictionary<string, List<BattlePassLevel>> StoredBattlePassLevels =
-            new Dictionary<string, List<BattlePassLevel>>();
+        private SCILLBattlePassEvents _bpEvents;
+
+        private void Awake()
+        {
+            _bpEvents = GetComponent<SCILLBattlePassEvents>();
+            Assert.IsNotNull(_bpEvents, "SCILLBattlePassAudio Script on object " + gameObject.name + " requires a SCILLBattlePassEvents script.");
+        }
 
         protected void OnEnable()
         {
-            SCILLBattlePassManager.OnBattlePassLevelsUpdatedFromServer += BattlePassLevelsUpdated;
-            SCILLBattlePassManager.OnBattlePassLevelRewardClaimed += OnBattlePassLevelRewardClaimed;
             SCILLBattlePassManager.OnBattlePassChallengeUpdate += OnBattlePassChallengeUpdate;
+            SCILLBattlePassManager.OnBattlePassLevelRewardClaimed += OnBattlePassLevelRewardClaimed;
+            _bpEvents.onUnlocked.AddListener(OnBattlePassUnlocked);
+            _bpEvents.onLevelCompleted.AddListener(OnLevelCompleted);
+        }
+        
+        protected void OnDisable()
+        {
+            SCILLBattlePassManager.OnBattlePassChallengeUpdate -= OnBattlePassChallengeUpdate;
+            SCILLBattlePassManager.OnBattlePassLevelRewardClaimed -= OnBattlePassLevelRewardClaimed;
+            _bpEvents.onUnlocked.RemoveListener(OnBattlePassUnlocked);
+            _bpEvents.onLevelCompleted.RemoveListener(OnLevelCompleted);
+        }
+
+        private void OnLevelCompleted()
+        {
+            Play(audioSettings.BattlePassLevelCompletedSound);
+        }
+
+        private void OnBattlePassUnlocked()
+        {
+            Play(audioSettings.BattlePassUnlockedSound);
         }
 
         private void OnBattlePassChallengeUpdate(BattlePassChallengeChangedPayload challengechangedpayload)
@@ -21,60 +48,14 @@ namespace SCILL.Effects
             Play(audioSettings.BattlePassLevelChallengeUpdatedSound);
         }
 
-        protected void OnDisable()
-        {
-            SCILLBattlePassManager.OnBattlePassLevelsUpdatedFromServer -= BattlePassLevelsUpdated;
-            SCILLBattlePassManager.OnBattlePassLevelRewardClaimed -= OnBattlePassLevelRewardClaimed;
-        }
+        
 
         private void OnBattlePassLevelRewardClaimed(BattlePassLevel level)
         {
             Play(audioSettings.BattlePassLevelRewardClaimedSound);
         }
 
-
-        private void BattlePassLevelsUpdated(List<BattlePassLevel> currentBpLevels)
-        {
-            AudioClip feedbackAudioClip = null;
-
-            if (currentBpLevels.Count > 0)
-            {
-                string battlePassID = currentBpLevels[0].battle_pass_id;
-                if (StoredBattlePassLevels.ContainsKey(battlePassID) && null != StoredBattlePassLevels[battlePassID])
-                {
-                    // initialize feedback clip with update sound
-                    List<BattlePassLevel> previousBattlePassLevels = StoredBattlePassLevels[battlePassID];
-                    for (int bpLevelID = 0; bpLevelID < currentBpLevels.Count; bpLevelID++)
-                    {
-                        BattlePassLevel currentBpLevel = currentBpLevels[bpLevelID];
-                        BattlePassLevel previousBpLevel = previousBattlePassLevels[bpLevelID];
-
-
-                        // Check if was unlocked
-                        bool wasBpUnlocked =
-                            null == previousBpLevel.activated_at && null != currentBpLevel.activated_at;
-                        if (wasBpUnlocked)
-                        {
-                            feedbackAudioClip = audioSettings.BattlePassUnlockedSound;
-                        }
-
-                        // check if level was completed
-                        bool wasLevelCompleted = currentBpLevel.level_completed !=
-                                                 previousBpLevel.level_completed;
-                        if (wasLevelCompleted)
-                        {
-                            feedbackAudioClip = audioSettings.BattlePassLevelCompletedSound;
-                        }
-
-                    }
-                }
-
-                StoredBattlePassLevels[battlePassID] = currentBpLevels;
-            }
-            
-            Play(feedbackAudioClip);
-        }
-
+        
         private void Play(AudioClip feedbackAudioClip)
         {
             if (feedbackAudioClip && audioSource)
