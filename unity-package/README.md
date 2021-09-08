@@ -16,15 +16,21 @@ Developer documentation can be found here: [https://developers.scillgame.com](ht
 
 ## Getting Started
 
-To add the Package using the Unity Package Manager:
+You can install the SDK using different methods:
 
-### Unity 2020.1.a21 and newer
+### Package Manager: Adding from git URL
 
-Use "add a package from git URL..." and use this URL: https://github.com/crystal-mesh/scill-unity.git?path=/unity-package
+Use "add a package from git URL..." with this URL: https://github.com/crystal-mesh/scill-unity.git?path=/unity-package
 
-### Older than Unity 2020.1.a21
+### Package Manager: Adding from disk
 
 Clone the repository to your local disk and use "add package from disk...". Navigate to "repository-path/unity-package" and select the package.json file.
+
+### Unity Package
+
+You can download the SCILL Unity SDK as a .unitypackage from our Github releases page at https://github.com/scillgame/scill-unity/releases/latest
+
+Because Unity does not resolve dependencies automatically when importing Assets as a `.unitypackage`, you will need to ensure that Unity’s Newtonsoft-JSON package has been added to your project. To add the Newtonsoft package to your project, navigate to the Package Manager by using the `Window` -> `Package Manager` menu. In the Package Manager window, click on the + button, choose `Add package from git URL ...` and enter the package reference: `com.unity.nuget.newtonsoft-json`
 
 ## Documentation
 
