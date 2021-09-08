@@ -186,7 +186,6 @@ namespace SCILL
 
         private bool _allContentLoaded;
 
-        private float _contentSize;
 
         private ScrollRect _scrollRect;
 
@@ -307,7 +306,6 @@ namespace SCILL
         {
             CurrentPage = 1;
             _allContentLoaded = false;
-            _contentSize = 0;
 
             if (SCILLManager.Instance == null || null == SCILLManager.Instance.SCILLClient) return;
 

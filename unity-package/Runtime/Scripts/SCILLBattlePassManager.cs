@@ -451,7 +451,7 @@ namespace SCILL
             {
                 // Check if the challenge is still in-progress. If not, we need to reload the levels to update
                 // current state - as change is not isolated to one challenge
-                if (payload.new_battle_pass_challenge is { type: "in-progress" })
+                if (payload.new_battle_pass_challenge.type == "in-progress")
                     // Inform all delegates of the challenge update
                     OnBattlePassChallengeUpdate?.Invoke(payload);
                 else
