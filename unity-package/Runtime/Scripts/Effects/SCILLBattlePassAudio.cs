@@ -8,14 +8,29 @@ namespace SCILL.Effects
 {
     /// <summary>
     /// Sample script for playing feedback audio clips on Battle Pass realtime events. 
-    /// Uses the data provided by the <see cref="audioSettings"/> scriptable object to play sound effects for events fired off by the <see cref="SCILLBattlePassEvents"/> script.
+    /// Uses the data provided by the <see cref="AudioSettings"/> scriptable object to play sound effects for events which are invoked by the <see cref="SCILLBattlePassEvents"/> script.
     /// </summary>
     public class SCILLBattlePassAudio : SCILLAudioBase
     {
         /// <summary>
-        /// Sounds will be played based on the events provided by this <see cref="SCILLBattlePassEvents"/> script.
+        /// Sound effects will be played based on the events provided by this <see cref="SCILLBattlePassEvents"/> script.
         /// </summary>
         [SerializeField] private SCILLBattlePassEvents _bpEvents;
+        
+        /// <summary>
+        /// Accessor for the <see cref="SCILLBattlePassEvents"/> script.
+        /// </summary>
+        protected SCILLBattlePassEvents BattlePassEventScript{
+            get
+            {
+                return _bpEvents;
+            }
+
+            set
+            {
+                _bpEvents = value;
+            }
+        }
 
         protected override void Awake()
         {

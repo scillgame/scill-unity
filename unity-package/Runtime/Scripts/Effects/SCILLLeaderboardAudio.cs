@@ -6,11 +6,22 @@ using SCILL.Effects;
 using SCILL.Model;
 using UnityEngine;
 
+
+/// <summary>
+/// Sample script for playing feedback audio clips on Leaderboard realtime events. 
+/// Uses the data provided by the <see cref="AudioSettings"/> scriptable object to play sound effects for events fired off by the <see cref="SCILLBattlePassEvents"/> script.
+/// <remarks>
+/// This script will only play effects for the leaderboard identified by the <see cref="leaderboardID"/>.
+/// </remarks>
+/// </summary>
 public class SCILLLeaderboardAudio : SCILLAudioBase
 {
+    /// <summary>
+    /// Id of the leaderboard for which the sound effects should be played.
+    /// </summary>
     [SerializeField] private string leaderboardID;
 
-    private void OnEnable()
+    protected virtual void OnEnable()
     {
         if (SCILLManager.Instance)
         {
@@ -22,13 +33,16 @@ public class SCILLLeaderboardAudio : SCILLAudioBase
         }
     }
 
-    private void OnDisable()
+    protected virtual void OnDisable()
     {
         SCILLManager.OnSCILLManagerReady -= RegisterToNotifications;
         UnRegisterFromNotifications();
     }
 
-    private void RegisterToNotifications()
+    /// <summary>
+    /// Start listening to leaderboard update notifications for the leaderboard with the id <see cref="leaderboardID"/>.
+    /// </summary>
+    protected virtual void RegisterToNotifications()
     {
         if (!string.IsNullOrEmpty(leaderboardID))
         {
@@ -36,7 +50,10 @@ public class SCILLLeaderboardAudio : SCILLAudioBase
         }
     }
 
-    private void UnRegisterFromNotifications()
+    /// <summary>
+    /// Stop listening to leaderboard update notifications for the leaderboard with the id <see cref="leaderboardID"/>.
+    /// </summary>
+    protected virtual void UnRegisterFromNotifications()
     {
         if (!string.IsNullOrEmpty(leaderboardID))
         {
@@ -44,7 +61,12 @@ public class SCILLLeaderboardAudio : SCILLAudioBase
         }
     }
 
-    private void OnLeaderboardUpdate(LeaderboardUpdatePayload payload)
+    /// <summary>
+    /// Called on updates to the leaderboard. Will check if the current user's ranking has changed and if yes,
+    /// it will play the audio clip referenced in the <see cref="AudioSettings"/> object.
+    /// </summary>
+    /// <param name="payload">Realtime update data.</param>
+    protected virtual void OnLeaderboardUpdate(LeaderboardUpdatePayload payload)
     {
         if (payload.leaderboard_data.leaderboard_id == leaderboardID)
         {

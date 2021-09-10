@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using SCILL.Model;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -51,13 +52,13 @@ namespace SCILL
             "Challenges instantiated will be added as children into this transform if set, otherwise it will be directly added as child to this game object.")]
         public Transform challengesContainer;
 
-        private readonly Dictionary<string, SCILLChallengeItem> _challengeObjects =
+        protected readonly Dictionary<string, SCILLChallengeItem> _challengeObjects =
             new Dictionary<string, SCILLChallengeItem>();
 
-        private ChallengeCategory _category;
+        protected ChallengeCategory _category;
 
         // Start is called before the first frame update
-        private void Start()
+        protected virtual void Start()
         {
             if (challengePrefab == null)
             {
@@ -78,10 +79,14 @@ namespace SCILL
         ///     calls this function once data has been changed, either because of user interactions or incoming real time update
         ///     messages.
         /// </summary>
-        public void UpdateCategory(ChallengeCategory updatedCategoryData)
+        public virtual void UpdateCategory(ChallengeCategory updatedCategoryData)
         {
             if (updatedCategoryData == null) return;
-            UpdateChallengeList(updatedCategoryData);
+            
+            if(categoryName)
+                categoryName.text = updatedCategoryData.category_name;
+            
+            UpdateChallengeList(updatedCategoryData.challenges);
             _category = updatedCategoryData;
         }
 
@@ -89,7 +94,7 @@ namespace SCILL
         ///     Connect a click event of a toggle button to this function to hide all children of this category object (or the
         ///     <see cref="challengesContainer" />) if <see cref="expanded" /> is <c>false</c>, otherwise show them.
         /// </summary>
-        public void OnToggleExpanded()
+        public virtual void OnToggleExpanded()
         {
             expanded = !expanded;
 
@@ -101,7 +106,7 @@ namespace SCILL
         ///     Call this function to update an individual challenge in the categories challenges list.
         /// </summary>
         /// <param name="updatedChallengeData">The challenge to update</param>
-        public void UpdateChallenge(Challenge updatedChallengeData)
+        public virtual void UpdateChallenge(Challenge updatedChallengeData)
         {
             string challengeID = updatedChallengeData.challenge_id;
             if (_challengeObjects.ContainsKey(challengeID))
@@ -115,7 +120,7 @@ namespace SCILL
             }
         }
 
-        private void InstantiateNewChallengeItem(Challenge updatedChallengeData)
+        protected virtual void InstantiateNewChallengeItem(Challenge updatedChallengeData)
         {
             string challengeID = updatedChallengeData.challenge_id;
             if (!challengePrefab)
@@ -136,16 +141,22 @@ namespace SCILL
             }
         }
 
+        [Obsolete("Please use UpdateChallengeList(List<Challenge>) instead.")]
+        public void UpdateChallengeList(ChallengeCategory updatedCategoryData)
+        {
+            UpdateChallengeList(updatedCategoryData.challenges);
+        }
+
         /// <summary>
         ///     Call this function to update the UI if challenge data has been changed. The <see cref="SCILLPersonalChallenges" /> script always
         ///     calls this function once data has been changed, either because of user interactions or incoming real time update
         ///     messages.
         /// </summary>
-        public void UpdateChallengeList(ChallengeCategory updatedCategoryData)
+        public virtual void UpdateChallengeList(List<Challenge> updatedList)
         {
-            if (null != updatedCategoryData)
+            if (null != updatedList)
             {
-                foreach (Challenge challenge in updatedCategoryData.challenges)
+                foreach (Challenge challenge in updatedList)
                 {
                     UpdateChallenge(challenge);
                 }

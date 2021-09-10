@@ -8,7 +8,7 @@ using UnityEngine.Events;
 namespace SCILL.Effects
 {
     /// <summary>
-    /// Simple Utility class for accessing Battle Pass related realtime events in the editor via <c>UnityEvent</c>. This script
+    /// Simple Utility class for accessing Battle Pass related realtime events in the editor via <c>UnityEvent</c>s. This script
     /// connects to <see cref="SCILLBattlePassManager"/> events, which are only called for the currently <see cref="SCILLBattlePassManager.SelectedBattlePass"/>.
     /// </summary>
     public class SCILLBattlePassEvents : MonoBehaviour
