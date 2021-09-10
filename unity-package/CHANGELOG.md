@@ -4,6 +4,67 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [2.1.1] - 2021-09-10
+
+### Fixed
+- Fixed an issue with Personal Challenge Category names not being displayed correctly.
+
+## [2.1.0] - 2021-09-08
+
+We've added visual and audio feedback effects to the samples - they will play for certain triggers like "Personal Challenge Completed" or "Battle Pass Level Changed".
+
+The `SCILLAudio` prefab can simply be dropped into your scene and will automatically connect to all relevant systems. Using a new `SCILLAudioSettings` Scriptable Object or adjusting the default you can switch out our sample clips with your own files. Samples of how to play particle effects or fire off UI animations can be seen in the sample scenes.
+
+### Added
+- Added Scripts for playing audio clips on certain triggers, e.g. Personal Challenge Completed or Battle Pass Level Changed
+- Audio feedback clips can be changed using the new `SCILLAudioSettings` Scriptable Object
+- Added sample particle systems and audio clips for visual and audio feedback
+- Added UnityEvents to Challenge items
+
+### Changed
+- Improved update behavior of `SCILLChallengeItem` and `SCILLBattlePassChallengeItem`
+
+### Fixed
+- Fixed issue with Battle Pass Level not being updated correctly under some conditions
+
+## [2.0.3] - 2021-07-19
+
+In this release we've added the Unity specific C# SDK project to the repository for easy access to the source code. The DLL produced by this project will only work with Unity, it will not work when trying to use it in a standalone C# project. For standalone C# projects, please use [the standalone SCILL C# SDK.](https://github.com/scillgame/scill-csharp)
+
+### Added
+- The C# SDK project is now part of this repository
+
+### Changed
+- Leaderboard Ranking Item: relative resource path for loading avatar images can now be adjusted in the editor
+
+### Fixed
+- Fixed issues with personal challenges not displaying progress bar correctly in some cases
+- Fixed issues with the battlepass UI not displaying in cases where a reward with a display prefab was loaded, but no photobox was selected in the RewardPreview
+
+
+## [2.0.2] - 2021-07-19
+
+### Fixed
+- Fixed an issue with leaderboards not updating on realtime update notifications
+- Fixed an issue with the header display of a users ranking not being updated correctly when receiving an update notification
+- Fixed an issue with leaderboards not loading pages correctly
+
+## [2.0.1] - 2021-07-19
+
+Removed Newtonsoft from the supplied plugins, making the plugin less prone to assembly clashes. If the SDK is added via a .unitypackage, or added directly into the Asset folder, you will need to  get the "com.unity.nuget.newtonsoft-json" package from the Unity Package Manger to resolve the dependencies. The Newtonsoft package is automatically supplied with the newest Unity versions.
+
+### Changed
+
+- Removed Newtonsoft DLL, instead opting for adding "com.unity.nuget.newtonsoft-json" version 2.0.0 as a package dependency. This will avoid assembly clashes, if  Newtonsoft is already used in a project.
+- Changed SCILL.dll Newtonsoft dependency from 13.0.1 to 12.0.2, for better backwards support
+
+### Fixed
+- Issue with GetAccessTokenAsync not being called in ScillManager startup if the callback version of the function is overriden
+
+### Added
+- ScillBackend documentation
+
 ## [2.0.0] - 2021-07-08
 
 This release adds support for WebGL builds to the SCILL Unity SDK.
