@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Scripts.Effects;
+using UnityEngine;
 using UnityEngine.Assertions;
 
 namespace SCILL.Effects
