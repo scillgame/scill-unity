@@ -133,10 +133,9 @@ namespace SCILL.Effects
 
             int? oldRank = payload.old_leaderboard_ranking?.rank;
             int? newRank = payload.new_leaderboard_ranking?.rank;
-            if (wasCurrentUserUpdated && oldRank > newRank)
+            if (wasCurrentUserUpdated && newRank < oldRank)
             {
-                if (oldRank < newRank)
-                    onUserRankingDecreased.Invoke();
+                onUserRankingDecreased.Invoke();
             }
         }
     }
