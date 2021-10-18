@@ -70,7 +70,7 @@ namespace SCILL
             // On client side, the event parser is set to use the access token to authenticate the request
             Config.AddApiKey("auth", "access_token");
 
-            SCILLSettings scillSettings = SCILLSettings.Load();
+            SCILLSettings scillSettings = Config.ScillSettings;
 
             EventsApi = GetApi<EventsApi>(AccessToken, scillSettings.GetApiEndpointURL(SCILLSettings.ApiEndpointType.Events, hostSuffix));
             ChallengesApi = GetApi<ChallengesApi>(AccessToken, scillSettings.GetApiEndpointURL(SCILLSettings.ApiEndpointType.Challenges, hostSuffix));

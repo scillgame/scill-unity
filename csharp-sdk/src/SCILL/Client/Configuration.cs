@@ -94,6 +94,8 @@ namespace SCILL.Client
         private string _dateTimeFormat = ISO8601_DATETIME_FORMAT;
         private string _tempFolderPath = Path.GetTempPath();
 
+        private SCILLSettings _scillSettings;
+
         #endregion Private Members
 
         #region Constructors
@@ -376,6 +378,29 @@ namespace SCILL.Client
                 }
 
                 _apiKey = value;
+            }
+        }
+
+         
+        public virtual SCILLSettings ScillSettings
+        {
+            get
+            {
+                if (null == _scillSettings)
+                {
+                    _scillSettings = SCILLSettings.Load();
+                }
+
+                return _scillSettings;
+            }
+            set
+            {
+                if (null == value)
+                {
+                    throw new InvalidOperationException("SCILL settings may not be null.");
+                }
+
+                _scillSettings = value;
             }
         }
 

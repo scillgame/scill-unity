@@ -11,12 +11,55 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Text;
+using JetBrains.Annotations;
 using RSG;
 using SCILL.Client;
 using SCILL.Model;
+using UnityEngine;
 
 namespace SCILL.Api
 {
+    /// <summary>
+    /// The Aggregate function type for the calculation of the leaderboard results - can be BEST (returns a single score - either the lowest if ASC sorting is used, or the highest if DESC is used) or SUM (default value - increments (sums up) the scores).
+    /// </summary>
+    public enum RankingAggregateType
+    {
+        /// <summary>
+        /// Returns a single score - the lowest, if the leaderboard is sorted in ascending order or highest, if
+        /// leaderboard is sorted in descending order.
+        /// </summary>
+        BEST,
+
+        /// <summary>
+        /// Default value - increments (sums up) the scores.
+        /// </summary>
+        SUM
+    }
+
+    /// <summary>
+    /// Used to submit optional parameters to leaderboard api calls.
+    ///
+    /// TODO: Adjust to fit more optional parameters in next major SDK update. Currently contains only a subset of API v2 specific parameters to ensure backwards compatibility.
+    /// </summary>
+    public class LeaderboardApiOptionalParameters
+    {
+        /// <summary>
+        /// The starting date limit (included) in RFC3339 format for the calculation of the results, counted in the previously set timezone, e.g. 2022-10-30
+        /// </summary>
+        public DateTime? StartDate { get; set; } = null;
+
+        /// <summary>
+        /// The ending date limit (included) in RFC3339 format for the calculation of the results, counted in the previously set timezone, e.g. 2022-10-30
+        /// </summary>
+        public DateTime? EndDate { get; set; } = null;
+
+        /// <summary>
+        /// The aggregate function for the calculation of the results - can be BEST (returns a single score - either the lowest if ASC sorting is used, or the highest if DESC is used) or SUM (default value - increments (sums up) the scores).
+        /// </summary>
+        public RankingAggregateType? AggregateType { get; set; } = null;
+    }
+
     /// <summary>
     /// Represents a collection of functions to interact with the API endpoints
     /// </summary>
@@ -24,6 +67,8 @@ namespace SCILL.Api
     {
         #region Asynchronous Operations
 
+        #region Retrieve Leaderboard
+
         /// <summary>
         /// Retrieve Leaderboard
         /// </summary>
@@ -37,10 +82,12 @@ namespace SCILL.Api
         /// <param name="currentPage">The page index starting at 1. The number of pageSize elements are returned for each page. Default value is 1 (optional)</param>
         /// <param name="pageSize">The number of elements per page. Default is 25. (optional)</param>
         /// <param name="language">Set the language. Content can be translated in the Admin Panel. Values can be international language codes like de, en, fr, it, ... (optional)</param>
+        /// <param name="currentPosition">The starting leaderboard position from which the results should be loaded. The number of results is controlled via the <see cref="pageSize"/> variable. This parameter
+        ///  overrides the <see cref="currentPage"/> parameter. API v2 only.</param>
+        /// <param name="optionalParameters">Additional, optional leaderboard api parameters. API v2 only.</param>
         void GetLeaderboardAsync(Action<Leaderboard> resolve, Action<Exception> reject, string leaderboardId,
-            int? currentPage = null,
-            int? pageSize = null,
-            string language = null);
+            int? currentPage = null, int? pageSize = null, string language = null, int? currentPosition = null,
+            LeaderboardApiOptionalParameters optionalParameters = null);
 
         /// <summary>
         /// Retrieve Leaderboard
@@ -53,9 +100,13 @@ namespace SCILL.Api
         /// <param name="currentPage">The page index starting at 1. The number of pageSize elements are returned for each page. Default value is 1 (optional)</param>
         /// <param name="pageSize">The number of elements per page. Default is 25. (optional)</param>
         /// <param name="language">Set the language. Content can be translated in the Admin Panel. Values can be international language codes like de, en, fr, it, ... (optional)</param>
+        /// <param name="currentPosition">The starting leaderboard position from which the results should be loaded. The number of results is controlled via the <see cref="pageSize"/> variable. This parameter
+        ///  overrides the <see cref="currentPage"/> parameter. API v2 only.</param>
+        /// <param name="optionalParameters">Additional, optional leaderboard api parameters. API v2 only.</param>
         /// <returns>Promise of Leaderboard</returns>
-        IPromise<Leaderboard> GetLeaderboardAsync(string leaderboardId, int? currentPage = null, int? pageSize = null,
-            string language = null);
+        IPromise<Leaderboard> GetLeaderboardAsync(string leaderboardId,
+            int? currentPage = null, int? pageSize = null, string language = null, int? currentPosition = null,
+            LeaderboardApiOptionalParameters optionalParameters = null);
 
         /// <summary>
         /// Retrieve Leaderboard
@@ -68,9 +119,77 @@ namespace SCILL.Api
         /// <param name="currentPage">The page index starting at 1. The number of pageSize elements are returned for each page. Default value is 1 (optional)</param>
         /// <param name="pageSize">The number of elements per page. Default is 25. (optional)</param>
         /// <param name="language">Set the language. Content can be translated in the Admin Panel. Values can be international language codes like de, en, fr, it, ... (optional)</param>
+        /// <param name="currentPosition">The starting leaderboard position from which the results should be loaded. The number of results is controlled via the <see cref="pageSize"/> variable. This parameter
+        ///  overrides the <see cref="currentPage"/> parameter. API v2 only.</param>
+        /// <param name="optionalParameters">Additional, optional leaderboard api parameters. API v2 only.</param>
         /// <returns>Promise of ApiResponse (Leaderboard)</returns>
         IPromise<ApiResponse<Leaderboard>> GetLeaderboardAsyncWithHttpInfo(string leaderboardId,
-            int? currentPage = null, int? pageSize = null, string language = null);
+            int? currentPage = null, int? pageSize = null, string language = null, int? currentPosition = null,
+            LeaderboardApiOptionalParameters optionalParameters = null);
+
+        #endregion
+
+        #region Retrieve Leaderboards
+
+        /// <summary>
+        /// Retrieve Leaderboards
+        /// </summary>
+        /// <remarks>
+        /// Returns an array of Leaderboard items defined for the application.
+        /// </remarks>
+        /// <exception cref="SCILL.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="resolve">Called on valid API response.</param>
+        /// <param name="reject">Called on error response.</param>
+        /// <param name="currentPage">The page index starting at 1. The number of pageSize elements are returned for each page. Default value is 1 (optional)</param>
+        /// <param name="pageSize">The number of elements per page. Default is 25. (optional)</param>
+        /// <param name="language">Set the language. Content can be translated in the Admin Panel. Values can be international language codes like de, en, fr, it, ... (optional)</param>
+        /// <param name="currentPosition">The starting leaderboard position from which the results should be loaded. The number of results is controlled via the <see cref="pageSize"/> variable. This parameter
+        ///  overrides the <see cref="currentPage"/> parameter. API v2 only.</param>
+        /// <param name="optionalParameters">Additional, optional leaderboard api parameters. API v2 only.</param>
+        void GetLeaderboardsAsync(Action<List<Leaderboard>> resolve, Action<Exception> reject, int? currentPage = null,
+            int? pageSize = null,
+            string language = null, int? currentPosition = null,
+            LeaderboardApiOptionalParameters optionalParameters = null);
+
+        /// <summary>
+        /// Retrieve Leaderboards
+        /// </summary>
+        /// <remarks>
+        /// Returns an array of Leaderboard items defined for the application.
+        /// </remarks>
+        /// <exception cref="SCILL.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="currentPage">The page index starting at 1. The number of pageSize elements are returned for each page. Default value is 1 (optional)</param>
+        /// <param name="pageSize">The number of elements per page. Default is 25. (optional)</param>
+        /// <param name="language">Set the language. Content can be translated in the Admin Panel. Values can be international language codes like de, en, fr, it, ... (optional)</param>
+        /// <param name="currentPosition">The starting leaderboard position from which the results should be loaded. The number of results is controlled via the <see cref="pageSize"/> variable. This parameter
+        ///  overrides the <see cref="currentPage"/> parameter. API v2 only.</param>
+        /// <param name="optionalParameters">Additional, optional leaderboard api parameters. API v2 only.</param>
+        /// <returns>Promise of List&lt;Leaderboard&gt;</returns>
+        IPromise<List<Leaderboard>> GetLeaderboardsAsync(int? currentPage = null, int? pageSize = null,
+            string language = null, int? currentPosition = null,
+            LeaderboardApiOptionalParameters optionalParameters = null);
+
+        /// <summary>
+        /// Retrieve Leaderboards
+        /// </summary>
+        /// <remarks>
+        /// Returns an array of Leaderboard items defined for the application.
+        /// </remarks>
+        /// <exception cref="SCILL.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="currentPage">The page index starting at 1. The number of pageSize elements are returned for each page. Default value is 1 (optional)</param>
+        /// <param name="pageSize">The number of elements per page. Default is 25. (optional)</param>
+        /// <param name="language">Set the language. Content can be translated in the Admin Panel. Values can be international language codes like de, en, fr, it, ... (optional)</param>
+        /// <param name="currentPosition">The starting leaderboard position from which the results should be loaded. The number of results is controlled via the <see cref="pageSize"/> variable. This parameter
+        ///  overrides the <see cref="currentPage"/> parameter. API v2 only.</param>
+        /// <param name="optionalParameters">Additional, optional leaderboard api parameters. API v2 only.</param>
+        /// <returns>Promise of ApiResponse (List&lt;Leaderboard&gt;)</returns>
+        IPromise<ApiResponse<List<Leaderboard>>> GetLeaderboardsAsyncWithHttpInfo(int? currentPage = null,
+            int? pageSize = null, string language = null, int? currentPosition = null,
+            LeaderboardApiOptionalParameters optionalParameters = null);
+
+        #endregion
+
+        #region Retrieve User Ranking
 
         /// <summary>
         /// Retrieve User Ranking
@@ -85,9 +204,10 @@ namespace SCILL.Api
         /// <param name="memberId">Either the user_id or team_id you used when sending the events. The memberType flag identifies which one is used.</param>
         /// <param name="leaderboardId">The id of the leaderboard</param>
         /// <param name="language">Set the language. Content can be translated in the Admin Panel. Values can be international language codes like de, en, fr, it, ... (optional)</param>
+        /// <param name="optionalParameters">Additional, optional leaderboard api parameters. API v2 only.</param>
         void GetLeaderboardRankingAsync(Action<LeaderboardMemberRanking> resolve, Action<Exception> reject,
             string memberType, string memberId,
-            string leaderboardId, string language = null);
+            string leaderboardId, string language = null, LeaderboardApiOptionalParameters optionalParameters = null);
 
         /// <summary>
         /// Retrieve User Ranking
@@ -100,9 +220,10 @@ namespace SCILL.Api
         /// <param name="memberId">Either the user_id or team_id you used when sending the events. The memberType flag identifies which one is used.</param>
         /// <param name="leaderboardId">The id of the leaderboard</param>
         /// <param name="language">Set the language. Content can be translated in the Admin Panel. Values can be international language codes like de, en, fr, it, ... (optional)</param>
+        /// <param name="optionalParameters">Additional, optional leaderboard api parameters. API v2 only.</param>
         /// <returns>Promise of LeaderboardMemberRanking</returns>
         IPromise<LeaderboardMemberRanking> GetLeaderboardRankingAsync(string memberType, string memberId,
-            string leaderboardId, string language = null);
+            string leaderboardId, string language = null, LeaderboardApiOptionalParameters optionalParameters = null);
 
         /// <summary>
         /// Retrieve User Ranking
@@ -115,9 +236,14 @@ namespace SCILL.Api
         /// <param name="memberId">Either the user_id or team_id you used when sending the events. The memberType flag identifies which one is used.</param>
         /// <param name="leaderboardId">The id of the leaderboard</param>
         /// <param name="language">Set the language. Content can be translated in the Admin Panel. Values can be international language codes like de, en, fr, it, ... (optional)</param>
+        /// <param name="optionalParameters">Additional, optional leaderboard api parameters. API v2 only.</param>
         /// <returns>Promise of ApiResponse (LeaderboardMemberRanking)</returns>
         IPromise<ApiResponse<LeaderboardMemberRanking>> GetLeaderboardRankingAsyncWithHttpInfo(string memberType,
-            string memberId, string leaderboardId, string language = null);
+            string memberId, string leaderboardId, string language = null, LeaderboardApiOptionalParameters optionalParameters = null);
+
+        #endregion
+
+        #region Retrieve User Rankings
 
         /// <summary>
         /// Retrieve User Rankings
@@ -131,10 +257,11 @@ namespace SCILL.Api
         /// <param name="memberType">The member type, can be user or team (right now) and sets which leaderboards should be selected.</param>
         /// <param name="memberId">Either the user_id or team_id you used when sending the events. The memberType flag identifies which one is used.</param>
         /// <param name="language">Set the language. Content can be translated in the Admin Panel. Values can be international language codes like de, en, fr, it, ... (optional)</param>
+        /// <param name="optionalParameters">Additional, optional leaderboard api parameters. API v2 only.</param>
         void GetLeaderboardRankingsAsync(Action<List<LeaderboardMemberRanking>> resolve, Action<Exception> reject,
             string memberType,
             string memberId,
-            string language = null);
+            string language = null, LeaderboardApiOptionalParameters optionalParameters = null);
 
         /// <summary>
         /// Retrieve User Rankings
@@ -146,9 +273,10 @@ namespace SCILL.Api
         /// <param name="memberType">The member type, can be user or team (right now) and sets which leaderboards should be selected.</param>
         /// <param name="memberId">Either the user_id or team_id you used when sending the events. The memberType flag identifies which one is used.</param>
         /// <param name="language">Set the language. Content can be translated in the Admin Panel. Values can be international language codes like de, en, fr, it, ... (optional)</param>
+        /// <param name="optionalParameters">Additional, optional leaderboard api parameters. API v2 only.</param>
         /// <returns>Promise of List&lt;LeaderboardMemberRanking&gt;</returns>
         IPromise<List<LeaderboardMemberRanking>> GetLeaderboardRankingsAsync(string memberType, string memberId,
-            string language = null);
+            string language = null, LeaderboardApiOptionalParameters optionalParameters = null);
 
         /// <summary>
         /// Retrieve User Rankings
@@ -160,53 +288,12 @@ namespace SCILL.Api
         /// <param name="memberType">The member type, can be user or team (right now) and sets which leaderboards should be selected.</param>
         /// <param name="memberId">Either the user_id or team_id you used when sending the events. The memberType flag identifies which one is used.</param>
         /// <param name="language">Set the language. Content can be translated in the Admin Panel. Values can be international language codes like de, en, fr, it, ... (optional)</param>
+        /// <param name="optionalParameters">Additional, optional leaderboard api parameters. API v2 only.</param>
         /// <returns>Promise of ApiResponse (List&lt;LeaderboardMemberRanking&gt;)</returns>
         IPromise<ApiResponse<List<LeaderboardMemberRanking>>> GetLeaderboardRankingsAsyncWithHttpInfo(string memberType,
-            string memberId, string language = null);
+            string memberId, string language = null, LeaderboardApiOptionalParameters optionalParameters = null);
 
-        /// <summary>
-        /// Retrieve Leaderboards
-        /// </summary>
-        /// <remarks>
-        /// Returns an array of Leaderboard items defined for the application.
-        /// </remarks>
-        /// <exception cref="SCILL.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="resolve">Called on valid API response.</param>
-        /// <param name="reject">Called on error response.</param>
-        /// <param name="currentPage">The page index starting at 1. The number of pageSize elements are returned for each page. Default value is 1 (optional)</param>
-        /// <param name="pageSize">The number of elements per page. Default is 25. (optional)</param>
-        /// <param name="language">Set the language. Content can be translated in the Admin Panel. Values can be international language codes like de, en, fr, it, ... (optional)</param>
-        void GetLeaderboardsAsync(Action<List<Leaderboard>> resolve, Action<Exception> reject, int? currentPage = null,
-            int? pageSize = null,
-            string language = null);
-
-        /// <summary>
-        /// Retrieve Leaderboards
-        /// </summary>
-        /// <remarks>
-        /// Returns an array of Leaderboard items defined for the application.
-        /// </remarks>
-        /// <exception cref="SCILL.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="currentPage">The page index starting at 1. The number of pageSize elements are returned for each page. Default value is 1 (optional)</param>
-        /// <param name="pageSize">The number of elements per page. Default is 25. (optional)</param>
-        /// <param name="language">Set the language. Content can be translated in the Admin Panel. Values can be international language codes like de, en, fr, it, ... (optional)</param>
-        /// <returns>Promise of List&lt;Leaderboard&gt;</returns>
-        IPromise<List<Leaderboard>> GetLeaderboardsAsync(int? currentPage = null, int? pageSize = null,
-            string language = null);
-
-        /// <summary>
-        /// Retrieve Leaderboards
-        /// </summary>
-        /// <remarks>
-        /// Returns an array of Leaderboard items defined for the application.
-        /// </remarks>
-        /// <exception cref="SCILL.Client.ApiException">Thrown when fails to make API call</exception>
-        /// <param name="currentPage">The page index starting at 1. The number of pageSize elements are returned for each page. Default value is 1 (optional)</param>
-        /// <param name="pageSize">The number of elements per page. Default is 25. (optional)</param>
-        /// <param name="language">Set the language. Content can be translated in the Admin Panel. Values can be international language codes like de, en, fr, it, ... (optional)</param>
-        /// <returns>Promise of ApiResponse (List&lt;Leaderboard&gt;)</returns>
-        IPromise<ApiResponse<List<Leaderboard>>> GetLeaderboardsAsyncWithHttpInfo(int? currentPage = null,
-            int? pageSize = null, string language = null);
+        #endregion
 
         #endregion Asynchronous Operations
     }
@@ -225,7 +312,7 @@ namespace SCILL.Api
         /// <returns></returns>
         public LeaderboardsApi(String basePath)
         {
-            this.Configuration = new SCILL.Client.Configuration {BasePath = basePath};
+            this.Configuration = new SCILL.Client.Configuration { BasePath = basePath };
 
             ExceptionFactory = SCILL.Client.Configuration.DefaultExceptionFactory;
         }
@@ -278,6 +365,50 @@ namespace SCILL.Api
         }
 
         /// <summary>
+        /// Will build the request path given the <see cref="mainPath"/> (e.g. "leaderboards" will result in /api/v{1/2}/leaderboards.
+        /// The <see cref="pathParameters"/> will be used to extend the path, e.g. Retrieving a leaderboard with id "1234" given pathParameters = new[]{"1234"} will result in /api/v{1/2}/leaderboards/1234
+        /// </summary>
+        /// <param name="mainPath">The main request path</param>
+        /// <param name="pathParameters">The path parameters of the request</param>
+        /// <returns>The request path, used to build the request URL.</returns>
+        private string BuildRequestPath(string mainPath, string[] pathParameters = null)
+        {
+            StringBuilder pathBuilder = new StringBuilder();
+            pathBuilder.Append("/api/");
+            pathBuilder.Append(Configuration.ScillSettings.ApiVersion);
+            pathBuilder.Append("/");
+            pathBuilder.Append(mainPath);
+            if (null != pathParameters)
+            {
+                foreach (string parameter in pathParameters)
+                {
+                    pathBuilder.Append("/");
+                    pathBuilder.Append(parameter);
+                }
+            }
+
+            Debug.Log($"Build request path: {pathBuilder.ToString()}");
+
+            return pathBuilder.ToString();
+        }
+
+        /// <summary>
+        /// Utility function for adding LeaderboardApiOptionalParameters to the ApiRequest.
+        /// </summary>
+        /// <param name="request">The request to add the query parameters given in the <see cref="optionalParameters"/></param>
+        /// <param name="optionalParameters">The optional leaderboard api parameters.</param>
+        private void AddOptionalApiParameters(ref ApiRequest request,
+            LeaderboardApiOptionalParameters optionalParameters)
+        {
+            if (null != optionalParameters)
+            {
+                request.AddQueryParameter("startDate", optionalParameters.StartDate, Configuration);
+                request.AddQueryParameter("endDate", optionalParameters.EndDate, Configuration);
+                request.AddQueryParameter("aggregate", optionalParameters.AggregateType, Configuration);
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the configuration object
         /// </summary>
         /// <value>An instance of the Configuration</value>
@@ -322,90 +453,118 @@ namespace SCILL.Api
             this.Configuration.AddDefaultHeader(key, value);
         }
 
+        #region Retrieve Leaderboard
+
         public void GetLeaderboardAsync(Action<Leaderboard> resolve, Action<Exception> reject, string leaderboardId,
             int? currentPage = null,
             int? pageSize = null,
-            string language = null)
+            string language = null, int? currentPosition = null,
+            LeaderboardApiOptionalParameters optionalParameters = null)
         {
-            GetLeaderboardAsync(leaderboardId, currentPage, pageSize, language).Then(resolve).Catch(reject);
+            GetLeaderboardAsync(leaderboardId, currentPage, pageSize, language, currentPosition, optionalParameters)
+                .Then(resolve).Catch(reject);
         }
 
         public IPromise<Leaderboard> GetLeaderboardAsync(string leaderboardId, int? currentPage = null,
-            int? pageSize = null, string language = null)
+            int? pageSize = null, string language = null, int? currentPosition = null,
+            LeaderboardApiOptionalParameters optionalParameters = null)
         {
-            return GetLeaderboardAsyncWithHttpInfo(leaderboardId, currentPage, pageSize, language)
+            return GetLeaderboardAsyncWithHttpInfo(leaderboardId, currentPage, pageSize, language, currentPosition,
+                    optionalParameters)
                 .ExtractResponseData();
         }
 
         public IPromise<ApiResponse<Leaderboard>> GetLeaderboardAsyncWithHttpInfo(string leaderboardId,
-            int? currentPage = null, int? pageSize = null, string language = null)
+            int? currentPage = null, int? pageSize = null, string language = null, int? currentPosition = null,
+            LeaderboardApiOptionalParameters optionalParameters = null)
         {
             // verify the required parameter 'leaderboardId' is set
             if (leaderboardId == null)
                 throw new ApiException(400,
                     "Missing required parameter 'leaderboardId' when calling LeaderboardsApi->GetLeaderboard");
 
-            var localVarPath = $"/api/v1/leaderboards/{leaderboardId}";
             HttpMethod method = HttpMethod.Get;
             object body = null;
 
+            var localVarPath = BuildRequestPath("leaderboards", new[] { leaderboardId });
+
             ApiRequest request =
-                Configuration.ApiClient.CreateBaseApiRequest(body, localVarPath, method);
+                Configuration.ApiClient.CreateBaseApiRequest(body, localVarPath, method, language);
 
             request.AddQueryParameter("currentPage", currentPage, Configuration);
             request.AddQueryParameter("pageSize", pageSize, Configuration);
+            request.AddQueryParameter("currentPosition", currentPosition, Configuration);
+            AddOptionalApiParameters(ref request, optionalParameters);
 
             var responsePromise =
                 Configuration.ApiClient.CallApi<Leaderboard>(request, ExceptionFactory, "GetLeaderboard");
             return responsePromise;
         }
-        
-        // public IPromise<ApiResponse<Leaderboard>> GetLeaderboardAsyncWithHttpInfo(string leaderboardId, DateTime? startDate,
-        //     int? currentPage = null, int? pageSize = null, string language = null)
-        // {
-        //     // verify the required parameter 'leaderboardId' is set
-        //     if (leaderboardId == null)
-        //         throw new ApiException(400,
-        //             "Missing required parameter 'leaderboardId' when calling LeaderboardsApi->GetLeaderboard");
-        //
-        //     var localVarPath = $"/api/v1/leaderboards/{leaderboardId}";
-        //     HttpMethod method = HttpMethod.Get;
-        //     object body = null;
-        //
-        //     ApiRequest request =
-        //         Configuration.ApiClient.CreateBaseApiRequest(body, localVarPath, method);
-        //
-        //     if (currentPage != null)
-        //         request.QueryParams.AddRange(
-        //             this.Configuration.ApiClient.ParameterToKeyValuePairs("", "currentPage",
-        //                 currentPage)); // query parameter
-        //     if (pageSize != null)
-        //         request.QueryParams.AddRange(
-        //             this.Configuration.ApiClient.ParameterToKeyValuePairs("", "pageSize", pageSize)); // query parameter
-        //
-        //
-        //     var responsePromise =
-        //         Configuration.ApiClient.CallApi<Leaderboard>(request, ExceptionFactory, "GetLeaderboard");
-        //     return responsePromise;
-        // }
+
+        #endregion
+
+        #region Retrieve Leaderboards
+
+        public void GetLeaderboardsAsync(Action<List<Leaderboard>> resolve, Action<Exception> reject,
+            int? currentPage = null,
+            int? pageSize = null, string language = null, int? currentPosition = null,
+            LeaderboardApiOptionalParameters optionalParameters = null)
+        {
+            GetLeaderboardsAsync(currentPage, pageSize, language, currentPage, optionalParameters).Then(resolve)
+                .Catch(reject);
+        }
+
+        public IPromise<List<Leaderboard>> GetLeaderboardsAsync(int? currentPage = null, int? pageSize = null,
+            string language = null, int? currentPosition = null,
+            LeaderboardApiOptionalParameters optionalParameters = null)
+        {
+            return GetLeaderboardsAsyncWithHttpInfo(currentPage, pageSize, language, currentPage, optionalParameters)
+                .ExtractResponseData();
+        }
+
+        public IPromise<ApiResponse<List<Leaderboard>>> GetLeaderboardsAsyncWithHttpInfo(int? currentPage = null,
+            int? pageSize = null, string language = null, int? currentPosition = null,
+            LeaderboardApiOptionalParameters optionalParameters = null)
+        {
+            var localVarPath = BuildRequestPath("leaderboards");
+
+            HttpMethod method = HttpMethod.Get;
+            object body = null;
+
+            ApiRequest request =
+                Configuration.ApiClient.CreateBaseApiRequest(body, localVarPath, method, language);
+
+            request.AddQueryParameter("currentPage", currentPage, Configuration);
+            request.AddQueryParameter("pageSize", pageSize, Configuration);
+            request.AddQueryParameter("currentPosition", pageSize, Configuration);
+            AddOptionalApiParameters(ref request, optionalParameters);
+
+            var responsePromise =
+                Configuration.ApiClient.CallApi<List<Leaderboard>>(request, ExceptionFactory, "GetLeaderboards");
+            return responsePromise;
+        }
+
+        #endregion
+
+        #region Retrieve User Ranking
 
         public void GetLeaderboardRankingAsync(Action<LeaderboardMemberRanking> resolve, Action<Exception> reject,
             string memberType,
             string memberId, string leaderboardId,
-            string language = null)
+            string language = null, LeaderboardApiOptionalParameters optionalParameters = null)
         {
-            GetLeaderboardRankingAsync(memberType, memberId, leaderboardId, language).Then(resolve).Catch(reject);
+            GetLeaderboardRankingAsync(memberType, memberId, leaderboardId, language, optionalParameters).Then(resolve).Catch(reject);
         }
 
         public IPromise<LeaderboardMemberRanking> GetLeaderboardRankingAsync(string memberType, string memberId,
-            string leaderboardId, string language = null)
+            string leaderboardId, string language = null, LeaderboardApiOptionalParameters optionalParameters = null)
         {
-            return GetLeaderboardRankingAsyncWithHttpInfo(memberType, memberId, leaderboardId, language)
+            return GetLeaderboardRankingAsyncWithHttpInfo(memberType, memberId, leaderboardId, language, optionalParameters)
                 .ExtractResponseData();
         }
 
         public IPromise<ApiResponse<LeaderboardMemberRanking>> GetLeaderboardRankingAsyncWithHttpInfo(string memberType,
-            string memberId, string leaderboardId, string language = null)
+            string memberId, string leaderboardId, string language = null, LeaderboardApiOptionalParameters optionalParameters = null)
         {
             // verify the required parameter 'memberType' is set
             if (memberType == null)
@@ -420,34 +579,46 @@ namespace SCILL.Api
                 throw new ApiException(400,
                     "Missing required parameter 'leaderboardId' when calling LeaderboardsApi->GetLeaderboardRanking");
 
-            var localVarPath = $"/api/v1/leaderboards-members/{memberType}/{memberId}/{leaderboardId}";
+            string localVarPath =
+                BuildRequestPath("leaderboards-members", new[] { memberType, memberId, leaderboardId });
+            
 
             HttpMethod method = HttpMethod.Get;
             object body = null;
+            
+            Debug.Log($"Requesting user ranking for memberType {memberType} and memberId {memberId}");
 
+            
             ApiRequest request =
-                Configuration.ApiClient.CreateBaseApiRequest(body, localVarPath, method);
+                Configuration.ApiClient.CreateBaseApiRequest(body, localVarPath, method, language);
+            
+            AddOptionalApiParameters(ref request, optionalParameters);
+
             var responsePromise =
                 Configuration.ApiClient.CallApi<LeaderboardMemberRanking>(request, ExceptionFactory,
                     "GetLeaderboardRanking");
             return responsePromise;
         }
+        
+        #endregion
+        
+        #region Retrieve User Rankings
 
         public void GetLeaderboardRankingsAsync(Action<List<LeaderboardMemberRanking>> resolve,
             Action<Exception> reject, string memberType,
-            string memberId, string language = null)
+            string memberId, string language = null, LeaderboardApiOptionalParameters optionalParameters = null)
         {
-            GetLeaderboardRankingsAsync(memberType, memberId, language).Then(resolve).Catch(reject);
+            GetLeaderboardRankingsAsync(memberType, memberId, language, optionalParameters).Then(resolve).Catch(reject);
         }
 
         public IPromise<List<LeaderboardMemberRanking>> GetLeaderboardRankingsAsync(string memberType, string memberId,
-            string language = null)
+            string language = null, LeaderboardApiOptionalParameters optionalParameters = null)
         {
-            return GetLeaderboardRankingsAsyncWithHttpInfo(memberType, memberId, language).ExtractResponseData();
+            return GetLeaderboardRankingsAsyncWithHttpInfo(memberType, memberId, language, optionalParameters).ExtractResponseData();
         }
 
         public IPromise<ApiResponse<List<LeaderboardMemberRanking>>> GetLeaderboardRankingsAsyncWithHttpInfo(
-            string memberType, string memberId, string language = null)
+            string memberType, string memberId, string language = null, LeaderboardApiOptionalParameters optionalParameters = null)
         {
             // verify the required parameter 'memberType' is set
             if (memberType == null)
@@ -458,53 +629,22 @@ namespace SCILL.Api
                 throw new ApiException(400,
                     "Missing required parameter 'memberId' when calling LeaderboardsApi->GetLeaderboardRankings");
 
-            var localVarPath = $"/api/v1/leaderboards-members/{memberType}/{memberId}";
+
+            string localVarPath = BuildRequestPath("leaderboards-members", new[] { memberType, memberId });
             HttpMethod method = HttpMethod.Get;
             object body = null;
 
             ApiRequest request =
-                Configuration.ApiClient.CreateBaseApiRequest(body, localVarPath, method);
+                Configuration.ApiClient.CreateBaseApiRequest(body, localVarPath, method, language);
+            
+            AddOptionalApiParameters(ref request, optionalParameters);
+            
             var responsePromise =
                 Configuration.ApiClient.CallApi<List<LeaderboardMemberRanking>>(request, ExceptionFactory,
                     "GetLeaderboardRankings");
             return responsePromise;
         }
-
-        public void GetLeaderboardsAsync(Action<List<Leaderboard>> resolve, Action<Exception> reject,
-            int? currentPage = null,
-            int? pageSize = null, string language = null)
-        {
-            GetLeaderboardsAsync(currentPage, pageSize, language).Then(resolve).Catch(reject);
-        }
-
-        public IPromise<List<Leaderboard>> GetLeaderboardsAsync(int? currentPage = null, int? pageSize = null,
-            string language = null)
-        {
-            return GetLeaderboardsAsyncWithHttpInfo(currentPage, pageSize, language).ExtractResponseData();
-        }
-
-        public IPromise<ApiResponse<List<Leaderboard>>> GetLeaderboardsAsyncWithHttpInfo(int? currentPage = null,
-            int? pageSize = null, string language = null)
-        {
-            var localVarPath = "/api/v1/leaderboards";
-
-            HttpMethod method = HttpMethod.Get;
-            object body = null;
-
-            ApiRequest request =
-                Configuration.ApiClient.CreateBaseApiRequest(body, localVarPath, method);
-
-            if (currentPage != null)
-                request.QueryParams.AddRange(
-                    this.Configuration.ApiClient.ParameterToKeyValuePairs("", "currentPage",
-                        currentPage)); // query parameter
-            if (pageSize != null)
-                request.QueryParams.AddRange(
-                    this.Configuration.ApiClient.ParameterToKeyValuePairs("", "pageSize", pageSize)); // query parameter
-
-            var responsePromise =
-                Configuration.ApiClient.CallApi<List<Leaderboard>>(request, ExceptionFactory, "GetLeaderboards");
-            return responsePromise;
-        }
+        
+        #endregion
     }
 }

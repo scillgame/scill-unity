@@ -327,7 +327,7 @@ namespace SCILL
 
                 leaderboardRankingPromise.Then(leaderboardMemberRanking =>
                 {
-                    var ranking = leaderboardMemberRanking.member;
+                    LeaderboardRanking ranking = leaderboardMemberRanking.member;
                     UpdateUsersHeaderRankingDisplay(ranking);
                 });
             }

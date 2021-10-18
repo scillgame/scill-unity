@@ -1,4 +1,5 @@
-﻿using SCILL.Model;
+﻿using System.Collections;
+using SCILL.Model;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
@@ -70,6 +71,7 @@ namespace SCILL.Effects
         {
             if (SCILLManager.Instance && null !=  SCILLManager.Instance.LeaderboardsApi && !string.IsNullOrEmpty(leaderboardId))
             {
+
                 SCILLManager.Instance.LeaderboardsApi.GetLeaderboardRankingAsync(
                     OnReceivedCurrentUserRanking,
                     exception => { Debug.LogError(exception.Message); },
@@ -77,8 +79,8 @@ namespace SCILL.Effects
                     SCILLManager.Instance.UserId,
                     leaderboardId);
             }
-            
         }
+
 
         /// <summary>
         /// Callback function for the leaderboard ranking request for the current user.

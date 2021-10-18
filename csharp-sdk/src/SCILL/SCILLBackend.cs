@@ -40,7 +40,7 @@ namespace SCILL
             _config = Configuration.Default.Clone(string.Empty, Configuration.Default.BasePath);
             _config.AddApiKey("auth", "api_key");
 
-            SCILLSettings scillConfig = SCILLSettings.Load();
+            SCILLSettings scillConfig = _config.ScillSettings;
             
             // EventsApi = GetApi<EventsApi>(apiKey, "https://ep" + hostSuffix + ".scillgame.com");
             // AuthApi = GetApi<AuthApi>(apiKey, "https://us" + hostSuffix + ".scillgame.com");
