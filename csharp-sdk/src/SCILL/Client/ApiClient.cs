@@ -226,19 +226,19 @@ namespace SCILL.Client
                 // Defaults to an ISO 8601, using the known as a Round-trip date/time pattern ("o")
                 // https://msdn.microsoft.com/en-us/library/az4se3k1(v=vs.110).aspx#Anchor_8
                 // For example: 2009-06-15T13:45:30.0000000
-                return ((DateTime) obj).ToString(Configuration.DateTimeFormat);
+                return ((DateTime)obj).ToString(Configuration.DateTimeFormat);
 
             if (obj is DateTimeOffset)
                 // Return a formatted date string - Can be customized with Configuration.DateTimeFormat
                 // Defaults to an ISO 8601, using the known as a Round-trip date/time pattern ("o")
                 // https://msdn.microsoft.com/en-us/library/az4se3k1(v=vs.110).aspx#Anchor_8
                 // For example: 2009-06-15T13:45:30.0000000
-                return ((DateTimeOffset) obj).ToString(Configuration.DateTimeFormat);
+                return ((DateTimeOffset)obj).ToString(Configuration.DateTimeFormat);
 
             if (obj is IList)
             {
                 var flattenedString = new StringBuilder();
-                foreach (var param in (IList) obj)
+                foreach (var param in (IList)obj)
                 {
                     if (flattenedString.Length > 0)
                         flattenedString.Append(",");
@@ -461,7 +461,10 @@ namespace SCILL.Client
         /// <summary>
         ///     Convert params to key/value pairs.
         ///     Use collectionFormat to properly format lists and collections.
+        /// If <see cref="collectionFormat"/> is set to "multi", will assume
+        /// that <see cref="value"/> is an IEnumerable and add all values as parameter.
         /// </summary>
+        /// <param name="collectionFormat">"multi" or empty</param>
         /// <param name="name">Key name.</param>
         /// <param name="value">Value object.</param>
         /// <returns>A list of KeyValuePairs</returns>
@@ -483,6 +486,8 @@ namespace SCILL.Client
 
             return parameters;
         }
+        
+       
 
         /// <summary>
         ///     Check if generic object is a collection.

@@ -1,0 +1,9 @@
+﻿{
+  "ApiVersion": "v1",
+  "Domain" : "scill.4players.io",
+  "DomainPrefixAuthentication" : "us",
+  "DomainPrefixEvents" : "ep",
+  "DomainPrefixChallenges" : "pcs",
+  "DomainPrefixBattlePasses" : "es",
+  "DomainPrefixLeaderborads" : "ls"
+}

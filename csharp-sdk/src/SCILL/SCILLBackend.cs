@@ -40,10 +40,14 @@ namespace SCILL
             _config = Configuration.Default.Clone(string.Empty, Configuration.Default.BasePath);
             _config.AddApiKey("auth", "api_key");
 
-
+            SCILLSettings scillConfig = SCILLSettings.Load();
+            
+            // EventsApi = GetApi<EventsApi>(apiKey, "https://ep" + hostSuffix + ".scillgame.com");
+            // AuthApi = GetApi<AuthApi>(apiKey, "https://us" + hostSuffix + ".scillgame.com");
+            
             // On backend side, the event parser is set to use the api key to authenticate the request
-            EventsApi = GetApi<EventsApi>(apiKey, "https://ep" + hostSuffix + ".scillgame.com");
-            AuthApi = GetApi<AuthApi>(apiKey, "https://us" + hostSuffix + ".scillgame.com");
+            EventsApi = GetApi<EventsApi>(apiKey, scillConfig.GetApiEndpointURL(SCILLSettings.ApiEndpointType.Events, hostSuffix));
+            AuthApi = GetApi<AuthApi>(apiKey, scillConfig.GetApiEndpointURL(SCILLSettings.ApiEndpointType.Authentication, hostSuffix));
 
         }
 

@@ -168,7 +168,7 @@ namespace SCILL
         public bool IsConnected { get; private set; } = false;
 
 
-        private void Awake()
+        protected virtual  void Awake()
         {
             // Create an instance of this class and make sure it stays (also survives scene changes)
             if (Instance == null)
@@ -189,6 +189,8 @@ namespace SCILL
                         OnSCILLManagerReady?.Invoke();
 
                         StartCoroutine(PingRoutine());
+
+                        Debug.Log("Successfully retrieved access token.");
                     },
                     e =>
                     {
@@ -206,11 +208,10 @@ namespace SCILL
                 Destroy(gameObject);
             }
 
-            SceneManager.activeSceneChanged += SceneManagerOnactiveSceneChanged;
         }
 
 
-        private void Update()
+        protected virtual void Update()
         {
 #if !UNITY_WEBGL || UNITY_EDITOR
             if (null != _mqtt)
@@ -218,7 +219,7 @@ namespace SCILL
 #endif
         }
 
-        private void OnDestroy()
+        protected virtual void OnDestroy()
         {
             if (null != _mqtt)
             {
@@ -367,10 +368,6 @@ namespace SCILL
 
             // Update the SCILLClient instance with the new language setting
             SCILLClient = new SCILLClient(AccessToken, AppId, language.ToString(), environment);
-        }
-
-        private void SceneManagerOnactiveSceneChanged(Scene oldScene, Scene newScene)
-        {
         }
 
 #if UNITY_EDITOR

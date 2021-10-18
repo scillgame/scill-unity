@@ -4,6 +4,7 @@ using RSG;
 using SCILL.Api;
 using SCILL.Client;
 using SCILL.Model;
+using UnityEngine;
 
 namespace SCILL
 {
@@ -69,11 +70,13 @@ namespace SCILL
             // On client side, the event parser is set to use the access token to authenticate the request
             Config.AddApiKey("auth", "access_token");
 
-            EventsApi = GetApi<EventsApi>(AccessToken, "https://ep" + hostSuffix + ".scillgame.com");
-            ChallengesApi = GetApi<ChallengesApi>(AccessToken, "https://pcs" + hostSuffix + ".scillgame.com");
-            BattlePassesApi = GetApi<BattlePassesApi>(AccessToken, "https://es" + hostSuffix + ".scillgame.com");
-            AuthApi = GetApi<AuthApi>(AccessToken, "https://us" + hostSuffix + ".scillgame.com");
-            LeaderboardsApi = GetApi<LeaderboardsApi>(AccessToken, "https://ls" + hostSuffix + ".scillgame.com");
+            SCILLSettings scillSettings = SCILLSettings.Load();
+
+            EventsApi = GetApi<EventsApi>(AccessToken, scillSettings.GetApiEndpointURL(SCILLSettings.ApiEndpointType.Events, hostSuffix));
+            ChallengesApi = GetApi<ChallengesApi>(AccessToken, scillSettings.GetApiEndpointURL(SCILLSettings.ApiEndpointType.Challenges, hostSuffix));
+            BattlePassesApi = GetApi<BattlePassesApi>(AccessToken, scillSettings.GetApiEndpointURL(SCILLSettings.ApiEndpointType.BattlePasses, hostSuffix));
+            AuthApi = GetApi<AuthApi>(AccessToken, scillSettings.GetApiEndpointURL(SCILLSettings.ApiEndpointType.Authentication, hostSuffix));
+            LeaderboardsApi = GetApi<LeaderboardsApi>(AccessToken, scillSettings.GetApiEndpointURL(SCILLSettings.ApiEndpointType.Leaderboards, hostSuffix));
         }
 
         /// <summary>

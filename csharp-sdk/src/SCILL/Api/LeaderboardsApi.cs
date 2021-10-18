@@ -352,19 +352,42 @@ namespace SCILL.Api
             ApiRequest request =
                 Configuration.ApiClient.CreateBaseApiRequest(body, localVarPath, method);
 
-            if (currentPage != null)
-                request.QueryParams.AddRange(
-                    this.Configuration.ApiClient.ParameterToKeyValuePairs("", "currentPage",
-                        currentPage)); // query parameter
-            if (pageSize != null)
-                request.QueryParams.AddRange(
-                    this.Configuration.ApiClient.ParameterToKeyValuePairs("", "pageSize", pageSize)); // query parameter
-
+            request.AddQueryParameter("currentPage", currentPage, Configuration);
+            request.AddQueryParameter("pageSize", pageSize, Configuration);
 
             var responsePromise =
                 Configuration.ApiClient.CallApi<Leaderboard>(request, ExceptionFactory, "GetLeaderboard");
             return responsePromise;
         }
+        
+        // public IPromise<ApiResponse<Leaderboard>> GetLeaderboardAsyncWithHttpInfo(string leaderboardId, DateTime? startDate,
+        //     int? currentPage = null, int? pageSize = null, string language = null)
+        // {
+        //     // verify the required parameter 'leaderboardId' is set
+        //     if (leaderboardId == null)
+        //         throw new ApiException(400,
+        //             "Missing required parameter 'leaderboardId' when calling LeaderboardsApi->GetLeaderboard");
+        //
+        //     var localVarPath = $"/api/v1/leaderboards/{leaderboardId}";
+        //     HttpMethod method = HttpMethod.Get;
+        //     object body = null;
+        //
+        //     ApiRequest request =
+        //         Configuration.ApiClient.CreateBaseApiRequest(body, localVarPath, method);
+        //
+        //     if (currentPage != null)
+        //         request.QueryParams.AddRange(
+        //             this.Configuration.ApiClient.ParameterToKeyValuePairs("", "currentPage",
+        //                 currentPage)); // query parameter
+        //     if (pageSize != null)
+        //         request.QueryParams.AddRange(
+        //             this.Configuration.ApiClient.ParameterToKeyValuePairs("", "pageSize", pageSize)); // query parameter
+        //
+        //
+        //     var responsePromise =
+        //         Configuration.ApiClient.CallApi<Leaderboard>(request, ExceptionFactory, "GetLeaderboard");
+        //     return responsePromise;
+        // }
 
         public void GetLeaderboardRankingAsync(Action<LeaderboardMemberRanking> resolve, Action<Exception> reject,
             string memberType,
