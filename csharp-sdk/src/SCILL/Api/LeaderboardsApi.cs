@@ -296,8 +296,43 @@ namespace SCILL.Api
         #endregion
 
         
+        #region Reset Leaderboard Rankings
+        /// <summary>
+        /// Calling this route will reset (delete) all the leaderboard’s ranking data. Only available when using Api Version v2.
+        /// </summary>
+        /// <remarks>
+        /// Requires the api key for authentication - only call this using the <see cref="SCILLBackend"/>.
+        /// </remarks>
+        /// <param name="resolve">Called on valid API response.</param>
+        /// <param name="reject">Called on error response.</param>
+        /// <param name="appId">The id of the app that the leaderboard belongs to</param>
+        /// <param name="leaderboardId">The id of the leaderboard</param>
+        void ResetLeaderboardRankingsAsync(Action<ActionResponse> resolve, Action<Exception> reject, string appId,
+            string leaderboardId);
         
+        /// <summary>
+        /// Calling this route will reset (delete) all the leaderboard’s ranking data. Only available when using Api Version v2.
+        /// </summary>
+        /// <remarks>
+        /// Requires the api key for authentication - only call this using the <see cref="SCILLBackend"/>.
+        /// </remarks>
+        /// <param name="appId">The id of the app that the leaderboard belongs to</param>
+        /// <param name="leaderboardId">The id of the leaderboard</param>
+        /// <returns>Promise of <see cref="ActionResponse"/></returns>
+        IPromise<ActionResponse> ResetLeaderboardRankingsAsync(string appId, string leaderboardId);
         
+        /// <summary>
+        /// Calling this route will reset (delete) all the leaderboard’s ranking data. Only available when using Api Version v2.
+        /// </summary>
+        /// <remarks>
+        /// Requires the api key for authentication - only call this using the <see cref="SCILLBackend"/>.
+        /// </remarks>
+        /// <param name="appId">The id of the app that the leaderboard belongs to</param>
+        /// <param name="leaderboardId">The id of the leaderboard</param>
+        /// <returns>Promise of ApiResponse with <see cref="ActionResponse"/> data.</returns>
+        IPromise<ApiResponse<ActionResponse>> ResetLeaderboardRankingsAsyncWithHttpInfo(string appId, string leaderboardId);
+
+        #endregion
         #endregion Asynchronous Operations
     }
 
@@ -664,7 +699,44 @@ namespace SCILL.Api
                     "GetLeaderboardRankings");
             return responsePromise;
         }
-        
+
+        public void ResetLeaderboardRankingsAsync(Action<ActionResponse> resolve, Action<Exception> reject, string appId, string leaderboardId)
+        {
+            ResetLeaderboardRankingsAsync(appId, leaderboardId).Then(resolve).Catch(reject);
+        }
+
+        public IPromise<ActionResponse> ResetLeaderboardRankingsAsync(string appId, string leaderboardId)
+        {
+            return ResetLeaderboardRankingsAsyncWithHttpInfo(appId, leaderboardId).ExtractResponseData();
+        }
+
+        public IPromise<ApiResponse<ActionResponse>> ResetLeaderboardRankingsAsyncWithHttpInfo(string appId, string leaderboardId)
+        {
+            VerifyRequiredParameter(appId, "LeaderboardsApi->ResetLeaderboardRankings");
+            VerifyRequiredParameter(leaderboardId, "LeaderboardsApi->ResetLeaderboardRankings");
+         
+            string localVarPath = BuildRequestPath("leaderboards-reset", new[] { appId, leaderboardId });
+            HttpMethod method = HttpMethod.Delete;
+            object body = null;
+
+            ApiRequest request =
+                Configuration.ApiClient.CreateBaseApiRequest(body, localVarPath, method);
+            
+            var responsePromise =
+                Configuration.ApiClient.CallApi<ActionResponse>(request, ExceptionFactory,
+                    "ResetLeaderboardRankings");
+            return responsePromise;
+        }
+
+        private void VerifyRequiredParameter(object parameter, string operationName)
+        {
+            if (null == parameter)
+            {
+                throw new ApiException(400,
+                    $"Missing required parameter '{nameof(parameter)}' when calling {operationName}");
+            }
+        }
+
         #endregion
     }
 }

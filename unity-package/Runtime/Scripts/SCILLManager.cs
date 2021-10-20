@@ -168,7 +168,7 @@ namespace SCILL
         public bool IsConnected { get; private set; } = false;
 
 
-        protected virtual  void Awake()
+        protected virtual void Awake()
         {
             // Create an instance of this class and make sure it stays (also survives scene changes)
             if (Instance == null)
@@ -207,7 +207,6 @@ namespace SCILL
             {
                 Destroy(gameObject);
             }
-
         }
 
 
@@ -575,6 +574,21 @@ namespace SCILL
         public IPromise<LeaderboardMemberRanking> GetPersonalRankingAsync(string leaderboardId)
         {
             return LeaderboardsApi.GetLeaderboardRankingAsync("user", GetUserId(), leaderboardId);
+        }
+
+        /// <summary>
+        /// Calling this will reset (delete) all the leaderboard’s ranking data. Only available when using Api Version v2.
+        /// </summary>
+        /// <remarks>
+        /// Requires the api key for authentication. This only works when a <see cref="SCILLBackend"/> has been initialized, therefore this can not be called from Client-Side Code.
+        /// </remarks>
+        /// <param name="resolve">Called on valid API response.</param>
+        /// <param name="reject">Called on error response.</param>
+        /// <param name="leaderboardId">The id of the leaderboard</param>
+        public void ResetLeaderboardRankings(Action<ActionResponse> resolve, Action<Exception> reject,
+            string leaderboardId)
+        {
+            _scillBackend.ResetLeaderboardRankings(resolve, reject, AppId, leaderboardId);
         }
 
         #endregion

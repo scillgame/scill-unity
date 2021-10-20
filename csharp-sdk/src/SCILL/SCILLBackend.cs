@@ -48,6 +48,7 @@ namespace SCILL
             // On backend side, the event parser is set to use the api key to authenticate the request
             EventsApi = GetApi<EventsApi>(apiKey, scillConfig.GetApiEndpointURL(SCILLSettings.ApiEndpointType.Events, hostSuffix));
             AuthApi = GetApi<AuthApi>(apiKey, scillConfig.GetApiEndpointURL(SCILLSettings.ApiEndpointType.Authentication, hostSuffix));
+            LeaderboardsApi = GetApi<LeaderboardsApi>(apiKey, scillConfig.GetApiEndpointURL(SCILLSettings.ApiEndpointType.Leaderboards, hostSuffix));
 
         }
 
@@ -66,6 +67,11 @@ namespace SCILL
         ///     battle passes.
         /// </summary>
         public EventsApi EventsApi { get; }
+        
+        /// <summary>
+        /// Getter foir the shared <see cref="LeaderboardsApi"/> instance. It's used to send events required for challenges and battle passes.
+        /// </summary>
+        public LeaderboardsApi LeaderboardsApi { get; }
 
 
         private T GetApi<T>(string token, string basePath) where T : IApiAccessor
@@ -118,5 +124,31 @@ namespace SCILL
 
             return stringTokenPromise;
         }
+
+        /// <summary>
+        /// Calling this will reset (delete) all of the leaderboard's ranking data.
+        /// </summary>
+        /// <param name="appId">The id of the app the leaderboard belongs to.</param>
+        /// <param name="leaderboardId">The id of the leaderboard</param>
+        /// <returns></returns>
+        public IPromise<ActionResponse> ResetLeaderboardRankings(string appId, string leaderboardId)
+        {
+            return LeaderboardsApi.ResetLeaderboardRankingsAsync(appId, leaderboardId);
+        }
+
+        /// <summary>
+        /// Calling this will reset (delete) all the leaderboard’s ranking data. Only available when using Api Version v2.
+        /// </summary>
+        /// <param name="resolve">Called on valid API response.</param>
+        /// <param name="reject">Called on error response.</param>
+        /// <param name="appId">The id of the app that the leaderboard belongs to</param>
+        /// <param name="leaderboardId">The id of the leaderboard</param>
+        public void ResetLeaderboardRankings(Action<ActionResponse> resolve, Action<Exception> reject, string appId,
+            string leaderboardId)
+        {
+            LeaderboardsApi.ResetLeaderboardRankingsAsync(resolve, reject, appId, leaderboardId);
+        }
+        
+        
     }
 }

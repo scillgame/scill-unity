@@ -1,0 +1,17 @@
+{
+    "name": "SCILL.RuntimeTests",
+    "rootNamespace": "",
+    "references": [
+        "GUID:3989c15fcc55d4ce6896c779da35734d",
+        "GUID:21bf07b167f3b1a48b2a83076f372430"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
