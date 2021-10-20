@@ -2080,6 +2080,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Effects_Sample_LeaderboardEvents
       objectReference: {fileID: 0}
+    - target: {fileID: 297589941374371625, guid: e69838053f7257f47b01f38b9be42d72,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2747862319197637211, guid: e69838053f7257f47b01f38b9be42d72,
         type: 3}
       propertyPath: leaderboardId

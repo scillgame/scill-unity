@@ -84,5 +84,7 @@ namespace SCILL.Client
             Content = content;
             Error = error;
         }
+        
+        
     }
 }

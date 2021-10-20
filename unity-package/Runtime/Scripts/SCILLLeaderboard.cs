@@ -267,7 +267,7 @@ namespace SCILL
             if (payload.leaderboard_data.leaderboard_id != leaderboardId) return;
 
             RequestFullLeaderboardReload();
-            
+
             if (payload.member_data.member_type == "user" &&
                 payload.member_data.member_id == SCILLManager.Instance.GetUserId())
                 OnUsersLeaderboardRankingChanged?.Invoke(payload);
@@ -356,22 +356,23 @@ namespace SCILL
 
         protected virtual void RequestFullLeaderboardReload()
         {
-            LoadLeaderboardRankings(1, pageSize * CurrentPage, true);   
+            LoadLeaderboardRankings(1, pageSize * CurrentPage, true);
         }
 
         protected virtual void LoadLeaderboardRankings(int page, bool clear = false)
         {
             LoadLeaderboardRankings(page, pageSize, clear);
-        } 
+        }
 
-        protected virtual void LoadLeaderboardRankings(int page,int customPageSize, bool clear = false )
+        protected virtual void LoadLeaderboardRankings(int page, int customPageSize, bool clear = false)
         {
             if (null != SCILLManager.Instance.SCILLClient && !IsLoading)
             {
                 //Debug.Log("LOAD LEADERBOARD RANKINGS " + page);
                 IsLoading = true;
 
-                var loadPromise = SCILLManager.Instance.SCILLClient.GetLeaderboardAsync(leaderboardId, page, customPageSize);
+                var loadPromise =
+                    SCILLManager.Instance.SCILLClient.GetLeaderboardAsync(leaderboardId, page, customPageSize);
 
                 loadPromise.Then(leaderboard =>
                 {
@@ -393,7 +394,9 @@ namespace SCILL
                     AddLeaderItems(rankings);
 
                     IsLoading = false;
-                });
+                }).Catch(
+                    exception => { Debug.LogError(exception.Message); }
+                );
             }
         }
 

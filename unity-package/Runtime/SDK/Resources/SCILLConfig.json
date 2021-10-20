@@ -1,5 +1,5 @@
 ﻿{
-  "ApiVersion": "v1",
+  "ApiVersion": "v2",
   "Domain" : "scill.4players.io",
   "DomainPrefixAuthentication" : "us",
   "DomainPrefixEvents" : "ep",

@@ -295,6 +295,9 @@ namespace SCILL.Api
 
         #endregion
 
+        
+        
+        
         #endregion Asynchronous Operations
     }
 
@@ -386,9 +389,7 @@ namespace SCILL.Api
                     pathBuilder.Append(parameter);
                 }
             }
-
-            Debug.Log($"Build request path: {pathBuilder.ToString()}");
-
+            Debug.Log($"Built request path: {pathBuilder.ToString()}");
             return pathBuilder.ToString();
         }
 
@@ -496,10 +497,20 @@ namespace SCILL.Api
             request.AddQueryParameter("currentPosition", currentPosition, Configuration);
             AddOptionalApiParameters(ref request, optionalParameters);
 
-            var responsePromise =
-                Configuration.ApiClient.CallApi<Leaderboard>(request, ExceptionFactory, "GetLeaderboard");
-            return responsePromise;
+
+            IPromise<ApiResponse<Leaderboard>> leaderboardPromise;
+            if(Configuration.ScillSettings.ApiVersion.Equals("v2"))
+            {
+                leaderboardPromise =
+                    Configuration.ApiClient.CallApi<LeaderboardResults>(request, ExceptionFactory, "GetLeaderboard").ToLeaderboardPromise();
+            }
+            else
+            {
+                leaderboardPromise = Configuration.ApiClient.CallApi<Leaderboard>(request, ExceptionFactory, "GetLeaderboard");
+            }
+            return leaderboardPromise;
         }
+        
 
         #endregion
 
@@ -539,10 +550,21 @@ namespace SCILL.Api
             request.AddQueryParameter("currentPosition", pageSize, Configuration);
             AddOptionalApiParameters(ref request, optionalParameters);
 
-            var responsePromise =
-                Configuration.ApiClient.CallApi<List<Leaderboard>>(request, ExceptionFactory, "GetLeaderboards");
-            return responsePromise;
+            IPromise<ApiResponse<List<Leaderboard>>> leaderboardsPromise;
+            if(Configuration.ScillSettings.ApiVersion.Equals(ApiVersionV2))
+            {
+                leaderboardsPromise =
+                    Configuration.ApiClient.CallApi<List<LeaderboardResults>>(request, ExceptionFactory, "GetLeaderboard").ToLeaderboardsPromise();
+            }
+            else
+            {
+                leaderboardsPromise =
+                    Configuration.ApiClient.CallApi<List<Leaderboard>>(request, ExceptionFactory, "GetLeaderboards");
+            }
+            return leaderboardsPromise;
         }
+
+        private static string ApiVersionV2 => "v2";
 
         #endregion
 
@@ -586,8 +608,6 @@ namespace SCILL.Api
             HttpMethod method = HttpMethod.Get;
             object body = null;
             
-            Debug.Log($"Requesting user ranking for memberType {memberType} and memberId {memberId}");
-
             
             ApiRequest request =
                 Configuration.ApiClient.CreateBaseApiRequest(body, localVarPath, method, language);
