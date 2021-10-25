@@ -4,6 +4,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2021-10-25
+
+Added the capability to access SCILL Api v2 endpoints for leaderboards. Leaderboard can be set to v2 on 
+creation in the 4Players Admin Panel. Leaderboards created for the Api v2 can only be accessed using Api v2
+requests. Leaderboards created for the Api v1 can only be accessed using Api v1 requests.
+
+**Important:** the SDK will automatically try to 
+access the v2 endpoints. If you're still using leaderboards created for the v1 endpoints, you will have to do the following:
+- Create a file called: `SCILLConfig.json` in a `Resources` folder under your `Assets` directory.
+- Set the file's content to: ``` {
+  "ApiVersion": "v1"
+  }```
+
+The SDK will then use the v1 endpoints of the SCILL Api. 
+
+### Added
+
+- Can now call `ResetLeaderboardRankings` to reset all ranking data of a leaderboard, using the `SCILLBackend`. This request is not available on Client Side Code.
+- Can now add a `SCILLConfig.json` file in a `Resources` folder under the `Assets` directory to adjust SCILL-SDK settings, i.e. the api version, the Api Domain and the domain prefixes for the Authentication, Events, Challenges, BattlePasses and Leaderboards Apis. The default configuration is set to:
+
+``` json 
+{
+  "ApiVersion": "v2",
+  "Domain" : "scill.4players.io",
+  "DomainPrefixAuthentication" : "us",
+  "DomainPrefixEvents" : "ep",
+  "DomainPrefixChallenges" : "pcs",
+  "DomainPrefixBattlePasses" : "es",
+  "DomainPrefixLeaderboards" : "ls"
+  }
+```
+
+### Changed
+
+- The Leaderboard Api requests ``GetLeaderboardAsync``, ``GetLeaderboardsAsync``, `GetLeaderboardRankingAsync` and `GetLeaderboardRankingsAsync` now provide additional, optional parameters. These parameters can only be used for requests sent using Api Version `v2`.
+
 
 ## [2.1.1] - 2021-09-10
 

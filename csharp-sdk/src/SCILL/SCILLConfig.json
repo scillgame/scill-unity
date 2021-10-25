@@ -5,5 +5,5 @@
   "DomainPrefixEvents" : "ep",
   "DomainPrefixChallenges" : "pcs",
   "DomainPrefixBattlePasses" : "es",
-  "DomainPrefixLeaderborads" : "ls"
+  "DomainPrefixLeaderboards" : "ls"
 }
