@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using SCILL.Client;
 using SCILL.Model;
 using UnityEngine;
 using UnityEngine.Events;
@@ -29,7 +31,13 @@ namespace SCILL.Effects
         /// <summary>
         /// The current users leaderboard ranking in the leaderboard with id <see cref="leaderboardId"/>
         /// </summary>
+        [Obsolete("Please use CurrentUserMemberRanking instead.")]
         protected LeaderboardRanking CurrentUserRanking;
+
+        /// <summary>
+        /// The current users leaderboard ranking in the leaderboard with id <see cref="leaderboardId"/>
+        /// </summary>
+        protected LeaderboardMember CurrentUserMember;
         
         protected virtual void OnEnable()
         {
@@ -74,10 +82,23 @@ namespace SCILL.Effects
 
                 SCILLManager.Instance.LeaderboardsApi.GetLeaderboardRankingAsync(
                     OnReceivedCurrentUserRanking,
-                    exception => { Debug.LogError(exception.Message); },
+                    OnGetLeaderboardRankingRejected, 
                     "user",
                     SCILLManager.Instance.UserId,
                     leaderboardId);
+            }
+        }
+
+        private void OnGetLeaderboardRankingRejected(Exception exception)
+        {
+            ApiException apiException = exception as ApiException;
+            if (null != apiException && 404 == apiException.ErrorCode)
+            {
+                Debug.Log($"User with id {SCILLManager.Instance.UserId} not present in Leaderboard with id {leaderboardId}");
+            }
+            else
+            {
+                Debug.LogError(exception.Message);
             }
         }
 
@@ -88,7 +109,10 @@ namespace SCILL.Effects
         /// <param name="ranking">The current user's leaderboard ranking.</param>
         protected virtual void OnReceivedCurrentUserRanking(LeaderboardMemberRanking ranking)
         {
-            CurrentUserRanking = ranking.member;
+#pragma warning disable 618
+            CurrentUserRanking = ranking.leaderboard_member.ToLeaderboardRanking();
+#pragma warning restore 618
+            CurrentUserMember = ranking.leaderboard_member;
         }
 
 
@@ -121,7 +145,7 @@ namespace SCILL.Effects
         {
             int? oldRank = payload.old_leaderboard_ranking?.rank;
             int? newRank = payload.new_leaderboard_ranking?.rank;
-            if (null != CurrentUserRanking && oldRank > CurrentUserRanking.rank && newRank <= CurrentUserRanking.rank)
+            if (null != CurrentUserMember && oldRank > CurrentUserMember.rank && newRank <= CurrentUserMember.rank)
             {
                 onUserRankingIncreased.Invoke();
                 RequestCurrentUserLeaderboardRank();

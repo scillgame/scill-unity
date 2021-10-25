@@ -35,7 +35,7 @@ namespace SCILL.Model
         /// <param name="leaderboardId">The id of the leaderboard.</param>
         /// <param name="leaderboardName">The name of the leaderboard.</param>
         /// <param name="leaderboardSortOrderAscending">Determines the results sort order. If true, the order is ascending, otherwise, it&#x27;s descending..</param>
-        /// <param name="leaderboardResultsByMemberType">This object uses twwo keys - \&quot;user\&quot; and \&quot;team\&quot;, both of which contain ranking info.</param>
+        /// <param name="leaderboardResultsByMemberType">This object uses two keys - \&quot;user\&quot; and \&quot;team\&quot;, both of which contain ranking info.</param>
         public LeaderboardResults(string leaderboardId = default(string), string leaderboardName = default(string), bool? leaderboardSortOrderAscending = default(bool?), Dictionary<string, LeaderboardMemberTypeRanking> leaderboardResultsByMemberType = default(Dictionary<string, LeaderboardMemberTypeRanking>))
         {
             this.leaderboard_id = leaderboardId;
@@ -66,9 +66,9 @@ namespace SCILL.Model
         public bool? leaderboard_sort_order_ascending { get; set; }
 
         /// <summary>
-        /// This object uses twwo keys - \&quot;user\&quot; and \&quot;team\&quot;, both of which contain ranking info
+        /// This object uses two keys - \&quot;user\&quot; and \&quot;team\&quot;, both of which contain ranking info
         /// </summary>
-        /// <value>This object uses twwo keys - \&quot;user\&quot; and \&quot;team\&quot;, both of which contain ranking info</value>
+        /// <value>This object uses two keys - \&quot;user\&quot; and \&quot;team\&quot;, both of which contain ranking info</value>
         [DataMember(Name="leaderboard_results_by_member_type", EmitDefaultValue=false)]
         public Dictionary<string, LeaderboardMemberTypeRanking> leaderboard_results_by_member_type { get; set; }
 

@@ -54,7 +54,7 @@ namespace SCILL
         /// <returns>The found configuration or null, if file was not found.</returns>
         public static SCILLSettings Load(string filePath = "SCILLConfig")
         {
-            SCILLSettings result = null;
+            SCILLSettings result = SCILLSettings.Default;
             TextAsset configAsset = Resources.Load<TextAsset>(filePath);
             if (configAsset)
             {
@@ -63,9 +63,17 @@ namespace SCILL
             }
             else
             {
-                Debug.LogWarning($"Loading {filePath} from Resources failed, fallback to default configuration.");
+                Debug.Log($"SCILL: Loading {filePath}.json from Resources failed, fallback to default configuration.");
             }
             return result;
+        }
+
+        private static SCILLSettings Default
+        {
+            get
+            {
+                return new SCILLSettings();
+            }
         }
 
         private void Init()

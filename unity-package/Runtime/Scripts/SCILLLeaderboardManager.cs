@@ -90,8 +90,14 @@ namespace SCILL
                 SCILLManager.Instance.GetPersonalRankingAsync(
                     memberRanking =>
                     {
-                        if (memberRanking != null && memberRanking.member != null && memberRanking.member.rank >= 1)
-                            OnLeaderboardRankingLoaded?.Invoke(memberRanking.member);
+                        if (null != memberRanking)
+                        {
+                            LeaderboardMember member = memberRanking.leaderboard_member;
+                            if (null != member && member.rank >= 1)
+                            {
+                                OnLeaderboardRankingLoaded.Invoke(member.ToLeaderboardRanking());
+                            }
+                        }
                     },
                     e =>
                     {

@@ -275,6 +275,7 @@ namespace SCILL
 
         protected virtual void AddLeaderItems(List<LeaderboardRanking> rankings)
         {
+            bool bFoundCurrentUser = false;
             foreach (var ranking in rankings)
             {
                 //Debug.Log("Adding ranking " + ranking.rank);
@@ -283,6 +284,7 @@ namespace SCILL
                 {
                     prefab = userRankingPrefab;
                     UpdateUsersHeaderRankingDisplay(ranking);
+                    bFoundCurrentUser = true;
                 }
                 else if (ranking.rank <= numberOfTopEntries) prefab = topRankingPrefab;
 
@@ -293,6 +295,11 @@ namespace SCILL
                     rankingItem.numberOfDecimals = numberOfDecimals;
                     rankingItem.ranking = ranking;
                 }
+            }
+
+            if (!bFoundCurrentUser)
+            {
+                HideUserRanking();
             }
         }
 
@@ -318,24 +325,16 @@ namespace SCILL
             if (!userRanking) return;
 
             // Load users ranking in this leaderboard
-            try
-            {
-                var leaderboardRankingPromise =
-                    SCILLManager.Instance.SCILLClient.GetLeaderboardRankingAsync("user",
-                        SCILLManager.Instance.GetUserId(),
-                        leaderboardId);
 
-                leaderboardRankingPromise.Then(leaderboardMemberRanking =>
-                {
-                    LeaderboardRanking ranking = leaderboardMemberRanking.member;
-                    UpdateUsersHeaderRankingDisplay(ranking);
-                });
-            }
-            catch (ApiException e)
+            var leaderboardRankingPromise =
+                SCILLManager.Instance.SCILLClient.GetLeaderboardRankingAsync("user",
+                    SCILLManager.Instance.GetUserId(),
+                    leaderboardId);
+
+            leaderboardRankingPromise.Then(leaderboardMemberRanking =>
             {
-                Debug.Log("Failed to load users leaderboard: " + e.Message);
-                throw;
-            }
+                UpdateUsersHeaderRankingDisplay(leaderboardMemberRanking.leaderboard_member.ToLeaderboardRanking());
+            }).Catch(exception => Debug.Log("Failed to load users leaderboard: " + exception.Message));
         }
 
         protected virtual void UpdateUsersHeaderRankingDisplay(LeaderboardRanking ranking)
@@ -343,7 +342,7 @@ namespace SCILL
             // If user is not in leaderboard, hide it
             if (ranking.rank < 0)
             {
-                userRanking.gameObject.SetActive(false);
+                HideUserRanking();
             }
             else
             {
@@ -352,6 +351,11 @@ namespace SCILL
                 userRanking.ranking = ranking;
                 userRanking.gameObject.SetActive(true);
             }
+        }
+
+        private void HideUserRanking()
+        {
+            userRanking.gameObject.SetActive(false);
         }
 
         protected virtual void RequestFullLeaderboardReload()

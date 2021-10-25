@@ -73,14 +73,14 @@ Contact: support@scillgame.com
         </EmbeddedResource>
     </ItemGroup>
     <ItemGroup>
-        <Content Include="SCILLConfig.json">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </Content>
+      <Content Include="Resources\SCILLConfig.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 
     <Target Name="AfterBuild">
         <Copy Condition="Exists('../../../unity-package/Runtime/SDK')" SourceFiles="bin/$(ConfigurationName)/SCILL.dll" DestinationFolder="../../../unity-package/Runtime/SDK" />
         <Copy Condition="Exists('../../../unity-package/Runtime/SDK')" SourceFiles="bin/$(ConfigurationName)/SCILL.pdb" DestinationFolder="../../../unity-package/Runtime/SDK" />
-        <Copy Condition="Exists('../../../unity-package/Runtime/SDK/Resources')" SourceFiles="bin/$(ConfigurationName)/SCILLConfig.json" DestinationFolder="../../../unity-package/Runtime/SDK/Resources" />
+        <!-- <Copy Condition="Exists('../../../unity-package/Runtime/SDK/Resources')" SourceFiles="bin/$(ConfigurationName)/Resources/SCILLConfig.json" DestinationFolder="../../../unity-package/Runtime/SDK/Resources" /> -->
     </Target>
 </Project>
