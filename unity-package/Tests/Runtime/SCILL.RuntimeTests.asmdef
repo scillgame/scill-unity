@@ -3,15 +3,20 @@
     "rootNamespace": "",
     "references": [
         "GUID:3989c15fcc55d4ce6896c779da35734d",
-        "GUID:21bf07b167f3b1a48b2a83076f372430"
+        "GUID:21bf07b167f3b1a48b2a83076f372430",
+        "GUID:27619889b8ba8c24980f49ee34dbb44a"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
-    "overrideReferences": false,
-    "precompiledReferences": [],
-    "autoReferenced": true,
-    "defineConstraints": [],
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
     "versionDefines": [],
     "noEngineReferences": false
 }
