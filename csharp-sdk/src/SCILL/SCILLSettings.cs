@@ -61,10 +61,10 @@ namespace SCILL
                 result = JsonConvert.DeserializeObject<SCILLSettings>(configAsset.text);
                 result.Init();
             }
-            else
-            {
-                Debug.Log($"SCILL: Loading {filePath}.json from Resources failed, fallback to default configuration.");
-            }
+            // else
+            // {
+            //     Debug.Log($"SCILL: Loading {filePath}.json from Resources failed, fallback to default configuration.");
+            // }
             return result;
         }
 

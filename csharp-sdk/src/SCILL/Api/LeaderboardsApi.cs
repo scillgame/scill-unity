@@ -424,7 +424,7 @@ namespace SCILL.Api
                     pathBuilder.Append(parameter);
                 }
             }
-            Debug.Log($"Built request path: {pathBuilder.ToString()}");
+            // Debug.Log($"Built request path: {pathBuilder.ToString()}");
             return pathBuilder.ToString();
         }
 

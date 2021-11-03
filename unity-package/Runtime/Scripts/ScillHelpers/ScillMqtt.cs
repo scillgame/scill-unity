@@ -245,7 +245,7 @@ namespace ScillHelpers
         private void MqttWSOnOnClose(WebSocketCloseCode closecode)
         {
             IsConnected = false;
-            Debug.Log("Closed connection to MQTT Server with code: " + closecode);
+            // Debug.Log("SCILL: Closed connection to MQTT Server with code: " + closecode);
         }
 
         /// <summary>

@@ -190,7 +190,7 @@ namespace SCILL
 
                         StartCoroutine(PingRoutine());
 
-                        Debug.Log("Successfully retrieved access token.");
+                        // Debug.Log("Successfully retrieved access token.");
                     },
                     e =>
                     {

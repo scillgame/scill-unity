@@ -17,11 +17,14 @@ namespace SCILL.Effects
         /// <summary>
         /// Id of the leaderboard for which the sound effects should be played.
         /// </summary>
-        [FormerlySerializedAs("leaderboardID")] [SerializeField] private string leaderboardId;
+        [FormerlySerializedAs("leaderboardID")] [SerializeField]
+        private string leaderboardId;
+
         /// <summary>
         /// Invoked, when the current users ranking is smaller than before.
         /// </summary>
         [SerializeField] public UnityEvent onUserRankingDecreased;
+
         /// <summary>
         /// Invoked, when the current users ranking is larger than before.
         /// </summary>
@@ -38,7 +41,7 @@ namespace SCILL.Effects
         /// The current users leaderboard ranking in the leaderboard with id <see cref="leaderboardId"/>
         /// </summary>
         protected LeaderboardMember CurrentUserMember;
-        
+
         protected virtual void OnEnable()
         {
             if (SCILLManager.Instance.IsConnected)
@@ -62,6 +65,15 @@ namespace SCILL.Effects
         /// </summary>
         protected virtual void InitializeLeaderboardEvents()
         {
+            StartCoroutine(DelayedInitializeLeaderboardEvents());
+        }
+
+        /// <summary>
+        /// Coroutine: Waits a frame before start listening to leaderboard update notifications for the leaderboard with the id <see cref="leaderboardId"/>.
+        /// </summary>
+        protected IEnumerator DelayedInitializeLeaderboardEvents()
+        {
+            yield return null;
             if (!string.IsNullOrEmpty(leaderboardId))
             {
                 SCILLManager.Instance.StartLeaderboardUpdateNotifications(leaderboardId, OnLeaderboardUpdate);
@@ -69,7 +81,7 @@ namespace SCILL.Effects
             }
         }
 
-        
+
         /// <summary>
         /// Utility function for requesting the current users leaderboard ranking, using the
         /// <see cref="leaderboardId"/> and the current users UserId. The resolve callback
@@ -77,12 +89,12 @@ namespace SCILL.Effects
         /// </summary>
         protected void RequestCurrentUserLeaderboardRank()
         {
-            if (SCILLManager.Instance && null !=  SCILLManager.Instance.LeaderboardsApi && !string.IsNullOrEmpty(leaderboardId))
+            if (SCILLManager.Instance && null != SCILLManager.Instance.LeaderboardsApi &&
+                !string.IsNullOrEmpty(leaderboardId))
             {
-
                 SCILLManager.Instance.LeaderboardsApi.GetLeaderboardRankingAsync(
                     OnReceivedCurrentUserRanking,
-                    OnGetLeaderboardRankingRejected, 
+                    OnGetLeaderboardRankingRejected,
                     "user",
                     SCILLManager.Instance.UserId,
                     leaderboardId);
@@ -94,7 +106,8 @@ namespace SCILL.Effects
             ApiException apiException = exception as ApiException;
             if (null != apiException && 404 == apiException.ErrorCode)
             {
-                Debug.Log($"User with id {SCILLManager.Instance.UserId} not present in Leaderboard with id {leaderboardId}");
+                Debug.Log(
+                    $"User with id {SCILLManager.Instance.UserId} not present in Leaderboard with id {leaderboardId}");
             }
             else
             {
@@ -126,7 +139,7 @@ namespace SCILL.Effects
                 SCILLManager.Instance.StopLeaderboardUpdateNotifications(leaderboardId, OnLeaderboardUpdate);
             }
         }
-        
+
         /// <summary>
         /// Called when receiving realtime leaderboard updates from the SCILL backend.
         /// </summary>
@@ -137,7 +150,6 @@ namespace SCILL.Effects
             {
                 CheckUserRankingDecreased(payload);
                 CheckUserRankingIncreased(payload);
-
             }
         }
 
