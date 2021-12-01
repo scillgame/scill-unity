@@ -1487,7 +1487,7 @@ PrefabInstance:
     - target: {fileID: 9218344741015612865, guid: 2c4dd3b4cb50344ad8f4a27d82cb793e,
         type: 3}
       propertyPath: leaderboardId
-      value: 671385819804106763
+      value: 707688677614157827
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2c4dd3b4cb50344ad8f4a27d82cb793e, type: 3}

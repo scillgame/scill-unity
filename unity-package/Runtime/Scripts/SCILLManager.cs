@@ -443,13 +443,14 @@ namespace SCILL
         ///     group events together. For example this can be a level or a match id.
         /// </param>
         /// <param name="metaData">A EventMetaData object that you can/must use to set property values for the respective event.</param>
+        /// <param name="teamId"></param>
         public void SendEventAsync(string eventName, string eventType = "single", string sessionId = null,
-            EventMetaData metaData = null)
+            EventMetaData metaData = null, string teamId = null)
         {
             // Please note, in some cases you should change session ids. This is just a simple example where we don't need
             // to do that
             var payload = new EventPayload(GetUserId(), sessionId != null ? sessionId : SessionId, eventName, eventType,
-                metaData);
+                metaData, teamId);
 
             try
             {
@@ -518,13 +519,14 @@ namespace SCILL
         ///     group events together. For example this can be a level or a match id.
         /// </param>
         /// <param name="metaData">A EventMetaData object that you can/must use to set property values for the respective event.</param>
+        /// <param name="teamId">Provide an optional team id that will be used in leaderboards to group results of teams..</param>
         public void SendEventForUserIdAsync(string userId, string eventName, string eventType = "single",
-            string sessionId = null, EventMetaData metaData = null)
+            string sessionId = null, EventMetaData metaData = null, string teamId = null)
         {
             // Please note, in some cases you should change session ids. This is just a simple example where we don't need
             // to do that
             var payload = new EventPayload(userId, sessionId != null ? sessionId : "persistent", eventName, eventType,
-                metaData);
+                metaData, teamId);
             try
             {
                 SendEventAsync(eventName, payload);
