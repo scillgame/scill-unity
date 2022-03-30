@@ -334,7 +334,9 @@ namespace SCILL
             leaderboardRankingPromise.Then(leaderboardMemberRanking =>
             {
                 UpdateUsersHeaderRankingDisplay(leaderboardMemberRanking.leaderboard_member.ToLeaderboardRanking());
-            }).Catch(exception => Debug.Log("Failed to load users leaderboard: " + exception.Message));
+            }).Catch(
+                
+                exception => Debug.Log($"Current User is not yet represented in leaderboard {leaderboardId}."));
         }
 
         protected virtual void UpdateUsersHeaderRankingDisplay(LeaderboardRanking ranking)
