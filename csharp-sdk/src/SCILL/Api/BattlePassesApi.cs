@@ -829,6 +829,8 @@ namespace SCILL.Api
             var localVarPath = $"/api/v1/battle-passes/{appId}/unlock/{battlePassId}";
             HttpMethod method = HttpMethod.Post;
 
+           
+                
             ApiRequest request =
                 Configuration.ApiClient.CreateBaseApiRequest(body, localVarPath, method, language);
 

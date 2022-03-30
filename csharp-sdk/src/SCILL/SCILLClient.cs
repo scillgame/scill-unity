@@ -722,6 +722,10 @@ namespace SCILL
             string battlePassId,
             BattlePassUnlockPayload body = null)
         {
+            if (null == body)
+            {
+                body = new BattlePassUnlockPayload(0, "EUR");
+            }
             BattlePassesApi.UnlockBattlePassAsync(resolve, reject, AppId, battlePassId, body, Language);
         }
 
@@ -741,6 +745,10 @@ namespace SCILL
         public IPromise<BattlePassUnlockInfo> UnlockBattlePassAsync(string battlePassId,
             BattlePassUnlockPayload body = null)
         {
+            if (null == body)
+            {
+                body = new BattlePassUnlockPayload(0, "EUR");
+            }
             return BattlePassesApi.UnlockBattlePassAsync(AppId, battlePassId, body, Language);
         }
 

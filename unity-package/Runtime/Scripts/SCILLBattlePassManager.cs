@@ -403,8 +403,6 @@ namespace SCILL
                 // If we have not selected a battle pass level, let's pick the current one
                 if (_selectedBattlePassLevelIndex == 0) SelectedBattlePassLevelIndex = GetCurrentBattlePassLevelIndex();
                 
-                
-
                 OnBattlePassLevelsUpdatedFromServer?.Invoke(levels);
 
             }).Catch(exception =>
@@ -513,7 +511,7 @@ namespace SCILL
             responsePromise.Then(response =>
             {
                 if (response != null && response.message == "OK") OnBattlePassLevelRewardClaimed?.Invoke(level);
-            });
+            }).Catch(e=>Debug.LogWarning($"Failed claiming BattlePass Level Reward for Level {level.level_id}"));
         }
     }
 }
