@@ -275,7 +275,6 @@ namespace SCILL
 
         protected virtual void AddLeaderItems(List<LeaderboardRanking> rankings)
         {
-            bool bFoundCurrentUser = false;
             foreach (var ranking in rankings)
             {
                 //Debug.Log("Adding ranking " + ranking.rank);
@@ -284,7 +283,6 @@ namespace SCILL
                 {
                     prefab = userRankingPrefab;
                     UpdateUsersHeaderRankingDisplay(ranking);
-                    bFoundCurrentUser = true;
                 }
                 else if (ranking.rank <= numberOfTopEntries) prefab = topRankingPrefab;
 
@@ -297,10 +295,7 @@ namespace SCILL
                 }
             }
 
-            if (!bFoundCurrentUser)
-            {
-                HideUserRanking();
-            }
+            
         }
 
         /// <summary>
@@ -336,7 +331,11 @@ namespace SCILL
                 UpdateUsersHeaderRankingDisplay(leaderboardMemberRanking.leaderboard_member.ToLeaderboardRanking());
             }).Catch(
                 
-                exception => Debug.Log($"Current User is not yet represented in leaderboard {leaderboardId}."));
+                exception =>
+                {
+                    HideUserRanking();
+                    Debug.Log($"Current User is not yet represented in leaderboard {leaderboardId}.");
+                });
         }
 
         protected virtual void UpdateUsersHeaderRankingDisplay(LeaderboardRanking ranking)
