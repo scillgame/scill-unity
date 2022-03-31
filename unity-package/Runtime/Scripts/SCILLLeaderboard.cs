@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using SCILL.Client;
 using SCILL.Model;
 using UnityEngine;
 using UnityEngine.UI;
@@ -184,19 +183,19 @@ namespace SCILL
         [Tooltip("The prefab of a UI item that will be used for any other rankings")]
         public SCILLLeaderboardRankingItem defaultRankingPrefab;
 
-        private bool _allContentLoaded;
+        protected bool _allContentLoaded;
 
 
-        private ScrollRect _scrollRect;
+        protected ScrollRect _scrollRect;
 
         /// <summary>
         ///     Returns the current page starting at <c>1</c>.
         /// </summary>
         public int CurrentPage { get; private set; }
 
-        private bool IsLoading { get; set; } = false;
+        protected bool IsLoading { get; set; }
 
-        private bool IsInitialized { get; set; } = false;
+        protected bool IsInitialized { get; set; }
 
         private void Awake()
         {
@@ -284,7 +283,10 @@ namespace SCILL
                     prefab = userRankingPrefab;
                     UpdateUsersHeaderRankingDisplay(ranking);
                 }
-                else if (ranking.rank <= numberOfTopEntries) prefab = topRankingPrefab;
+                else if (ranking.rank <= numberOfTopEntries)
+                {
+                    prefab = topRankingPrefab;
+                }
 
                 var rankingGo = Instantiate(prefab.gameObject, rankingsContainer.transform, false);
                 var rankingItem = rankingGo.GetComponent<SCILLLeaderboardRankingItem>();
@@ -294,8 +296,6 @@ namespace SCILL
                     rankingItem.ranking = ranking;
                 }
             }
-
-            
         }
 
         /// <summary>
@@ -330,7 +330,6 @@ namespace SCILL
             {
                 UpdateUsersHeaderRankingDisplay(leaderboardMemberRanking.leaderboard_member.ToLeaderboardRanking());
             }).Catch(
-                
                 exception =>
                 {
                     HideUserRanking();
@@ -383,26 +382,31 @@ namespace SCILL
                 {
                     //Debug.Log(leaderboard.ToJson());
 
-                    if (leaderboardName) leaderboardName.text = leaderboard.name;
-
-                    var rankings = memberType == SCILLMemberType.User
-                        ? leaderboard.grouped_by_users
-                        : leaderboard.grouped_by_teams;
-
-                    //Debug.Log("Loaded leaderboard rankings, number of items: " + rankings.Count + ", Page-Size: " + pageSize);
-
-                    // Make sure we stop loading new stuff if we are at the end of the list
-                    if (rankings.Count < pageSize) _allContentLoaded = true;
-
-                    if (clear) ClearRankings();
-
-                    AddLeaderItems(rankings);
-
-                    IsLoading = false;
+                    UpdateLeaderboardUI(clear, leaderboard);
                 }).Catch(
                     exception => { Debug.LogError(exception.Message); }
                 );
             }
+        }
+
+        protected void UpdateLeaderboardUI(bool clear, Leaderboard leaderboard)
+        {
+            if (leaderboardName) leaderboardName.text = leaderboard.name;
+
+            var rankings = memberType == SCILLMemberType.User
+                ? leaderboard.grouped_by_users
+                : leaderboard.grouped_by_teams;
+
+            //Debug.Log("Loaded leaderboard rankings, number of items: " + rankings.Count + ", Page-Size: " + pageSize);
+
+            // Make sure we stop loading new stuff if we are at the end of the list
+            if (rankings.Count < pageSize) _allContentLoaded = true;
+
+            if (clear) ClearRankings();
+
+            AddLeaderItems(rankings);
+
+            IsLoading = false;
         }
 
         protected virtual void AddNextPage()
@@ -424,7 +428,7 @@ namespace SCILL
             // Make sure we delete all items from the battle pass levels container
             // This way we can leave some dummy level items in Unity Editor which makes it easier to design UI
             foreach (var child in rankingsContainer
-                .GetComponentsInChildren<SCILLLeaderboardRankingItem>())
+                         .GetComponentsInChildren<SCILLLeaderboardRankingItem>())
                 Destroy(child.gameObject);
         }
     }

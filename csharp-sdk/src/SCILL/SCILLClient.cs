@@ -69,6 +69,8 @@ namespace SCILL
 
             // On client side, the event parser is set to use the access token to authenticate the request
             Config.AddApiKey("auth", "access_token");
+            
+            Config.DateTimeFormat = "yyyy-MM-dd";
 
             SCILLSettings scillSettings = Config.ScillSettings;
 
@@ -767,11 +769,13 @@ namespace SCILL
         ///     Default value is 1 (optional)
         /// </param>
         /// <param name="pageSize">The number of elements per page. Default is 25. (optional)</param>
+        /// <param name="currentPosition">The starting position from which to send info. Will overwrite currentPage setting.</param>
+        /// <param name="optionalParameters">Optional parameters for further specifying returned rankings.</param>
         public void GetLeaderboardAsync(Action<Leaderboard> resolve, Action<Exception> reject, string leaderboardId,
             int? currentPage = null,
-            int? pageSize = null)
+            int? pageSize = null, int? currentPosition = null, LeaderboardApiOptionalParameters optionalParameters = null)
         {
-            LeaderboardsApi.GetLeaderboardAsync(resolve, reject, leaderboardId, currentPage, pageSize, Language);
+            LeaderboardsApi.GetLeaderboardAsync(resolve, reject, leaderboardId, currentPage, pageSize, Language, currentPosition, optionalParameters);
         }
 
         /// <summary>
@@ -787,11 +791,13 @@ namespace SCILL
         ///     Default value is 1 (optional)
         /// </param>
         /// <param name="pageSize">The number of elements per page. Default is 25. (optional)</param>
+        /// <param name="currentPosition">The starting position from which to send info. Will overwrite currentPage setting.</param>
+        /// <param name="optionalParameters">Optional parameters for further specifying returned rankings.</param>
         /// <returns>Promise of Leaderboard</returns>
         public IPromise<Leaderboard> GetLeaderboardAsync(string leaderboardId, int? currentPage = null,
-            int? pageSize = null)
+            int? pageSize = null, int? currentPosition = null, LeaderboardApiOptionalParameters optionalParameters = null)
         {
-            return LeaderboardsApi.GetLeaderboardAsync(leaderboardId, currentPage, pageSize, Language);
+            return LeaderboardsApi.GetLeaderboardAsync(leaderboardId, currentPage, pageSize, Language, currentPosition, optionalParameters);
         }
 
         /// <summary>
@@ -813,11 +819,12 @@ namespace SCILL
         ///     which one is used.
         /// </param>
         /// <param name="leaderboardId">The id of the leaderboard</param>
+        /// <param name="optionalParameters">Optional parameters for further specifying returned rankings.</param>
         public void GetLeaderboardRankingAsync(Action<LeaderboardMemberRanking> resolve, Action<Exception> reject,
             string memberType,
-            string memberId, string leaderboardId)
+            string memberId, string leaderboardId, LeaderboardApiOptionalParameters optionalParameters = null)
         {
-            LeaderboardsApi.GetLeaderboardRankingAsync(resolve, reject, memberType, memberId, leaderboardId, Language);
+            LeaderboardsApi.GetLeaderboardRankingAsync(resolve, reject, memberType, memberId, leaderboardId, Language, optionalParameters);
         }
 
         /// <summary>
@@ -837,11 +844,12 @@ namespace SCILL
         ///     which one is used.
         /// </param>
         /// <param name="leaderboardId">The id of the leaderboard</param>
+        /// <param name="optionalParameters">Optional parameters for further specifying returned rankings.</param>
         /// <returns>Promise of LeaderboardMemberRanking</returns>
         public IPromise<LeaderboardMemberRanking> GetLeaderboardRankingAsync(string memberType,
-            string memberId, string leaderboardId)
+            string memberId, string leaderboardId, LeaderboardApiOptionalParameters optionalParameters = null)
         {
-            return LeaderboardsApi.GetLeaderboardRankingAsync(memberType, memberId, leaderboardId, Language);
+            return LeaderboardsApi.GetLeaderboardRankingAsync(memberType, memberId, leaderboardId, Language, optionalParameters);
         }
 
 
@@ -863,11 +871,12 @@ namespace SCILL
         ///     Either the user_id or team_id you used when sending the events. The memberType flag identifies
         ///     which one is used.
         /// </param>
+        /// <param name="optionalParameters">Optional parameters for further specifying returned rankings.</param>
         public void GetLeaderboardRankingsAsync(Action<List<LeaderboardMemberRanking>> resolve,
             Action<Exception> reject,
-            string memberType, string memberId)
+            string memberType, string memberId, LeaderboardApiOptionalParameters optionalParameters = null)
         {
-            LeaderboardsApi.GetLeaderboardRankingsAsync(resolve, reject, memberType, memberId, Language);
+            LeaderboardsApi.GetLeaderboardRankingsAsync(resolve, reject, memberType, memberId, Language, optionalParameters);
         }
 
         /// <summary>
@@ -886,11 +895,12 @@ namespace SCILL
         ///     Either the user_id or team_id you used when sending the events. The memberType flag identifies
         ///     which one is used.
         /// </param>
+        /// <param name="optionalParameters">Optional parameters for further specifying returned rankings.</param>
         /// <returns>Promise of List&lt;LeaderboardMemberRanking&gt;</returns>
         public IPromise<List<LeaderboardMemberRanking>> GetLeaderboardRankingsAsync(
-            string memberType, string memberId)
+            string memberType, string memberId, LeaderboardApiOptionalParameters optionalParameters = null)
         {
-            return LeaderboardsApi.GetLeaderboardRankingsAsync(memberType, memberId, Language);
+            return LeaderboardsApi.GetLeaderboardRankingsAsync(memberType, memberId, Language, optionalParameters);
         }
 
         /// <summary>
@@ -907,11 +917,13 @@ namespace SCILL
         ///     Default value is 1 (optional)
         /// </param>
         /// <param name="pageSize">The number of elements per page. Default is 25. (optional)</param>
+        /// <param name="currentPosition">The starting position from which to send info. Will overwrite currentPage setting.</param>
+        /// <param name="optionalParameters">Optional parameters for further specifying returned rankings.</param>
         public void GetLeaderboardsAsync(Action<List<Leaderboard>> resolve, Action<Exception> reject,
             int? currentPage = null,
-            int? pageSize = null)
+            int? pageSize = null, int? currentPosition = null, LeaderboardApiOptionalParameters optionalParameters = null)
         {
-            LeaderboardsApi.GetLeaderboardsAsync(resolve, reject, currentPage, pageSize, Language);
+            LeaderboardsApi.GetLeaderboardsAsync(resolve, reject, currentPage, pageSize, Language, currentPosition, optionalParameters);
         }
 
         /// <summary>
@@ -926,11 +938,13 @@ namespace SCILL
         ///     Default value is 1 (optional)
         /// </param>
         /// <param name="pageSize">The number of elements per page. Default is 25. (optional)</param>
+        /// <param name="currentPosition">The starting position from which to send info. Will overwrite currentPage setting.</param>
+        /// <param name="optionalParameters">Optional parameters for further specifying returned rankings.</param>
         /// <returns>Promise of List&lt;Leaderboard&gt;</returns>
         public IPromise<List<Leaderboard>> GetLeaderboardsAsync(int? currentPage = null,
-            int? pageSize = null)
+            int? pageSize = null, int? currentPosition = null, LeaderboardApiOptionalParameters optionalParameters = null)
         {
-            return LeaderboardsApi.GetLeaderboardsAsync(currentPage, pageSize, Language);
+            return LeaderboardsApi.GetLeaderboardsAsync(currentPage, pageSize, Language, currentPosition, optionalParameters);
         }
 
         #endregion
@@ -945,7 +959,10 @@ namespace SCILL
                     config.ApiKey,
                     config.ApiKeyPrefix,
                     newBasePath)
-                {AccessToken = token};
+            {
+                AccessToken = token,
+                DateTimeFormat = config.DateTimeFormat
+            };
         }
     }
 }

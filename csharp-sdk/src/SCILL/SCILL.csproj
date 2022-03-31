@@ -16,7 +16,7 @@ Contact: support@scillgame.com
         <AppDesignerFolder>Properties</AppDesignerFolder>
         <RootNamespace>SCILL</RootNamespace>
         <AssemblyName>SCILL</AssemblyName>
-        <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+        <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
         <FileAlignment>512</FileAlignment>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
