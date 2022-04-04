@@ -122,17 +122,17 @@ namespace SCILL
         private readonly Dictionary<string, string> _leaderboardIdToTopicMap = new Dictionary<string, string>();
 
 
-        private ScillMqtt _mqtt;
+        protected ScillMqtt _mqtt;
 
         private string _personalChallengeNotificationTopic;
 
         // Local instance of SCILLBackend. Please note, that SCILLBackend should not be used in game clients in production!
-        private SCILLBackend _scillBackend;
+        protected SCILLBackend _scillBackend;
 
         /// <summary>
         ///     Getter for the AccessToken.
         /// </summary>
-        public string AccessToken { get; private set; }
+        public string AccessToken { get; protected set; }
 
         // Simple wrappers to get SCILL product APIs
 
@@ -160,12 +160,12 @@ namespace SCILL
         /// <summary>
         ///     Getter for the shared <see cref="SCILLClient" /> instance. Will update when changing language.
         /// </summary>
-        public SCILLClient SCILLClient { get; private set; }
+        public SCILLClient SCILLClient { get; protected set; }
 
         /// <summary>
         /// Returns true, if the <c>SCILLManager</c> Instance successfully generated an access token.
         /// </summary>
-        public bool IsConnected { get; private set; } = false;
+        public bool IsConnected { get; protected set; } = false;
 
 
         protected virtual void Awake()
@@ -179,14 +179,10 @@ namespace SCILL
                 GenerateAccessToken(
                     accessToken =>
                     {
-                        AccessToken = accessToken;
-
-                        SCILLClient = new SCILLClient(AccessToken, AppId, language.ToString(), environment);
                         _mqtt = new ScillMqtt();
                         ScillMqtt.OnMqttConnectionEstablished += OnMqttConnectionEstablished;
-
                         IsConnected = true;
-                        OnSCILLManagerReady?.Invoke();
+                        UpdateAccessToken(accessToken);
 
                         StartCoroutine(PingRoutine());
 
@@ -207,6 +203,13 @@ namespace SCILL
             {
                 Destroy(gameObject);
             }
+        }
+
+        protected virtual void UpdateAccessToken(string newAccessToken)
+        {
+            AccessToken = newAccessToken;
+            SCILLClient = new SCILLClient(AccessToken, AppId, language.ToString(), environment);
+            OnSCILLManagerReady?.Invoke();
         }
 
 

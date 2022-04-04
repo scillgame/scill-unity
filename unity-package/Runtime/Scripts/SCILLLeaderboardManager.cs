@@ -47,7 +47,7 @@ namespace SCILL
         {
             if (leaderboardId != null)
             {
-                if (!string.IsNullOrEmpty(SCILLManager.Instance.AccessToken))
+                if (SCILLManager.Instance.IsConnected)
                     InitLeaderboardData();
                 else
                     SCILLManager.OnSCILLManagerReady += InitLeaderboardData;
