@@ -209,6 +209,11 @@ namespace SCILL
         {
             AccessToken = newAccessToken;
             SCILLClient = new SCILLClient(AccessToken, AppId, language.ToString(), environment);
+            InvokeScillManagerReady();
+        }
+
+        protected virtual void InvokeScillManagerReady()
+        {
             OnSCILLManagerReady?.Invoke();
         }
 
