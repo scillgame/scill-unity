@@ -9,7 +9,6 @@ using ScillHelpers;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
-using UnityEngine.SceneManagement;
 
 namespace SCILL
 {
@@ -116,10 +115,10 @@ namespace SCILL
         public string SessionId = "persistent";
 
         // <battlepassId, topic>
-        private readonly Dictionary<string, string> _battlepassIdToTopicMap = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> _battlepassIdToTopicMap = new();
 
         // <leaderboardId, topic>
-        private readonly Dictionary<string, string> _leaderboardIdToTopicMap = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> _leaderboardIdToTopicMap = new();
 
 
         protected ScillMqtt _mqtt;
@@ -163,9 +162,9 @@ namespace SCILL
         public SCILLClient SCILLClient { get; protected set; }
 
         /// <summary>
-        /// Returns true, if the <c>SCILLManager</c> Instance successfully generated an access token.
+        ///     Returns true, if the <c>SCILLManager</c> Instance successfully generated an access token.
         /// </summary>
-        public bool IsConnected { get; protected set; } = false;
+        public bool IsConnected { get; protected set; }
 
 
         protected virtual void Awake()
@@ -192,7 +191,7 @@ namespace SCILL
                     {
                         SCILLNotificationManager.Instance?.AddNotification(SCILLNotificationType.Error,
                             "Failed to generate access token");
-                        Debug.LogError(e.Message);
+                        Debug.LogError("Failed to generate access token: " + e.Message);
                     },
                     GetUserId());
 
@@ -203,18 +202,6 @@ namespace SCILL
             {
                 Destroy(gameObject);
             }
-        }
-
-        protected virtual void UpdateAccessToken(string newAccessToken)
-        {
-            AccessToken = newAccessToken;
-            SCILLClient = new SCILLClient(AccessToken, AppId, language.ToString(), environment);
-            InvokeScillManagerReady();
-        }
-
-        protected virtual void InvokeScillManagerReady()
-        {
-            OnSCILLManagerReady?.Invoke();
         }
 
 
@@ -233,6 +220,18 @@ namespace SCILL
                 ScillMqtt.OnMqttConnectionEstablished -= OnMqttConnectionEstablished;
                 _mqtt.Close();
             }
+        }
+
+        protected virtual void UpdateAccessToken(string newAccessToken)
+        {
+            AccessToken = newAccessToken;
+            SCILLClient = new SCILLClient(AccessToken, AppId, language.ToString(), environment);
+            InvokeScillManagerReady();
+        }
+
+        protected virtual void InvokeScillManagerReady()
+        {
+            OnSCILLManagerReady?.Invoke();
         }
 
 
@@ -587,10 +586,11 @@ namespace SCILL
         }
 
         /// <summary>
-        /// Calling this will reset (delete) all the leaderboard’s ranking data. Only available when using Api Version v2.
+        ///     Calling this will reset (delete) all the leaderboard’s ranking data. Only available when using Api Version v2.
         /// </summary>
         /// <remarks>
-        /// Requires the api key for authentication. This only works when a <see cref="SCILLBackend"/> has been initialized, therefore this can not be called from Client-Side Code.
+        ///     Requires the api key for authentication. This only works when a <see cref="SCILLBackend" /> has been initialized,
+        ///     therefore this can not be called from Client-Side Code.
         /// </remarks>
         /// <param name="resolve">Called on valid API response.</param>
         /// <param name="reject">Called on error response.</param>
@@ -638,14 +638,12 @@ namespace SCILL
             OnChallengeChangedNotification += handler;
 
             if (ShouldShartupChallengeMonitoring() && null != SCILLClient)
-            {
                 SCILLClient.AuthApi.GetUserChallengesNotificationTopicAsync().Then(topicRequestResult =>
                 {
                     _personalChallengeNotificationTopic = topicRequestResult.topic;
                     if (IsMqttConnectionAvailable())
                         _mqtt.SubscribeToTopicChallenge(topicRequestResult.topic, OnChallengeChangedNotification);
                 });
-            }
         }
 
         private bool ShouldShartupChallengeMonitoring()
