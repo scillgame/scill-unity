@@ -306,9 +306,15 @@ namespace SCILL
             if (null != callback)
                 userInfoPromise.Then(result =>
                 {
-                    if (result.Equals(userInfo)) callback(true);
+                    if (result.Equals(userInfo))
+                    {
+                        callback(true);
+                    }
+                    else
+                    {
+                        callback(false);
+                    }
 
-                    callback(false);
                 }).Catch(err => callback(false));
         }
 
