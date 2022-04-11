@@ -115,10 +115,10 @@ namespace SCILL
         public string SessionId = "persistent";
 
         // <battlepassId, topic>
-        private readonly Dictionary<string, string> _battlepassIdToTopicMap = new();
+        private readonly Dictionary<string, string> _battlepassIdToTopicMap = new Dictionary<string, string>();
 
         // <leaderboardId, topic>
-        private readonly Dictionary<string, string> _leaderboardIdToTopicMap = new();
+        private readonly Dictionary<string, string> _leaderboardIdToTopicMap = new Dictionary<string, string>();
 
 
         protected ScillMqtt _mqtt;

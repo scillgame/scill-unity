@@ -1,6 +1,6 @@
 {
   "name": "com.4players.scillgame",
-  "version": "2.4.0",
+  "version": "2.3.2",
   "displayName": "SCILLs Unity SDK",
   "description": "This package is based on SCILLs C# SDK and offers ready to be used UI elements for challenges and battle passes. Just drop a few prefabs into your game to add challenges and battle passes.",
   "unity": "2019.4",
@@ -29,5 +29,5 @@
   "dependencies": {
     "com.unity.nuget.newtonsoft-json": "2.0.0"
   },
-  "unityRelease": "15f1"
+  "unityRelease": "33f1"
 }
